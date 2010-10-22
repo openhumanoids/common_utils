@@ -292,9 +292,29 @@ macro(pods_config_search_paths)
     endif(NOT DEFINED __pods_setup)
 endmacro(pods_config_search_paths)
 
+macro(enforce_out_of_source)
+    if(CMAKE_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
+      file(REMOVE CMakeCache.txt)
+      file(REMOVE CMakeFiles)
+      message(FATAL_ERROR 
+      "\n
+      Do not run cmake directly in the pod directory. 
+      use the supplied Makefile instead!
+      to build, simply type: 
+       $ make
+      ")
+    endif()
+endmacro(enforce_out_of_source)
+
 #set the variable POD_NAME to the directory path, and set the cmake PROJECT_NAME
-get_filename_component(POD_NAME ${CMAKE_SOURCE_DIR} NAME)
+if(NOT POD_NAME)
+    get_filename_component(POD_NAME ${CMAKE_SOURCE_DIR} NAME)
+    message(STATUS "POD_NAME is not set... Defaulting to directory name: ${POD_NAME}") 
+endif(NOT POD_NAME)
 project(${POD_NAME})
+
+#make sure we're running an out-of-source build
+enforce_out_of_source()
 
 #call the function to setup paths
 pods_config_search_paths()
