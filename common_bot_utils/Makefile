@@ -1,4 +1,4 @@
-# Default makefile distributed with pods version: 10.11.01
+# Default makefile distributed with pods version: 10.11.11
 
 default_target: all
 
@@ -34,23 +34,12 @@ configure:
 	# create the build directories if necessary
 	@[ -d $(BUILD_PREFIX) ] || mkdir -p $(BUILD_PREFIX) || exit 1
 	@[ -d pod-build ] || mkdir pod-build || exit 1
-
 	@echo "$(BUILD_PREFIX)" > pod-build/build_prefix
-	
-	#cleanup in case an "in-source" attempt
-	if [ -d CMakeFiles ]; then rm -rf CMakeFiles CMakeCache.txt; fi
-	
+
 	# run CMake to generate and configure the build scripts
 	@cd pod-build && cmake -DCMAKE_INSTALL_PREFIX=$(BUILD_PREFIX) \
 	                       -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) ..
 
 clean:
-	if [ -d pod-build ]; then make -C pod-build clean; fi
-	rm -rf pod-build
-	rm -rf build #remove the local build directory if it exists
-	rm -rf CMakeFiles CMakeCache.txt #cleanup in case an "in-source" build was accidentaly attempted
-
-uninstall:
-	@echo removing...
-	@cat pod-build/install_manifest.txt
-	@rm -f `cat pod-build/install_manifest.txt`
+	if [ -e pod-build/install_manifest.txt ]; then rm -f `cat pod-build/install_manifest.txt`; fi
+	if [ -d pod-build ]; then $(MAKE) -C pod-build clean; rm -rf pod-build; fi

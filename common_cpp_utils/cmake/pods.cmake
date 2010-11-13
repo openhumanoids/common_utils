@@ -27,7 +27,7 @@
 #
 # ----
 # File: pods.cmake
-# Distributed with pods version: 10.10.08
+# Distributed with pods version: 10.11.11
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -45,7 +45,8 @@ function(pods_install_headers)
     list(REMOVE_AT ARGV -1)
     #copy the headers to the INCLUDE_OUTPUT_PATH (pod-build/include)
     foreach(header ${ARGV})
-	    configure_file(${header} ${INCLUDE_OUTPUT_PATH}/${dest_dir}/${header} COPYONLY)
+        get_filename_component(_header_name ${header} NAME)
+        configure_file(${header} ${INCLUDE_OUTPUT_PATH}/${dest_dir}/${header} COPYONLY)
 	endforeach(header)
 	#mark them to be installed
 	install(FILES ${ARGV} DESTINATION include/${dest_dir})
@@ -294,13 +295,13 @@ endmacro(pods_config_search_paths)
 
 macro(enforce_out_of_source)
     if(CMAKE_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
-      file(REMOVE CMakeCache.txt)
-      file(REMOVE CMakeFiles)
       message(FATAL_ERROR 
       "\n
       Do not run cmake directly in the pod directory. 
-      use the supplied Makefile instead!
-      to build, simply type: 
+      use the supplied Makefile instead!  You now need to
+      remove CMakeCache.txt and the CMakeFiles directory.
+
+      Then to build, simply type: 
        $ make
       ")
     endif()

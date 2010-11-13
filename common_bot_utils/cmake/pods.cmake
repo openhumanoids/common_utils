@@ -27,7 +27,7 @@
 #
 # ----
 # File: pods.cmake
-# Distributed with pods version: 10.11.01
+# Distributed with pods version: 10.11.11
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -289,19 +289,23 @@ macro(pods_config_search_paths)
         # for osx, which uses "install name" path rather than rpath
         set(CMAKE_INSTALL_NAME_DIR ${LIBRARY_OUTPUT_PATH})
 
+        #hack to make cmake always create an install and clean 
+        install(FILES DESTINATION)
+        add_custom_target(tmp)
+        
         set(__pods_setup true)
     endif(NOT DEFINED __pods_setup)
 endmacro(pods_config_search_paths)
 
 macro(enforce_out_of_source)
     if(CMAKE_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
-      file(REMOVE CMakeCache.txt)
-      file(REMOVE CMakeFiles)
       message(FATAL_ERROR 
       "\n
       Do not run cmake directly in the pod directory. 
-      use the supplied Makefile instead!
-      to build, simply type: 
+      use the supplied Makefile instead!  You now need to
+      remove CMakeCache.txt and the CMakeFiles directory.
+
+      Then to build, simply type: 
        $ make
       ")
     endif()
