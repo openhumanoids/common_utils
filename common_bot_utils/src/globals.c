@@ -7,9 +7,9 @@
 #include <glib.h>
 
 #include <bot_core/bot_core.h>
+#include <bot_param_client/param_client.h>
 #include "globals.h"
 
-#include "arconf.h"
 
 //#define dbg(...) fprintf(stderr, __VA_ARGS__)
 #define dbg(...)
@@ -83,14 +83,17 @@ static BotConf *global_config = NULL;
 static int64_t global_config_refcount = 0;
 
 BotConf *
-globals_get_config(void)
+globals_get_config(int keep_updated)
 {
   g_static_rec_mutex_lock(&_mutex);
 
   if (global_config_refcount == 0) {
     assert (! global_config);
 
-    global_config = arconf_parse_default();
+    if (!global_lcm_refcount)
+      globals_get_lcm();
+
+    global_config = bot_param_new_from_server(global_lcm,keep_updated);
     if (!global_config) {
       goto fail;
     }

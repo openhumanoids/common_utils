@@ -4,47 +4,7 @@
 #include <string.h>
 #include "arconf.h"
 #include <common_c_utils/math_util.h>
-//#include <carmen3d/lcm_utils.h>
 
-#define CONF_LOCAL_FILENAME "local.cfg"
-#define CONF_DEFAULT_FILENAME "quad.cfg"
-#define CONF_LOCAL_FILEPATH CONFIG_DIR "/" CONF_LOCAL_FILENAME
-#define CONF_DEFAULT_FILEPATH CONFIG_DIR "/" CONF_DEFAULT_FILENAME
-
-//
-//BotConf *
-//arconf_parse_default (void)
-//{
-//    /* configuration file path:
-//     *   - Use environmental variable AR_CONF_FILE as path if it is defined
-//     *   - Otherwise, use CONF_LOCAL_FILEPATH as path if a file at
-//     *     CONF_LOCAL_FILEPATH exists (i.e. openable for reading).
-//     *   - Otherwise, use CONF_DEFAULT_FILEPATH as path
-//     */
-//
-//    FILE * f = NULL;
-//    char * path = getenv ("AR_CONF_FILE");
-//    if (!path || !strlen(path)) {
-//        path = CONF_LOCAL_FILEPATH;
-//        f = fopen (path, "r");
-//        if (!f)
-//            path = CONF_DEFAULT_FILEPATH;
-//
-//    }
-//
-//    if (!f)
-//        f = fopen (path, "r");
-//    if (!f) {
-//        fprintf (stderr, "Error: failed to open Agile config file:\n%s\n",
-//                 path);
-//        return NULL;
-//    }
-//
-//    BotConf * c;
-//    c = bot_conf_parse_file (f, path);
-//    fclose (f);
-//    return c;
-//}
 
 int
 arconf_get_vehicle_footprint (BotConf *cfg, double fp[8])
@@ -68,21 +28,6 @@ arconf_get_vehicle_footprint (BotConf *cfg, double fp[8])
     bot_conf_get_double_array (cfg, key_bl, fp+6, 2);
     return 0;
 }
-
-//int
-//arconf_get_rndf_absolute_path (BotConf * config, char *buf, int buf_size)
-//{
-//    char rndf_path[256];
-//    char *rndf_file;
-//    if (bot_conf_get_str (config, "rndf", &rndf_file) < 0)
-//        return -1;
-//    snprintf (rndf_path, sizeof (rndf_path), CONFIG_DIR"/%s", rndf_file);
-//
-//    if (strlen (rndf_path) > buf_size)
-//        return -1;
-//    strcpy (buf, rndf_path);
-//    return 0;
-//}
 
 
 static int

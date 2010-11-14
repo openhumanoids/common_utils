@@ -2,7 +2,7 @@
 #define __ARCONF_H__
 
 #include <bot_core/bot_core.h>
-//#include <bot_core/core/lcmtypes/botlcm_pose_t.h>
+
 
 
 
@@ -10,10 +10,7 @@
 extern "C" {
 #endif
 
-BotConf * arconf_parse_default (void);
 int arconf_get_vehicle_footprint (BotConf *cfg, double fp[8]);
-int arconf_get_rndf_absolute_path (BotConf * config, char *buf, int buf_size);
-
 
 int arconf_get_camera_thumbnail_channel (BotConf *config,
                                          const char *camera_name, char *result, int result_size);

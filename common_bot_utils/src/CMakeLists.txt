@@ -26,5 +26,5 @@ pods_install_libraries(common_bot_utils)
 pods_install_pkg_config_file(common_bot_utils
     CFLAGS -std=c99
     LIBS -lcommon_bot_utils 
-    REQUIRES bot2-core
+    REQUIRES bot2-core bot2-lcmgl-client bot2-param-client
     VERSION 0.0.1)

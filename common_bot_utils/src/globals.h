@@ -33,7 +33,7 @@ extern "C" {
   // needed to retrieve all lcmgls for switch_buffer
   GHashTable *globals_get_lcmgl_hashtable(void);
 
-  BotConf * globals_get_config(void);
+  BotConf * globals_get_config(int keep_updated);
   void globals_release_config(BotConf *config);
 
 
