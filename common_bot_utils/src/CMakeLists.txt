@@ -8,7 +8,10 @@ add_library(common_bot_utils SHARED
     ${c_files})
 
 pods_use_pkg_config_packages(common_bot_utils 
-    bot2-core)
+    bot2-core
+    bot2-lcmgl-client 
+    bot2-param-client)
+
 
 # set the library API version.  Increment this every time the public API
 # changes.
