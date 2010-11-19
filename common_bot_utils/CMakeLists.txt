@@ -4,7 +4,7 @@ set(POD_NAME common_bot_utils)
 include(cmake/pods.cmake)
 
 
-#if we can find the bot-core library, build the scan-matcher 
+#if we can find the bot-core library, build this pod 
 find_library(BOT2_CORE_FOUND bot2-core)
 if (BOT2_CORE_FOUND)
      add_subdirectory(src)
