@@ -544,6 +544,63 @@ pointlist2d_t * geom_convex_polygon_convex_polygon_intersect_2d (
         const pointlist2d_t *a, const pointlist2d_t *b);
 
 /**
+ * geom_polygon_intersect_2d:
+ *
+ * Computes the intersection of two polygons %a and %b.
+ *
+ * Returns: a newly allocated list of polygons representing the
+ * intersection of the two polygons.  Note that the intersection of
+ * two polygons can often result in more than one polygon.
+ */
+polygon2d_t * geom_polygon_intersect_2d (const polygon2d_t * a,
+                                         const polygon2d_t * b);
+
+/**
+ * geom_polygon_diff_2d:
+ *
+ * Computes the difference of two polygons %a and %b.  (%a minus
+ * the intersecting regions of %a and %b).
+ *
+ * Returns: a newly allocated list of polygons representing the
+ * difference of the two polygons.  Note that the difference of
+ * two polygons can often result in more than one polygon.
+ */
+polygon2d_t * geom_polygon_diff_2d (const polygon2d_t * a,
+                                    const polygon2d_t * b);
+
+/**
+ * geom_polygon_area_2d:
+ *
+ * Computes the area of a polygon.
+ */
+double
+geom_polygon_area_2d (const polygon2d_t * a);
+
+/**
+ * geom_polygon_union_list_2d:
+ *
+ * Computes the union of a list of pointlists.
+ *
+ * Returns: a newly allocated polygon representing the
+ * union of the pointlists in the input list.  Note that the
+ * resulting polygon can have holes, represented by additional
+ * contours in the resulting polygon.
+ */
+polygon2d_t * geom_polygon_union_list_2d (pointlist2d_t ** list,
+                                          int num);
+
+/**
+ * geom_polygon_union_2d:
+ *
+ * Computes the union of a list of polygons.
+ *
+ * Returns: a newly allocated polygon representing the
+ * union of the polygons in the input list.
+ */
+polygon2d_t * geom_polygon_union_2d (polygon2d_t ** list, int num);
+
+
+/**
  * geom_rotate_point_2d:
  *
  * rotates a point %p0 by %theta radians counterclockwise about the origin.

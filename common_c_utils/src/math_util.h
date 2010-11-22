@@ -63,6 +63,13 @@ static inline int theta_to_int(double theta, int max)
     return v;
 }
 
+static inline void 
+math_util_sincos(double theta, double *s, double *c)
+{
+    *s = sin(theta);
+    *c = cos(theta);
+}
+
 static inline int imin(int a, int b)
 {
     return (a < b) ? a : b;

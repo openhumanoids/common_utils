@@ -22,6 +22,7 @@ static inline void draw_disk (double x, double y, double r)
 
 #include "geometry.h"
 #include "convexhull.h"
+#include "gpc.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338
@@ -221,6 +222,142 @@ pointlist2d_t * geom_convex_polygon_convex_polygon_intersect_2d (
 
     return NULL;
 }
+
+polygon2d_t * 
+geom_polygon_intersect_2d (const polygon2d_t * a,
+                           const polygon2d_t * b)
+{
+    gpc_polygon pa, pb, pres;
+
+    pa.num_contours = a->nlists;
+    pa.hole = NULL;
+    pa.contour = a->pointlists;
+
+    pb.num_contours = b->nlists;
+    pb.hole = NULL;
+    pb.contour = b->pointlists;
+    
+    gpc_polygon_clip (GPC_INT, &pa, &pb, &pres);
+
+    polygon2d_t plist;
+    plist.nlists = pres.num_contours;
+    plist.pointlists = pres.contour;
+
+    polygon2d_t * pout = polygon2d_new_copy (&plist);
+    gpc_free_polygon (&pres);
+
+    return pout;
+}
+
+polygon2d_t *
+geom_polygon_diff_2d (const polygon2d_t * a, const polygon2d_t * b)
+{
+    gpc_polygon pa, pb, pres;
+
+    pa.num_contours = a->nlists;
+    pa.hole = NULL;
+    pa.contour = a->pointlists;
+
+    pb.num_contours = b->nlists;
+    pb.hole = NULL;
+    pb.contour = b->pointlists;
+    
+    gpc_polygon_clip (GPC_DIFF, &pa, &pb, &pres);
+
+    polygon2d_t plist;
+    plist.nlists = pres.num_contours;
+    plist.pointlists = pres.contour;
+
+    polygon2d_t * pout = polygon2d_new_copy (&plist);
+    gpc_free_polygon (&pres);
+
+    return pout;
+}
+
+double
+geom_polygon_area_2d (const polygon2d_t * a)
+{
+    gpc_polygon pa, pb, pres;
+
+    pa.num_contours = a->nlists;
+    pa.hole = NULL;
+    pa.contour = a->pointlists;
+
+    pb.num_contours = 0;
+    pb.hole = NULL;
+    pb.contour = NULL;
+    
+    gpc_polygon_clip (GPC_UNION, &pa, &pb, &pres);
+
+    double area = 0;
+    int i;
+    for (i = 0; i < pres.num_contours; i++) {
+        double a = geom_simple_polygon_area_2d (pres.contour + i);
+        area += pres.hole[i] ? -a : a;
+    }
+    gpc_free_polygon (&pres);
+
+    return area;
+}
+
+polygon2d_t *
+geom_polygon_union_list_2d (pointlist2d_t ** list, int num)
+{
+    gpc_polygon pa;
+
+    int i;
+    pa.num_contours = 0;
+    pa.hole = NULL;
+    pa.contour = NULL;
+
+    for (i = 0; i < num; i++) {
+        gpc_polygon pb, pres;
+        pb.num_contours = 1;
+        pb.hole = NULL;
+        pb.contour = (pointlist2d_t *) list[i];
+        gpc_polygon_clip (GPC_UNION, &pa, &pb, &pres);
+        gpc_free_polygon (&pa);
+        memcpy (&pa, &pres, sizeof (gpc_polygon));
+    }
+
+    polygon2d_t plist;
+    plist.nlists = pa.num_contours;
+    plist.pointlists = pa.contour;
+    polygon2d_t * pout = polygon2d_new_copy (&plist);
+    gpc_free_polygon (&pa);
+
+    return pout;
+}
+
+polygon2d_t *
+geom_polygon_union_2d (polygon2d_t ** list, int num)
+{
+    gpc_polygon pa;
+
+    int i;
+    pa.num_contours = 0;
+    pa.hole = NULL;
+    pa.contour = NULL;
+
+    for (i = 0; i < num; i++) {
+        gpc_polygon pb, pres;
+        pb.num_contours = list[i]->nlists;
+        pb.hole = NULL;
+        pb.contour = list[i]->pointlists;
+        gpc_polygon_clip (GPC_UNION, &pa, &pb, &pres);
+        gpc_free_polygon (&pa);
+        memcpy (&pa, &pres, sizeof (gpc_polygon));
+    }
+
+    polygon2d_t plist;
+    plist.nlists = pa.num_contours;
+    plist.pointlists = pa.contour;
+    polygon2d_t * pout = polygon2d_new_copy (&plist);
+    gpc_free_polygon (&pa);
+
+    return pout;
+}
+
 
 pointlist2i_t *
 geom_compute_convex_polygon_covered_points_2i (const pointlist2i_t *p)
