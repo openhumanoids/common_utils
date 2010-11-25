@@ -20,16 +20,17 @@ http://en.wikipedia.org/wiki/Ziggurat_algorithm
 #include "rand_utils.h"
 #include <time.h>
 #include <math.h>
+#include <stdint.h>
 
 
-static unsigned long jz,jsr=123456789;
+static uint32_t jz,jsr=123456789;
 
 #define SHR3 (jz=jsr, jsr^=(jsr<<13), jsr^=(jsr>>17), jsr^=(jsr<<5),jz+jsr)
 #define UNI (.5 + (signed) SHR3*.2328306e-9)
 #define IUNI SHR3
 
-static long hz;
-static unsigned long iz, kn[128], ke[256];
+static int32_t hz;
+static uint32_t iz, kn[128], ke[256];
 static float wn[128],fn[128], we[256],fe[256];
 
 #define RNOR (hz=SHR3, iz=hz&127, (fabs(hz)<kn[iz])? hz*wn[iz] : nfix())
@@ -74,7 +75,7 @@ float efix(void)
 }
 /*--------This procedure sets the seed and creates the tables------*/
 
-void zigset(unsigned long jsrseed)
+void zigset(uint32_t jsrseed)
 {  const double m1 = 2147483648.0, m2 = 4294967296.;
    double dn=3.442619855899,tn=dn,vn=9.91256303526217e-3, q;
    double de=7.697117470131487, te=de, ve=3.949659822581572e-3;

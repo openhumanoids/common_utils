@@ -7,7 +7,7 @@ add_library(common_c_utils SHARED ${c_files})
 # set the library API version.  Increment this every time the public API
 # changes.
 set_target_properties(common_c_utils PROPERTIES SOVERSION 1)
-
+target_link_libraries(common_c_utils m)
 pods_use_pkg_config_packages(common_c_utils 
     glib-2.0)
 
@@ -17,6 +17,6 @@ pods_install_libraries(common_c_utils)
 pods_install_headers(${h_files} DESTINATION common_c_utils)
 
 pods_install_pkg_config_file(common_c_utils
-    LIBS -lcommon_c_utils 
+    LIBS -lcommon_c_utils
     REQUIRES glib-2.0
     VERSION 0.0.1)
