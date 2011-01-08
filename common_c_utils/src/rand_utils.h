@@ -29,6 +29,12 @@ static inline float signed_randf()
 {
     return randf()*2.0 - 1.0;
 }
+//random number between mi and ma
+static inline float randf_in_range(float mi, float ma)
+{
+    return randf()*(ma-mi) + mi;
+}
+
 
 // return a random integer between [0, bound)
 static inline int irand(int bound)
