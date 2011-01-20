@@ -47,6 +47,7 @@ Copyright: (C) 1997-2004, Advanced Interfaces Group,
 #include <stdint.h>
 #include <float.h>
 #include <math.h>
+#include <assert.h>
 
 
 /*
@@ -1002,26 +1003,33 @@ void gpc_free_polygon(gpc_polygon *p)
 void gpc_read_polygon(FILE *fp, int read_hole_flags, gpc_polygon *p)
 {
   int c, v;
-
-  fscanf(fp, "%d", &(p->num_contours));
+  int ret;
+  ret =fscanf(fp, "%d", &(p->num_contours));
+  assert(ret==1);
   MALLOC(p->hole, p->num_contours * sizeof(int),
          "hole flag array creation", int);
   MALLOC(p->contour, p->num_contours
          * sizeof(gpc_vertex_list), "contour creation", gpc_vertex_list);
   for (c= 0; c < p->num_contours; c++)
   {
-    fscanf(fp, "%d", &(p->contour[c].npoints));
+    ret = fscanf(fp, "%d", &(p->contour[c].npoints));
+    assert(ret==1);
 
-    if (read_hole_flags)
-      fscanf(fp, "%d", &(p->hole[c]));
-    else
+    if (read_hole_flags){
+      ret =fscanf(fp, "%d", &(p->hole[c]));
+      assert(ret==1);
+    }
+    else{
       p->hole[c]= FALSE; /* Assume all contours to be external */
+    }
 
     MALLOC(p->contour[c].points, p->contour[c].npoints
            * sizeof(gpc_vertex), "vertex creation", gpc_vertex);
-    for (v= 0; v < p->contour[c].npoints; v++)
-      fscanf(fp, "%lf %lf", &(p->contour[c].points[v].x),
+    for (v= 0; v < p->contour[c].npoints; v++){
+      ret =fscanf(fp, "%lf %lf", &(p->contour[c].points[v].x),
                             &(p->contour[c].points[v].y));
+      assert(ret==1);
+    }
   }
 }
 
