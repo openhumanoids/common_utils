@@ -11,7 +11,7 @@
 
 #define to_radians(x) ( (x) * (PI / 180.0 ))
 #define to_degrees(x) ( (x) * (180.0 / PI ))
-#define clamp(x,min,max) (x < min ? min : (x > max ? max : x))
+#define clamp_value(x,min,max) (x < min ? min : (x > max ? max : x))
 
 static inline double sq(double v)
 {
