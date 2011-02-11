@@ -8,10 +8,15 @@
 #ifndef PI
 #define PI 3.14159265358979323846264338
 #endif
-
+#ifndef to_radians
 #define to_radians(x) ( (x) * (PI / 180.0 ))
+#endif
+#ifndef to_degrees
 #define to_degrees(x) ( (x) * (180.0 / PI ))
+#endif
+#ifndef clamp_value
 #define clamp_value(x,min,max) (x < min ? min : (x > max ? max : x))
+#endif
 
 static inline double sq(double v)
 {
