@@ -5,9 +5,13 @@
  */
 
 #include "circbuffer.h"
-#include "math_util.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+#ifndef MIN
+#define MIN(a,b)((a < b) ? a : b)
+#endif
 
 int circ_buf_create(circular_buffer * cbuf, int size)
 {
@@ -52,7 +56,7 @@ int circ_buf_write(circular_buffer * cbuf, int numBytes, char * buf)
 
   }
   //write to wrap around point.
-  int bytes_written = imin(cbuf->maxSize - cbuf->writeOffset, numBytes);
+  int bytes_written = MIN(cbuf->maxSize - cbuf->writeOffset, numBytes);
   memcpy(cbuf->buf + cbuf->writeOffset, buf, bytes_written * sizeof(char));
   numBytes -= bytes_written;
 
@@ -75,10 +79,10 @@ int circ_buf_peek(circular_buffer * cbuf, int numBytes, char * buf)
   //read numBytes from start of buffer, but don't move readPtr
   if (numBytes > cbuf->numBytes || numBytes > cbuf->maxSize) {
     fprintf(stderr, "ERROR can't read that many bytes from the circular buffer! \n");
-    exit(0);
+   return -1;
   }
   //read up to wrap around point
-  int bytes_read = imin(cbuf->maxSize - cbuf->readOffset, numBytes);
+  int bytes_read = MIN(cbuf->maxSize - cbuf->readOffset, numBytes);
   memcpy(buf, cbuf->buf + cbuf->readOffset, bytes_read * sizeof(char));
   numBytes -= bytes_read;
 
