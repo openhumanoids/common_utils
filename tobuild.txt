@@ -1,7 +1,6 @@
 # list of pods to build, one one each line.  Empty lines
 # and lines starting with '#' are ignored
 
-common_c_utils
-common_image_utils
-
-# common_bot_utils
+geom-utils
+image-utils
+laser-utils
