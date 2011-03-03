@@ -5,3 +5,4 @@ geom-utils
 image-utils
 laser-utils
 path-util
+eigen-utils
