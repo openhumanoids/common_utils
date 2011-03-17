@@ -6,3 +6,4 @@ set(POD_NAME common_image_utils)
 include(cmake/pods.cmake)
 
 add_subdirectory(src)
+add_subdirectory(src/renderer)
