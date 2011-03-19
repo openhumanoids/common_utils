@@ -155,7 +155,7 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
   for (GList *criter = crlist; criter; criter = criter->next) {
     cam_renderer_t *cr = (cam_renderer_t*) criter->data;
 
-    if (!cr->last_image)
+    if (!cr->last_image || !cr->camtrans)
       continue;
 
     int rmode = bot_gtk_param_widget_get_enum(cr->pw, PARAM_RENDER_IN);
@@ -532,7 +532,7 @@ static int cam_renderer_prepare_texture(cam_renderer_t *cr)
     cr->is_uploaded = 1;
   }
 
-  if (!cr->vertices) {
+  if (!cr->vertices && cr->camtrans) {
     int xstep = 4;
     int ystep = 12;
     int ncols = cr->width / xstep + 1;
@@ -751,14 +751,18 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
       cr->camtrans = bot_param_get_new_camtrans(self->param, cam_name);
       cr->coord_frame = bot_param_get_camera_coord_frame(self->param, cam_name);
       free(cam_name);
-
-      double xscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
-      double yscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
-      assert(fabs(xscale - yscale) < 1e-6);
-      bot_camtrans_scale_image(cr->camtrans, xscale);
+      if (cr->camtrans) {
+        double xscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
+        double yscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
+        assert(fabs(xscale - yscale) < 1e-6);
+        bot_camtrans_scale_image(cr->camtrans, xscale);
+      }
+      else {
+        printf("%s:%d couldn't find calibration parameters for %s\n", __FILE__, __LINE__, cam_name);
+      }
     }
     else {
-      printf("%s:%d couldn't find camera calibration for %s\n", __FILE__, __LINE__, channel);
+      printf("%s:%d couldn't find camera parameters for %s\n", __FILE__, __LINE__, channel);
     }
 
     cr->msg_received = 1;
