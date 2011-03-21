@@ -750,7 +750,6 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
     if (cam_name != NULL) {
       cr->camtrans = bot_param_get_new_camtrans(self->param, cam_name);
       cr->coord_frame = bot_param_get_camera_coord_frame(self->param, cam_name);
-      free(cam_name);
       if (cr->camtrans) {
         double xscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
         double yscale = cr->width / bot_camtrans_get_image_width(cr->camtrans);
@@ -760,6 +759,7 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
       else {
         printf("%s:%d couldn't find calibration parameters for %s\n", __FILE__, __LINE__, cam_name);
       }
+      free(cam_name);
     }
     else {
       printf("%s:%d couldn't find camera parameters for %s\n", __FILE__, __LINE__, channel);
