@@ -4,7 +4,11 @@ file(GLOB hpp_files *.hpp)
 add_library(eigen-utils SHARED
     ${cpp_files})
 
-pods_use_pkg_config_packages(eigen-utils eigen3)
+target_link_libraries(eigen-utils ${OPENGL_LIBRARIES})
+
+set(REQUIRED_LIBS eigen3 bot2-lcmgl-client)
+
+pods_use_pkg_config_packages(eigen-utils ${REQUIRED_LIBS})
 
 # set the library API version.  Increment this every time the public API
 # changes.
@@ -21,5 +25,5 @@ pods_install_libraries(eigen-utils)
 pods_install_pkg_config_file(eigen-utils
     CFLAGS
     LIBS -leigen-utils
-    REQUIRES eigen3 bot2-lcmgl-client
+    REQUIRES ${REQUIRED_LIBS}
     VERSION 0.0.1)

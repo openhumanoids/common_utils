@@ -5,7 +5,11 @@
 #include <Eigen/Cholesky>
 #include <math.h>
 #include <bot_lcmgl_client/lcmgl.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 #define eigen_dump(MAT) cout << #MAT << endl << (MAT) << endl
 

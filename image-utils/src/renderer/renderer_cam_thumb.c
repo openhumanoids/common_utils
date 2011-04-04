@@ -7,8 +7,13 @@
 #include <gtk/gtk.h>
 
 #define GL_GLEXT_PROTOTYPES 1
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 #include <bot_core/bot_core.h>
