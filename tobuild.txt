@@ -3,6 +3,9 @@
 
 geom-utils
 image-utils
+
+# laser-mapping depense on octomap
+octomap-utils 
 laser-utils
 path-util
 eigen-utils

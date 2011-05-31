@@ -8,7 +8,7 @@ SUBDIRS:=$(shell grep -v "^\#" tobuild.txt)
 #   If not, search up to two parent directories for a 'build' directory.
 #   Otherwise, use ./build.
 ifeq "$(BUILD_PREFIX)" ""
-BUILD_PREFIX=$(shell for pfx in .. ../..; do d=`pwd`/$$pfx/build; \
+BUILD_PREFIX=$(shell for pfx in ./ .. ../..; do d=`pwd`/$$pfx/build; \
                if [ -d $$d ]; then echo $$d; exit 0; fi; done; echo `pwd`/build)
 endif
 

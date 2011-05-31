@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 2.6.0)
+
+# pull in the pods macros. See cmake/pods.cmake for documentation
+set(POD_NAME octomap-utils)
+include(cmake/pods.cmake)
+
+find_library(OCTOMAP_LIBS octomap)
+if("${OCTOMAP_LIBS}" STREQUAL "OCTOMAP_LIBS-NOTFOUND")
+  message("\n\n---- noctomap not found. Not building octomap-utils\n")
+  return()
+endif()
+
+find_package(PkgConfig REQUIRED)
+
+#tell cmake to build these subdirectories
+add_subdirectory(src)
+add_subdirectory(src/renderer)

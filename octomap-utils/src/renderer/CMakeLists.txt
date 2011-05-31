@@ -1,0 +1,26 @@
+pkg_check_modules(BOT2_VIS bot2-vis)
+if(NOT BOT2_VIS_FOUND)
+    message("bot2-vis not found.  Not building octomap libbot2 renderer")
+    return()
+endif()
+
+# Create a shared library liboctomap-renderer.so with a single source file
+add_library(octomap-renderer SHARED
+    renderer_octomap.cpp)
+
+# make the header public
+# install it to include/octomap-renderer
+pods_install_headers(renderer_octomap.h DESTINATION octomap_utils)
+
+pods_use_pkg_config_packages(octomap-renderer bot2-vis)
+
+# make the library public
+pods_install_libraries(octomap-renderer)
+
+# create a pkg-config file for the library, to make it easier for other
+# software to use.
+pods_install_pkg_config_file(octomap-renderer
+    CFLAGS
+    LIBS -loctomap-renderer
+    REQUIRES octomap-util
+    VERSION 0.0.1)
