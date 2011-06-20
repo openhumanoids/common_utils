@@ -21,6 +21,26 @@ Eigen::Vector2d angleToVec(double angle);
 
 void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 
+/*
+ * computes quat such that: quat*vec1 = vec2
+ */
+void alignVectors(const Eigen::Vector3d & vec1, const Eigen::Vector3d & vec2, Eigen::Quaterniond & quat)
+{
+  Eigen::Vector3d axis = vec1.cross(vec2);
+  axis = axis / axis.norm();
+  double angle = acos(vec1.dot(vec2)) / (vec1.norm() * vec2.norm());
+
+  quat = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
+}
+
+template<int N>
+void double_array_to_vector(const double * array, Eigen::Matrix<double, N, 1> & vector)
+{
+  for (int ii = 0; ii < N; ii++) {
+    vector(ii, 0) = array[ii];
+  }
+}
+
 static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
 {
   bot_lcmgl_vertex3d(lcmgl, vec(0), vec(1), vec(2));
