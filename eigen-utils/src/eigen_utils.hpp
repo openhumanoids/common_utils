@@ -33,11 +33,29 @@ void alignVectors(const Eigen::Vector3d & vec1, const Eigen::Vector3d & vec2, Ei
   quat = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
 }
 
+/*
+ * returns the skew symmetric matrix corresponding to vec.cross(<other vector>)
+ */
+Eigen::Matrix3d skewHat(const Eigen::Vector3d & vec)
+{
+  Eigen::Matrix3d skew_hat;
+  skew_hat << 0, -vec(3), vec(2), vec(3), 0, -vec(1), -vec(2), vec(1), 0;
+  return skew_hat;
+}
+
 template<int N>
 void double_array_to_vector(const double * array, Eigen::Matrix<double, N, 1> & vector)
 {
   for (int ii = 0; ii < N; ii++) {
     vector(ii, 0) = array[ii];
+  }
+}
+
+template<int N>
+void double_vector_to_array(const Eigen::Matrix<double, N, 1> & vector, double * array, )
+{
+  for (int ii = 0; ii < N; ii++) {
+    array[ii] = vector(ii, 0);
   }
 }
 
