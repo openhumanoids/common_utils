@@ -52,7 +52,7 @@ void double_array_to_vector(const double * array, Eigen::Matrix<double, N, 1> & 
 }
 
 template<int N>
-void double_vector_to_array(const Eigen::Matrix<double, N, 1> & vector, double * array, )
+void double_vector_to_array(const Eigen::Matrix<double, N, 1> & vector, double * array)
 {
   for (int ii = 0; ii < N; ii++) {
     array[ii] = vector(ii, 0);
