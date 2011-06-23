@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
 #include <math.h>
+#include <iostream>
 #include <bot_lcmgl_client/lcmgl.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
@@ -11,9 +12,9 @@
 #include <GL/gl.h>
 #endif
 
-#define eigen_dump(MAT) cout << #MAT << endl << (MAT) << endl
-
 namespace eigen_utils {
+
+#define eigen_dump(MAT) std::cout << #MAT << std::endl << (MAT) << std::endl
 
 double atan2Vec(const Eigen::Vector2d & vec);
 
@@ -22,41 +23,13 @@ Eigen::Vector2d angleToVec(double angle);
 void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 
 /*
- * computes quat such that: quat*vec1 = vec2
- */
-void alignVectors(const Eigen::Vector3d & vec1, const Eigen::Vector3d & vec2, Eigen::Quaterniond & quat)
-{
-  Eigen::Vector3d axis = vec1.cross(vec2);
-  axis = axis / axis.norm();
-  double angle = acos(vec1.dot(vec2)) / (vec1.norm() * vec2.norm());
-
-  quat = Eigen::Quaterniond(Eigen::AngleAxisd(angle, axis));
-}
-
-/*
  * returns the skew symmetric matrix corresponding to vec.cross(<other vector>)
  */
 Eigen::Matrix3d skewHat(const Eigen::Vector3d & vec)
 {
   Eigen::Matrix3d skew_hat;
-  skew_hat << 0, -vec(3), vec(2), vec(3), 0, -vec(1), -vec(2), vec(1), 0;
+  skew_hat << 0, -vec(2), vec(1), vec(2), 0, -vec(0), -vec(1), vec(0), 0;
   return skew_hat;
-}
-
-template<int N>
-void double_array_to_vector(const double * array, Eigen::Matrix<double, N, 1> & vector)
-{
-  for (int ii = 0; ii < N; ii++) {
-    vector(ii, 0) = array[ii];
-  }
-}
-
-template<int N>
-void double_vector_to_array(const Eigen::Matrix<double, N, 1> & vector, double * array)
-{
-  for (int ii = 0; ii < N; ii++) {
-    array[ii] = vector(ii, 0);
-  }
 }
 
 static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
