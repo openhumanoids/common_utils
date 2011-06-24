@@ -589,18 +589,18 @@ static int cam_renderer_prepare_texture(cam_renderer_t *cr)
         v->vy = ray_cam[1];
         v->vz = ray_cam[2];
 
-        v->ground_candidate = 0;
-        if (ray_body[2] < 0) {
-          point2d_t isect_pt;
-          if (0 == geom_ray_z_plane_intersect_3d(POINT3D(cam_pos_body), POINT3D(ray_body), 0, &isect_pt)) {
-
-            double dist = geom_point_point_distance_squared_2d(&isect_pt, POINT2D(cam_pos_body));
-
-            if (dist < MAX_GROUND_PROJECTION_DISTANCE_SQ) {
-              v->ground_candidate = 1;
-            }
-          }
-        }
+        v->ground_candidate = 1; //3D vehicles -> all rays are ground candidates...
+        //        if (ray_body[2] < 0) {
+        //          point2d_t isect_pt;
+        //          if (0 == geom_ray_z_plane_intersect_3d(POINT3D(cam_pos_body), POINT3D(ray_body), 0, &isect_pt)) {
+        //
+        //            double dist = geom_point_point_distance_squared_2d(&isect_pt, POINT2D(cam_pos_body));
+        //
+        //            if (dist < MAX_GROUND_PROJECTION_DISTANCE_SQ) {
+        //              v->ground_candidate = 1;
+        //            }
+        //          }
+        //        }
 
         v++;
 
