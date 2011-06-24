@@ -20,8 +20,8 @@ pods_install_libraries(octomap-util)
 # software to use.
 pods_install_pkg_config_file(octomap-util
     CFLAGS
-    LIBS -loctomap -loctomath -loctomap-util
-    REQUIRES occ-map
+    LIBS -loctomap-util
+    REQUIRES occ-map octomap
     VERSION 0.0.1)
 
     
