@@ -17,7 +17,6 @@
 #include <bot_frames/bot_frames.h>
 #include <laser_utils/laser_util.h>
 
-
 #include "renderer_laser.h"
 
 #define RENDERER_NAME "Laser"
@@ -38,6 +37,7 @@
 #define COLOR_MODE_Z_MIN_Z -.5
 #define COLOR_MODE_Z_DZ 0.01
 #define SPACIAL_DECIMATION_LIMIT 0.05 /* meters */
+#define ANGULAR_DECIMATION_LIMIT .075 /* radians */
 
 #ifndef DATA_FROM_LR3
 #define DATA_FROM_LR3 0
@@ -368,11 +368,14 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
 
     /* spacial decimation */
     gboolean stationary = FALSE;
+    BotTrans delta;
     if (self->param_spacial_decimate && self->param_scan_memory > 10) {
-      double d[3];
-      bot_vector_subtract_3d(point3d_as_array(&lscan->origin), point3d_as_array(&last_scan->origin), d);
-      double dist = bot_vector_magnitude_3d(d);
-      if (dist < SPACIAL_DECIMATION_LIMIT) {
+      bot_trans_invert_and_compose(&lscan->origin, &last_scan->origin, &delta);
+      double dist = bot_vector_magnitude_3d(delta.trans_vec);
+      double rot;
+      double axis[3];
+      bot_quat_to_angle_axis(delta.rot_quat, &rot, axis);
+      if (dist < SPACIAL_DECIMATION_LIMIT && rot < ANGULAR_DECIMATION_LIMIT) {
         stationary = TRUE;
       }
     }
