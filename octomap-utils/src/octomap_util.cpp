@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <list>
 #include "octomap_util.hpp"
+#include <laser_utils/laser_util.h>
 
 using namespace std;
 using namespace octomap;
@@ -81,4 +82,20 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
     printf(" %f", v);
   }
   return voxMap;
+}
+
+double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans){
+
+  double likelihood =0;
+  for (int i=0;i<lscan->npoints;i++){
+    if (lscan->invalidPoints[i]!=0)
+      continue;
+    double proj_xyz[3];
+    bot_trans_apply_vec(trans,point3d_as_array(&lscan->points[i]),proj_xyz);
+    OcTreeNode* node = oc->search(proj_xyz[0],proj_xyz[1],proj_xyz[2]);
+    if (node!=NULL)
+      likelihood+= node->getLogOdds();
+  }
+
+  return likelihood;
 }

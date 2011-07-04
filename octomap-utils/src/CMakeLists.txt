@@ -21,10 +21,14 @@ pods_install_libraries(octomap-util)
 pods_install_pkg_config_file(octomap-util
     CFLAGS
     LIBS -loctomap-util
-    REQUIRES occ-map octomap
+    REQUIRES occ-map octomap laser-util
     VERSION 0.0.1)
 
     
 add_executable(octomap2voxelmap octomap2voxelmap.cpp)
 pods_use_pkg_config_packages(octomap2voxelmap octomap-util)
 pods_install_executables(octomap2voxelmap)
+
+#add_executable(laser_likelihood_test laser_likelihood_test)
+#pods_use_pkg_config_packages(laser_likelihood_test octomap-util)
+#pods_install_executables(laser_likelihood_test)

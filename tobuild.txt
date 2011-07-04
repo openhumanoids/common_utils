@@ -3,9 +3,7 @@
 
 geom-utils
 image-utils
-
-# laser-mapping depends on octomap
-octomap-utils 
 laser-utils
+octomap-utils 
 path-util
 eigen-utils
