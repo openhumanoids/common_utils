@@ -514,6 +514,10 @@ static int cam_renderer_prepare_texture(cam_renderer_t *cr)
       stride = cr->last_image->width;
       gl_format = GL_LUMINANCE;
       tex_src = cr->last_image->data;
+    } else if (cr->last_image->pixelformat == PIXEL_FORMAT_RGB) {
+      stride = cr->last_image->row_stride;
+      gl_format = GL_RGB;
+      tex_src = cr->last_image->data;
     }
     else if (cr->last_image->pixelformat == PIXEL_FORMAT_MJPEG) {
       bot_core_image_t * msg = cr->last_image;
