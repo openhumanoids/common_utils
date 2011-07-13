@@ -70,7 +70,7 @@ LaserOctomapper::LaserOctomapper(char * logFname) :
   frames = bot_frames_get_global(lcm_pub, param);
 
   //TODO: these should be parameters
-  float res = .02;
+  float res = .1;
   ocTree = new OcTree(res);
 
   laser_projectors = g_hash_table_new(g_str_hash, g_str_equal);
