@@ -1,3 +1,17 @@
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(EIGEN3 eigen3)
+if(NOT EIGEN3_FOUND)
+    message("eigen3 not found. not building eigen-utils") 
+    return()             
+endif()
+
+pkg_check_modules(BOT_LCMGL bot2-lcmgl-client)
+if(NOT BOT_LCMGL_FOUND)
+    message("bot2-lcmgl-client not found. not building eigen-utils") 
+    return()             
+endif()
+
+
 file(GLOB cpp_files *.cpp)
 file(GLOB hpp_files *.hpp)
 
