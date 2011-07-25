@@ -3,9 +3,13 @@
 
 // do not #include this file directly, instead #include geometry.h
 
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define PI 3.14159265
 
 // =========== constructors, destructors ==========
 
@@ -182,6 +186,27 @@ polygon2d_new (void)
     polygon2d_t *self = g_slice_new (polygon2d_t);
     self->nlists = 0;
     self->pointlists = NULL;
+    return self;
+}
+
+
+static inline polygon2d_t* 
+polygon2d_new_circle(double cx, double cy, int diameter, int res) {
+ 
+    polygon2d_t *self = g_slice_new(polygon2d_t);
+    self->nlists = 1;
+    
+    pointlist2d_t *plist  = pointlist2d_new (res);
+ 
+    double theta = 2 * PI / res;
+    for(int i; i < res; i ++) {
+      plist->points[i].x= cx + diameter * cos(i * theta);
+      plist->points[i].y= cy + diameter * sin(i * theta);
+    }
+    
+    self->pointlists = plist;
+    //pointlist2d_free (plist);
+  
     return self;
 }
 
