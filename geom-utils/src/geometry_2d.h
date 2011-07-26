@@ -208,9 +208,9 @@ polygon2d_new_circle(double cx, double cy, double radius, int res) {
     pointlist2d_t *plist  = pointlist2d_new (res);
  
     double theta = 2 * PI / res;
-    for(int i; i < res; i ++) {
-      plist->points[i].x= cx + radius * cos(i * theta);
-      plist->points[i].y= cy + radius * sin(i * theta);
+    for(int i=0; i < res; i ++) {
+        plist->points[i].x= cx + radius * cos(i * theta);
+        plist->points[i].y= cy + radius * sin(i * theta);
     }
     
     self->pointlists = plist;
