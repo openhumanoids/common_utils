@@ -189,9 +189,18 @@ polygon2d_new (void)
     return self;
 }
 
-
+/**
+ * polygon_2d_new_circ
+ *
+ * Generates a 2D polygon representation of a circle centered at %cx and %cy 
+ * of radius %radius. The resolution %res specifies the number of points 
+ * that are used to generate the polygon.
+ *
+ * Returns a polygon2d_t representing the polygon approximation of the circle.
+ * The calling function is responsible for freeing memory via polygon2d_free().
+ */
 static inline polygon2d_t* 
-polygon2d_new_circle(double cx, double cy, int diameter, int res) {
+polygon2d_new_circle(double cx, double cy, double radius, int res) {
  
     polygon2d_t *self = g_slice_new(polygon2d_t);
     self->nlists = 1;
@@ -200,12 +209,11 @@ polygon2d_new_circle(double cx, double cy, int diameter, int res) {
  
     double theta = 2 * PI / res;
     for(int i; i < res; i ++) {
-      plist->points[i].x= cx + diameter * cos(i * theta);
-      plist->points[i].y= cy + diameter * sin(i * theta);
+      plist->points[i].x= cx + radius * cos(i * theta);
+      plist->points[i].y= cy + radius * sin(i * theta);
     }
     
     self->pointlists = plist;
-    //pointlist2d_free (plist);
   
     return self;
 }
