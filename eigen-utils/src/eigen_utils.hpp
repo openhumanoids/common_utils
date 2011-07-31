@@ -32,6 +32,22 @@ Eigen::Matrix3d skewHat(const Eigen::Vector3d & vec)
   return skew_hat;
 }
 
+void quaternionToBotDouble(double bot_quat[4], const Eigen::Quaterniond & eig_quat)
+{
+  bot_quat[0] = eig_quat.coeffs()(3);
+  bot_quat[1] = eig_quat.coeffs()(0);
+  bot_quat[2] = eig_quat.coeffs()(1);
+  bot_quat[3] = eig_quat.coeffs()(2);
+}
+
+void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[4])
+{
+  eig_quat.coeffs()(3) = bot_quat[0];
+  eig_quat.coeffs()(0) = bot_quat[1];
+  eig_quat.coeffs()(1) = bot_quat[2];
+  eig_quat.coeffs()(2) = bot_quat[3];
+}
+
 static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
 {
   bot_lcmgl_vertex3d(lcmgl, vec(0), vec(1), vec(2));
