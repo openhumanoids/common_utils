@@ -17,7 +17,7 @@ using namespace octomap;
 //TODO: make me a parameter
 static int scan_skip = 0;
 static int beam_skip = 0;
-static double publish_interval = 1;
+static double publish_interval = 5;
 
 #define MISS_INC -0.1
 #define HIT_INC 1.0
