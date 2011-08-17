@@ -9,7 +9,9 @@
 extern "C" {
 #endif
 
+#ifndef PI
 #define PI 3.14159265
+#endif
 
 // =========== constructors, destructors ==========
 
