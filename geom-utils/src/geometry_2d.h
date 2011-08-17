@@ -9,10 +9,6 @@
 extern "C" {
 #endif
 
-#ifndef PI
-#define PI 3.14159265
-#endif
-
 // =========== constructors, destructors ==========
 
 static inline point2d_t *
@@ -209,7 +205,7 @@ polygon2d_new_circle(double cx, double cy, double radius, int res) {
     
     pointlist2d_t *plist  = pointlist2d_new (res);
  
-    double theta = 2 * PI / res;
+    double theta = 2 * M_PI / res;
     for(int i=0; i < res; i ++) {
         plist->points[i].x= cx + radius * cos(i * theta);
         plist->points[i].y= cy + radius * sin(i * theta);
