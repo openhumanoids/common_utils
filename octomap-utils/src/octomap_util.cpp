@@ -84,17 +84,16 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   return voxMap;
 }
 
-double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans){
+double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans)
+{
 
-  double likelihood =0;
-  for (int i=0;i<lscan->npoints;i++){
-    if (lscan->invalidPoints[i]!=0)
+  double likelihood = 0;
+  for (int i = 0; i < lscan->npoints; i++) {
+    if (lscan->invalidPoints[i] != 0)
       continue;
     double proj_xyz[3];
-    bot_trans_apply_vec(trans,point3d_as_array(&lscan->points[i]),proj_xyz);
-    OcTreeNode* node = oc->search(proj_xyz[0],proj_xyz[1],proj_xyz[2]);
-    if (node!=NULL)
-      likelihood+= node->getLogOdds();
+    bot_trans_apply_vec(trans, point3d_as_array(&lscan->points[i]), proj_xyz);
+    likelihood += getOctomapLogLikelihood(oc, proj_xyz);
   }
 
   return likelihood;
