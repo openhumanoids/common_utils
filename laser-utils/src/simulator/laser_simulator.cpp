@@ -76,10 +76,10 @@ void LaserSimulator::PublishLaser()
     bot_trans_apply_vec(&curr_pose, laser_xyz, local_xyz);
 
     double borderInstersect[2];
-    if (nearMapBorder && getMapBorderInstersection(curr_pose.trans_vec, local_xyz,borderInstersect)) {
+    if (nearMapBorder && getMapBorderInstersection(curr_pose.trans_vec, local_xyz, borderInstersect)) {
       // crop beam to edge of the map
-      local_xyz[0]=borderInstersect[0];
-      local_xyz[1]=borderInstersect[1];
+      local_xyz[0] = borderInstersect[0];
+      local_xyz[1] = borderInstersect[1];
     }
 
     if (map->collisionCheck(curr_pose.trans_vec, local_xyz, occupancy_thresh, hitPoint)) {
@@ -138,6 +138,8 @@ LaserSimulator::LaserSimulator(lcm_t * _lcm, BotParam * _param, BotFrames * _fra
 void usage(char * name)
 {
   fprintf(stderr, "usage: %s map-filename [lidar-name]\n", name);
+  fprintf(stderr, " assumes the coordinate frames are all set up in the bot-param-server,\n");
+  fprintf(stderr, " and that the pose of the laser will be updated in BotFrames\n");
   exit(1);
 }
 
@@ -145,6 +147,13 @@ int main(int argc, char *argv[])
 {
   string map_fname;
   string laser_name = "laser";
+
+  if (argc < 1 || argc > 3)
+    usage(argv[0]);
+  map_fname = argv[1];
+  if (argc > 2)
+    laser_name = argv[2];
+
   GMainLoop * mainloop = g_main_loop_new(NULL, FALSE);
 
   lcm_t * lcm = bot_lcm_get_global(NULL);
@@ -152,14 +161,6 @@ int main(int argc, char *argv[])
   bot_signal_pipe_glib_quit_on_kill(mainloop);
   BotParam * param = bot_param_get_global(lcm, 0);
   BotFrames * frames = bot_frames_get_global(lcm, param);
-
-  if (argc <1 || argc>3)
-    usage(argv[0]);
-
-  map_fname = argv[1];
-
-  if (argc > 2)
-    laser_name = argv[2];
 
   fprintf(stderr, "Publishing the simulated lider '%s'\n", laser_name.c_str());
 
