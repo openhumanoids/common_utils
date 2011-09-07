@@ -7,6 +7,8 @@ if(NOT BOT2_VIS_FOUND)
     return()
 endif()
 
+# Necessary to build on OSX
+find_package(OpenGL REQUIRED)
 
 add_definitions(-std=gnu99)
 

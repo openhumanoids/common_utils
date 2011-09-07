@@ -1,10 +1,3 @@
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(BOT_FRAMES bot2-frames)
-if(NOT BOT_FRAMES_FOUND)
-    message("bot-frames not found. not building laser-utils") 
-    return()             
-endif()
-
 add_definitions(-std=gnu99)
 # Create a shared library liblaser-util.so with a single source file
 add_library(laser-util SHARED
