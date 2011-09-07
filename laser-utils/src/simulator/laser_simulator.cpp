@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
   string map_fname;
   string laser_name = "laser";
 
-  if (argc < 1 || argc > 3)
+  if (argc < 2 || argc > 3)
     usage(argv[0]);
   map_fname = argv[1];
   if (argc > 2)
