@@ -176,14 +176,14 @@ void LaserLikelihooder::processScansInQueue()
     }
     bot_tictoc("processScan");
     BotTrans body_to_local;
-    bot_frames_get_trans(frames, "body", "local", &body_to_local);
+    bot_frames_get_trans(frames, "body", bot_frames_get_root_name(frames), &body_to_local);
     double like1 = evaluateLaserLikelihood(ocTree, lscan, &body_to_local);
     int gridSizeXY = 21;
     int gridSizeZ = 1;
     double gridRes = .025;
-    bot_lcmgl_point_size(lcmgl,5);
+    bot_lcmgl_point_size(lcmgl, 5);
     bot_lcmgl_enable(lcmgl, GL_DEPTH_TEST);
-    bot_lcmgl_depth_func(lcmgl,GL_LESS);
+    bot_lcmgl_depth_func(lcmgl, GL_LESS);
     bot_lcmgl_begin(lcmgl, GL_POINTS);
     for (int i = 0; i < gridSizeXY; i++) {
       for (int j = 0; j < gridSizeXY; j++) {
@@ -221,12 +221,13 @@ void LaserLikelihooder::processScansInQueue()
     bot_lcmgl_end(lcmgl);
 
     double like = evaluateLaserLikelihood(ocTree, lscan, &body_to_local);
-    printf("%d scans, like=%f ",lscan->numValidPoints,like);
+    printf("%d scans, like=%f ", lscan->numValidPoints, like);
     bot_trans_print_trans(&body_to_local);
     printf("\n");
-    bot_lcmgl_point_size(lcmgl,10);
+    bot_lcmgl_point_size(lcmgl, 10);
     bot_lcmgl_color3f(lcmgl, bot_color_util_yellow[0], bot_color_util_yellow[1], bot_color_util_yellow[2]);
     bot_lcmgl_begin(lcmgl, GL_POINTS);
+
     for (int i=0;i<lscan->npoints;i++){
        if (lscan->invalidPoints[i]!=0)
          continue;
@@ -235,12 +236,12 @@ void LaserLikelihooder::processScansInQueue()
        lcmglColor3fv(bot_color_util_jet(llike/3.511031));
        bot_trans_apply_vec(&body_to_local,point3d_as_array(&lscan->points[i]),proj_xyz);
        bot_lcmgl_vertex3f(lcmgl, proj_xyz[0], proj_xyz[1], proj_xyz[2]);
+
     }
 
     bot_lcmgl_end(lcmgl);
     bot_lcmgl_disable(lcmgl, GL_DEPTH_TEST);
     bot_lcmgl_switch_buffer(lcmgl);
-
 
     bot_tictoc("processScan");
     laser_destroy_projected_scan(lscan);
