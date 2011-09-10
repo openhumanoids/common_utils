@@ -8,6 +8,7 @@
 #include <iostream>
 #include <bot_lcmgl_client/lcmgl.h>
 #include <bot_core/bot_core.h>
+#include <bot_vis/bot_vis.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else
@@ -42,6 +43,8 @@ static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec
 
 void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector3d & mu3d,
     double scale = 1, bool fill = false);
+
+void bot_gl_cov_ellipse(const Eigen::Matrix2d & cov, double scale = 1);
 
 void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector2d & mu2d,
     double scale = 1, bool fill = false);

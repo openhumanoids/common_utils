@@ -2,6 +2,8 @@
 
 namespace eigen_utils {
 
+using namespace Eigen;
+
 double atan2Vec(const Eigen::Vector2d & vec)
 {
   return atan2(vec(1), vec(0));
@@ -59,7 +61,21 @@ void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[
   eig_quat.coeffs()(2) = bot_quat[3];
 }
 
-static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
+void bot_gl_cov_ellipse(const Eigen::Matrix2d & cov, double scale)
+{
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix2d> eigen_solver(cov);
+  Eigen::Vector2d eig_vals = eigen_solver.eigenvalues();
+  Eigen::Matrix2d eig_vecs = eigen_solver.eigenvectors();
+
+  Eigen::Vector2d A = eig_vecs.block<2, 1>(0, 0);
+  double a = sqrt(eig_vals(0, 0)) * scale;
+  double b = sqrt(eig_vals(1, 0)) * scale;
+  double phi = atan2Vec(A);
+
+  bot_gl_draw_ellipse(b, a, phi, 100);
+}
+
+void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
 {
   bot_lcmgl_vertex3d(lcmgl, vec(0), vec(1), vec(2));
 }
@@ -101,7 +117,6 @@ void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, con
   xyz.block<2, 1>(0, 0) = mu2d;
   bot_lcmgl_cov_ellispe(lcmgl, cov, xyz, scale, fill);
 }
-
 
 }
 
