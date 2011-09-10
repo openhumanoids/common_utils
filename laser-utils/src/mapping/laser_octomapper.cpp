@@ -143,7 +143,7 @@ void LaserOctomapper::processScansInQueue()
   for (it = lscans_to_be_processed.begin(); it != lscans_to_be_processed.end(); it++) {
     laser_projected_scan * lscan = *it;
     if (!lscan->projection_status) {
-      laser_update_projected_scan(lscan->projector, lscan, "local");
+      laser_update_projected_scan(lscan->projector, lscan, bot_frames_get_root_name(this->frames));
     }
     if (!lscan->projection_status)
       break;
