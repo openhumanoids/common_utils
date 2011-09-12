@@ -48,18 +48,26 @@ void bot_gl_cov_ellipse(const Eigen::Matrix2d & cov, double scale = 1);
 
 void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector2d & mu2d,
     double scale = 1, bool fill = false);
+
+void bot_lcmgl_rotate_frame(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & quat, const Eigen::Vector3d & pos);
+
+void bot_lcmgl_rotate_frame_from_ned_to_enu(bot_lcmgl_t * lcmgl);
 /**
  * generate random normal vector with mu=0, Sigma = I
  */
 template<int N>
 void randn_identity(Eigen::Matrix<double, N, 1> & vec)
 {
-  vec = Eigen::Matrix<double, N, 1>::Zero();
-  int num_samps = 12;
-  for (int ii = 0; ii < num_samps; ii++) {
-    vec += Eigen::Matrix<double, N, 1>::Random();
+//  vec = Eigen::Matrix<double, N, 1>::Zero();
+//  int num_samps = 12;
+//  for (int ii = 0; ii < num_samps; ii++) {
+//    vec += Eigen::Matrix<double, N, 1>::Random();
+//  }
+//  vec /= 2;
+
+  for (int ii = 0; ii < N; ii++) {
+    vec(ii) = bot_gauss_rand(0, 1);
   }
-  vec /= 2;
 }
 
 template<int N>
@@ -69,6 +77,28 @@ Eigen::Matrix<double, N, 1> randn(const Eigen::Matrix<double, N, N> & cov)
   randn_identity(vec);
   Eigen::Matrix<double, N, N> chol_decomp = cov.llt().matrixL();
   return chol_decomp * vec;
+}
+
+/**
+ * unnormalized log likelihood
+ */
+template<int N>
+double loglike_unnormalized(const Eigen::Matrix<double, N, 1> & x, const Eigen::Matrix<double, N, 1> & mu
+    , const Eigen::Matrix<double, N, N> & sigma)
+{
+  Eigen::Matrix<double, N, 1> diff = mu - x;
+  return -0.5 * diff.transpose() * sigma.ldlt().solve(diff);
+}
+
+/**
+ * unnormalized log likelhihood using information matrix
+ */
+template<int N>
+double loglike_information_unnormalized(const Eigen::Matrix<double, N, 1> & x, const Eigen::Matrix<double, N, 1> & mu
+    , const Eigen::Matrix<double, N, N> & sigma_inv)
+{
+  Eigen::Matrix<double, N, 1> diff = mu - x;
+  return -0.5 * diff.transpose() * sigma_inv * diff;
 }
 
 template<int N>
@@ -89,8 +119,9 @@ void fitParticles(
 {
 
   int num_samples = state_samples.cols();
-  weights /= weights.sum();
-  mean = state_samples * weights;
+
+  double sum_weights = weights.sum();
+  mean = state_samples * weights / sum_weights;
 
   Eigen::Matrix<double, N, 1> diff;
   covariance = Eigen::Matrix<double, N, N>::Zero();
@@ -99,6 +130,7 @@ void fitParticles(
     diff = mean - state_samples.block(0, ii, N, 1);
     covariance += diff * diff.transpose() * weights(ii);
   }
+  covariance = covariance / sum_weights;
 }
 
 }
