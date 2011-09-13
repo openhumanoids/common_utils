@@ -41,13 +41,16 @@ void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[
 
 static inline void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec);
 
-void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector3d & mu3d,
+void bot_lcmgl_cov_ellipse(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector3d & mu3d,
     double scale = 1, bool fill = false);
 
 void bot_gl_cov_ellipse(const Eigen::Matrix2d & cov, double scale = 1);
 
-void bot_lcmgl_cov_ellispe(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector2d & mu2d,
+void bot_lcmgl_cov_ellipse(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector2d & mu2d,
     double scale = 1, bool fill = false);
+
+void bot_lcmgl_3d_cov_ellipse(bot_lcmgl_t * lcmgl, const Eigen::Matrix3d & cov, const Eigen::Vector3d & mu,
+    double scale = 1);
 
 void bot_lcmgl_rotate_frame(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & quat, const Eigen::Vector3d & pos);
 
@@ -55,20 +58,17 @@ void bot_lcmgl_rotate_frame_from_ned_to_enu(bot_lcmgl_t * lcmgl);
 /**
  * generate random normal vector with mu=0, Sigma = I
  */
+
 template<int N>
 void randn_identity(Eigen::Matrix<double, N, 1> & vec)
 {
-//  vec = Eigen::Matrix<double, N, 1>::Zero();
-//  int num_samps = 12;
-//  for (int ii = 0; ii < num_samps; ii++) {
-//    vec += Eigen::Matrix<double, N, 1>::Random();
-//  }
-//  vec /= 2;
-
   for (int ii = 0; ii < N; ii++) {
-    vec(ii) = bot_gauss_rand(0, 1);
+    vec(ii, 0) = bot_gauss_rand(0, 1);
   }
 }
+
+void randn_identity(Eigen::VectorXd & vec);
+
 
 template<int N>
 Eigen::Matrix<double, N, 1> randn(const Eigen::Matrix<double, N, N> & cov)
@@ -133,6 +133,8 @@ void fitParticles(
   covariance = covariance / sum_weights;
 }
 
+void fitParticles(const Eigen::MatrixXd & state_samples, Eigen::VectorXd & weights
+    , Eigen::VectorXd & mean, Eigen::MatrixXd & covariance);
 }
 
 #endif
