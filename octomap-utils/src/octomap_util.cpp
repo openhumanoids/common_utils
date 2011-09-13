@@ -96,5 +96,5 @@ double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan *
     likelihood += getOctomapLogLikelihood(oc, proj_xyz);
   }
 
-  return likelihood;
+  return log(likelihood / (OCMAP_BIN_VAL * (double) lscan->numValidPoints));
 }

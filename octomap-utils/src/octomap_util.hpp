@@ -5,6 +5,8 @@
 #include <octomap/octomap.h>
 #include <laser_utils/laser_util.h>
 
+#define OCMAP_BIN_VAL 3.511031
+
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth);
 
 double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans);
