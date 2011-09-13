@@ -81,6 +81,8 @@ extern "C" {
   int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame);
 
 
+  void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation);
+
   void laser_destroy_projected_scan(laser_projected_scan * proj_scan);
 
 #ifdef __cplusplus
