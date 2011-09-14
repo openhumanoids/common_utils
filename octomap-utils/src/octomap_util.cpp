@@ -96,5 +96,10 @@ double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan *
     likelihood += getOctomapLogLikelihood(oc, proj_xyz);
   }
 
-  return log(likelihood / (OCMAP_BIN_VAL * (double) lscan->numValidPoints));
+  double percent_hit = likelihood / (OCMAP_BIN_VAL * (double) lscan->numValidPoints);
+
+  double abes_magic_exponent = 2.0;
+  double abe_hack = pow(percent_hit , abes_magic_exponent);
+
+  return log(abe_hack);
 }
