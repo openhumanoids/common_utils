@@ -4,6 +4,10 @@ cmake_minimum_required(VERSION 2.6.0)
 set(POD_NAME octomap-utils)
 include(cmake/pods.cmake)
 
+include(cmake/lcmtypes.cmake)
+lcmtypes_build()
+
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(OCTOMAP octomap)
 if(NOT OCTOMAP_FOUND)

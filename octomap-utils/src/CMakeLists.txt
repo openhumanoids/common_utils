@@ -32,3 +32,11 @@ pods_install_executables(octomap2voxelmap)
 add_executable(laser_likelihood_test laser_likelihood_test)
 pods_use_pkg_config_packages(laser_likelihood_test octomap-util bot2-lcmgl-client)
 pods_install_executables(laser_likelihood_test)
+
+add_executable(octomap-blurrer octomap-blurrer.cpp)
+pods_use_pkg_config_packages(octomap-blurrer octomap-util)
+pods_install_executables(octomap-blurrer)
+
+add_executable(octomap-server octomap-server.cpp)
+pods_use_pkg_config_packages(octomap-server octomap-util lcmtypes_octomap-utils)
+pods_install_executables(octomap-server)
