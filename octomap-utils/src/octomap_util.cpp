@@ -2,6 +2,9 @@
 #include <list>
 #include "octomap_util.hpp"
 #include <laser_utils/laser_util.h>
+#include <lcmtypes/octomap_file_t.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace occ_map;
@@ -160,7 +163,6 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
   }
   fprintf(stderr, "];\n");
 
-
   printf("Creating Blurred Map\n");
   octomap::OcTree *ocTree_blurred = new OcTree(res);
   //set blurred map to occupancy probablity
@@ -180,7 +182,7 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
       if (!ocTree_blurred->genKey(center + indexTable->data[i], key)) {
         fprintf(stderr, "Error: couldn't generate key in blurred map!\n");
       }
-      octomap::OcTreeNode* leaf = ocTree_blurred->updateNode(key, blurKernel->data[i], true);
+      ocTree_blurred->updateNode(key, blurKernel->data[i], true);
     }
   }
 
@@ -199,6 +201,78 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
   }
 
   return ocTree_blurred;
+}
+
+void saveOctomap(octomap::OcTree *ocTree, const char * fname)
+{
+
+  octomap_file_t save_msg;
+
+  ocTree->expand(); //make sure tree is full size
+  save_msg.num_nodes = ocTree->getNumLeafNodes();
+  save_msg.nodes = new octomap_node_t[save_msg.num_nodes];
+  save_msg.resolution = ocTree->getResolution();
+  int count = 0;
+  for (octomap::OcTree::leaf_iterator it = ocTree->begin_leafs(),
+      end = ocTree->end_leafs(); it != end; ++it)
+  {
+    if (count > save_msg.num_nodes) {
+      fprintf(stderr, "ERROR: iterator gave us too many nodes\n");
+      break;
+    }
+    octomap::OcTreeNode &node = *it;
+    save_msg.nodes[count].xyz[0] = it.getX();
+    save_msg.nodes[count].xyz[1] = it.getY();
+    save_msg.nodes[count].xyz[2] = it.getZ();
+    save_msg.nodes[count].negLogLike = node.getValue();
+    count++;
+  }
+  if (count != save_msg.num_nodes) {
+    fprintf(stderr, "ERROR: iterator didn't give us enough nodes\n");
+  }
+
+  int sz = octomap_file_t_encoded_size(&save_msg);
+  char * buf = (char *) malloc(sz * sizeof(char));
+  octomap_file_t_encode(buf, 0, sz, &save_msg);
+  std::ofstream ofs(fname, std::ios::binary);
+  ofs << sz;
+  ofs.write(buf, sz);
+  ofs.close();
+  free(buf);
+  delete[] save_msg.nodes;
+
+}
+
+octomap::OcTree * loadOctomap(const char * fname)
+{
+
+  std::ifstream ifs(fname, std::ios::binary);
+  int sz;
+  ifs >> sz;
+  char * tmpdata = (char *) malloc(sz * sizeof(char));
+  ifs.read(tmpdata, sz * sizeof(char));
+  ifs.close();
+  octomap_file_t * saved_msg = (octomap_file_t *) calloc(1, sizeof(octomap_file_t));
+  octomap_file_t_decode(tmpdata, 0, sz, saved_msg);
+  free(tmpdata);
+
+  octomap::OcTree *ocTree = new octomap::OcTree(saved_msg->resolution);
+  ocTree->setClampingThresMax(1000);
+  ocTree->setClampingThresMin(-1000);
+  for (int i = 0; i < saved_msg->num_nodes; i++) {
+    OcTreeKey key;
+    point3d location(saved_msg->nodes[i].xyz[0],saved_msg->nodes[i].xyz[1],saved_msg->nodes[i].xyz[2]);
+    if (!ocTree->genKey(location, key)) {
+      fprintf(stderr, "Error: couldn't generate key in map for (%f,%f,%f)!\n",location.x(),location.y(),location.z());
+      break;
+    }
+    ocTree->updateNode(key, saved_msg->nodes[i].negLogLike, true);
+  }
+  ocTree->updateInnerOccupancy();
+
+  octomap_file_t_destroy(saved_msg);
+  return ocTree;
+
 }
 
 }

@@ -8,7 +8,10 @@
 
 
 namespace octomap {
-static const float LOGLIKE_HITS_EMPTY =  log(.05);
+static const float LOGLIKE_HITS_EMPTY = -12;
+
+octomap::OcTree * loadOctomap(const char * fname);
+void saveOctomap(octomap::OcTree *ocTree, const char * fname);
 
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth);
 

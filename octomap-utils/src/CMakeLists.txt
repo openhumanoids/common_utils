@@ -21,7 +21,7 @@ pods_install_libraries(octomap-util)
 pods_install_pkg_config_file(octomap-util
     CFLAGS
     LIBS -loctomap-util
-    REQUIRES occ-map octomap laser-util
+    REQUIRES occ-map octomap laser-util lcmtypes_octomap-utils
     VERSION 0.0.1)
 
     
@@ -38,5 +38,5 @@ pods_use_pkg_config_packages(octomap-blurrer octomap-util)
 pods_install_executables(octomap-blurrer)
 
 add_executable(octomap-server octomap-server.cpp)
-pods_use_pkg_config_packages(octomap-server octomap-util lcmtypes_octomap-utils)
+pods_use_pkg_config_packages(octomap-server octomap-util)
 pods_install_executables(octomap-server)

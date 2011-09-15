@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
   string blurred_fname = octomap_fname + string("_blurred");
 
   printf("loading octomap from: %s\n", octomap_fname.c_str());
-  octomap::OcTree * ocTree = new OcTree(octomap_fname);
+  octomap::OcTree * ocTree = new  octomap::OcTree(octomap_fname);
 
   ocTree->toMaxLikelihood();
   ocTree->expand();
@@ -26,12 +26,13 @@ int main(int argc, char ** argv)
   double minX, minY, minZ, maxX, maxY, maxZ;
   ocTree->getMetricMin(minX, minY, minZ);
   ocTree->getMetricMax(maxX, maxY, maxZ);
-  printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]  res: %f\n", minX, minY, minZ, maxX, maxY, maxZ,ocTree->getResolution());
+  printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]  res: %f\n", minX, minY, minZ, maxX, maxY, maxZ,
+      ocTree->getResolution());
 
   printf("blurring octomap\n");
   octomap::OcTree * ocTree_blurred = octomapBlur(ocTree, blur_sigma);
-  ocTree_blurred->prune();
   printf("Saving blurred map to: %s\n", blurred_fname.c_str());
-  ocTree_blurred->writeBinaryConst(blurred_fname);
+  saveOctomap(ocTree_blurred, blurred_fname.c_str());
+
   return 0;
 }
