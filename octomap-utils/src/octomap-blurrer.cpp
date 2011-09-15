@@ -30,9 +30,10 @@ int main(int argc, char ** argv)
       ocTree->getResolution());
 
   printf("blurring octomap\n");
-  octomap::OcTree * ocTree_blurred = octomapBlur(ocTree, blur_sigma);
+  double minNegLogLike;
+  octomap::OcTree * ocTree_blurred = octomapBlur(ocTree, blur_sigma, &minNegLogLike);
   printf("Saving blurred map to: %s\n", blurred_fname.c_str());
-  saveOctomap(ocTree_blurred, blurred_fname.c_str());
+  saveOctomap(ocTree_blurred, blurred_fname.c_str(), minNegLogLike);
 
   return 0;
 }

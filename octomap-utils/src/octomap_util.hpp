@@ -10,14 +10,18 @@
 namespace octomap {
 static const float LOGLIKE_HITS_EMPTY = -12;
 
-octomap::OcTree * loadOctomap(const char * fname);
-void saveOctomap(octomap::OcTree *ocTree, const char * fname);
+//our own save/load
+octomap::OcTree * loadOctomap(const char * fname, double *minNegLogLike);
+void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLike);
+
+
+
 
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth);
 
-octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma);
+octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double * minNegLogLike);
 
-double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans);
+double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans, double minNegLogLike);
 
 static inline double getOctomapLogLikelihood(octomap::OcTree *oc, double xyz[3])
 {

@@ -88,7 +88,7 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   return voxMap;
 }
 
-double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans)
+double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans, double minNegLogLike)
 {
 
   double logLike = 0;
@@ -99,11 +99,19 @@ double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_sca
     bot_trans_apply_vec(trans, point3d_as_array(&lscan->points[i]), proj_xyz);
     logLike += getOctomapLogLikelihood(oc, proj_xyz);
   }
+  double MAX_LOG_LIKE = -minNegLogLike* (double) lscan->numValidPoints;
+  double MIN_LOG_LIKE = LOGLIKE_HITS_EMPTY* (double) lscan->numValidPoints;
+  double percent_hit = (logLike-MIN_LOG_LIKE) / (MAX_LOG_LIKE-MIN_LOG_LIKE);
+
+  double abes_magic_exponent = 2.0;
+  double abe_hack = pow(percent_hit, abes_magic_exponent);
+
+  return log(abe_hack);
 
   return logLike;
 }
 
-octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
+octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double *minNegLogLike)
 {
 
   float res = ocTree->getResolution();
@@ -152,16 +160,20 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
     blurKernel->data[i] /= kernel_sum;
   }
 
+  double cross_section_sum = 0;
   xyz[0] = xyz[1] = xyz[2] = 0;
   blurKernel->worldToTable(xyz, ixyz);
   fprintf(stderr, "kernel = [\n");
   for (ixyz[1] = 0; ixyz[1] < blurKernel->dimensions[1]; ixyz[1]++) {
     for (ixyz[0] = 0; ixyz[0] < blurKernel->dimensions[0]; ixyz[0]++) {
       fprintf(stderr, "%f ", blurKernel->readValue(ixyz));
+      cross_section_sum += blurKernel->readValue(ixyz);
     }
     fprintf(stderr, "\n");
   }
   fprintf(stderr, "];\n");
+
+  printf("cross_section_sum = %f\n", cross_section_sum);
 
   printf("Creating Blurred Map\n");
   octomap::OcTree *ocTree_blurred = new OcTree(res);
@@ -189,7 +201,7 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
   printf("Updating inner occupancy!\n");
   ocTree_blurred->updateInnerOccupancy();
 
-  //convert to log odds
+  //convert from probabilities to log odds, capping at the likelihood of a wall
   int numBlurLeaves = ocTree_blurred->getNumLeafNodes();
   printf("Converting to Log Odds\n");
   count = 0;
@@ -197,13 +209,13 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
       end = ocTree_blurred->end_leafs(); it != end; ++it)
   {
     octomap::OcTreeNode &node = *it;
-    node.setValue(-log(node.getValue()));
+    node.setValue(-log(fmin(cross_section_sum, node.getValue())));
   }
-
+  *minNegLogLike = -log(cross_section_sum);
   return ocTree_blurred;
 }
 
-void saveOctomap(octomap::OcTree *ocTree, const char * fname)
+void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLike)
 {
 
   octomap_file_t save_msg;
@@ -212,6 +224,7 @@ void saveOctomap(octomap::OcTree *ocTree, const char * fname)
   save_msg.num_nodes = ocTree->getNumLeafNodes();
   save_msg.nodes = new octomap_node_t[save_msg.num_nodes];
   save_msg.resolution = ocTree->getResolution();
+  save_msg.minNegLogLike = minNegLogLike;
   int count = 0;
   for (octomap::OcTree::leaf_iterator it = ocTree->begin_leafs(),
       end = ocTree->end_leafs(); it != end; ++it)
@@ -243,7 +256,7 @@ void saveOctomap(octomap::OcTree *ocTree, const char * fname)
 
 }
 
-octomap::OcTree * loadOctomap(const char * fname)
+octomap::OcTree * loadOctomap(const char * fname, double * minNegLogLike)
 {
 
   std::ifstream ifs(fname, std::ios::binary);
@@ -256,14 +269,16 @@ octomap::OcTree * loadOctomap(const char * fname)
   octomap_file_t_decode(tmpdata, 0, sz, saved_msg);
   free(tmpdata);
 
+  *minNegLogLike = saved_msg->minNegLogLike;
   octomap::OcTree *ocTree = new octomap::OcTree(saved_msg->resolution);
   ocTree->setClampingThresMax(1000);
   ocTree->setClampingThresMin(-1000);
   for (int i = 0; i < saved_msg->num_nodes; i++) {
     OcTreeKey key;
-    point3d location(saved_msg->nodes[i].xyz[0],saved_msg->nodes[i].xyz[1],saved_msg->nodes[i].xyz[2]);
+    point3d location(saved_msg->nodes[i].xyz[0], saved_msg->nodes[i].xyz[1], saved_msg->nodes[i].xyz[2]);
     if (!ocTree->genKey(location, key)) {
-      fprintf(stderr, "Error: couldn't generate key in map for (%f,%f,%f)!\n",location.x(),location.y(),location.z());
+      fprintf(stderr, "Error: couldn't generate key in map for (%f,%f,%f)!\n", location.x(), location.y(),
+          location.z());
       break;
     }
     ocTree->updateNode(key, saved_msg->nodes[i].negLogLike, true);
