@@ -295,7 +295,6 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
     glPointSize(2.0f);
 
  if (self->param_alpha < 1) {
-    printf("blend enabled\n");
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
