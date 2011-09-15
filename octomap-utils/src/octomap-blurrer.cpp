@@ -30,6 +30,7 @@ int main(int argc, char ** argv)
 
   printf("blurring octomap\n");
   octomap::OcTree * ocTree_blurred = octomapBlur(ocTree, blur_sigma);
+  ocTree_blurred->prune();
   printf("Saving blurred map to: %s\n", blurred_fname.c_str());
   ocTree_blurred->writeBinaryConst(blurred_fname);
   return 0;

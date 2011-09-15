@@ -95,7 +95,7 @@ LaserLikelihooder::LaserLikelihooder(char * octomapFname) :
 
   //  ocTree = new OcTree("/home/abachrac/stuff/pods_stuff/Quad/build/bin/octomap.bt");
   ocTree = new OcTree(octomapFname);
-  ocTree->toMaxLikelihood();
+
 
   fprintf(stderr, "Publishing map... ");
   double minX, minY, minZ, maxX, maxY, maxZ;
@@ -177,7 +177,7 @@ void LaserLikelihooder::processScansInQueue()
     bot_tictoc("processScan");
     BotTrans body_to_local;
     bot_frames_get_trans(frames, "body", bot_frames_get_root_name(frames), &body_to_local);
-    double like1 = evaluateLaserLikelihood(ocTree, lscan, &body_to_local);
+    double like1 = evaluateLaserLogLikelihood(ocTree, lscan, &body_to_local);
     int gridSizeXY = 21;
     int gridSizeZ = 1;
     double gridRes = .025;
@@ -192,7 +192,7 @@ void LaserLikelihooder::processScansInQueue()
           tmp.trans_vec[0] += gridRes * (i - gridSizeXY / 2);
           tmp.trans_vec[1] += gridRes * (j - gridSizeXY / 2);
           tmp.trans_vec[2] += gridRes * (k - gridSizeZ / 2);
-          double like = evaluateLaserLikelihood(ocTree, lscan, &tmp);
+          double like = evaluateLaserLogLikelihood(ocTree, lscan, &tmp);
           bot_lcmgl_vertex3f(lcmgl, tmp.trans_vec[0], tmp.trans_vec[1], tmp.trans_vec[2]);
           float * color = bot_color_util_jet(like / (lscan->numValidPoints * 3.5));
           bot_lcmgl_color3f(lcmgl, color[0], color[1], color[2]);
@@ -211,7 +211,7 @@ void LaserLikelihooder::processScansInQueue()
           tmp.trans_vec[0] += gridRes * (i - gridSizeXY / 2);
           tmp.trans_vec[1] += gridRes * (j - gridSizeZ / 2);
           tmp.trans_vec[2] += gridRes * (k - gridSizeZ / 2);
-          double like = evaluateLaserLikelihood(ocTree, lscan, &tmp);
+          double like = evaluateLaserLogLikelihood(ocTree, lscan, &tmp);
           bot_lcmgl_vertex3f(lcmgl, tmp.trans_vec[0], tmp.trans_vec[1], tmp.trans_vec[2]);
           float * color = bot_color_util_jet(like / (lscan->numValidPoints * 3.5));
           bot_lcmgl_color3f(lcmgl, color[0], color[1], color[2]);
@@ -220,7 +220,7 @@ void LaserLikelihooder::processScansInQueue()
     }
     bot_lcmgl_end(lcmgl);
 
-    double like = evaluateLaserLikelihood(ocTree, lscan, &body_to_local);
+    double like = evaluateLaserLogLikelihood(ocTree, lscan, &body_to_local);
     printf("%d scans, like=%f ", lscan->numValidPoints, like);
     bot_trans_print_trans(&body_to_local);
     printf("\n");

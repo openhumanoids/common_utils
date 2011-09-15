@@ -85,24 +85,19 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   return voxMap;
 }
 
-double evaluateLaserLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans)
+double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans)
 {
 
-  double likelihood = 0;
+  double logLike = 0;
   for (int i = 0; i < lscan->npoints; i++) {
     if (lscan->invalidPoints[i] != 0)
       continue;
     double proj_xyz[3];
     bot_trans_apply_vec(trans, point3d_as_array(&lscan->points[i]), proj_xyz);
-    likelihood += getOctomapLogLikelihood(oc, proj_xyz);
+    logLike += getOctomapLogLikelihood(oc, proj_xyz);
   }
 
-  double percent_hit = likelihood / (OCMAP_BIN_VAL * (double) lscan->numValidPoints);
-
-  double abes_magic_exponent = 2.0;
-  double abe_hack = pow(percent_hit , abes_magic_exponent);
-
-  return log(abe_hack);
+  return logLike;
 }
 
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
@@ -199,10 +194,6 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma)
   for (octomap::OcTree::leaf_iterator it = ocTree_blurred->begin_leafs(),
       end = ocTree_blurred->end_leafs(); it != end; ++it)
   {
-    if (count % (numLeaves / 20) == 0) {
-      printf("%d of %d\n", count, numBlurLeaves);
-    }
-    count++;
     octomap::OcTreeNode &node = *it;
     node.setValue(-log(node.getValue()));
   }
