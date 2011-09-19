@@ -38,6 +38,7 @@
 #define COLOR_MODE_Z_MIN_Z -2
 #define COLOR_MODE_Z_DZ 0.1
 #define PARAM_MAX_DRAW_Z "Max Draw Z"
+#define PARAM_MIN_DRAW_Z "Min Draw Z"
 #define SPACIAL_DECIMATION_LIMIT 0.05 /* meters */
 #define ANGULAR_DECIMATION_LIMIT .075 /* radians */
 
@@ -100,6 +101,7 @@ typedef struct _RendererLaser {
   double param_color_mode_z_max_z;
   double param_color_mode_z_min_z;
   double param_max_draw_z;
+  double param_min_draw_z;
   double param_alpha;
   int z_relative;
 
@@ -199,7 +201,7 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       }
       //count number of points we want to draw
       for (int i = 0; i < lscan->npoints; i++) {
-        if (!lscan->invalidPoints[i] && lscan->points[i].z < self->param_max_draw_z)
+        if (!lscan->invalidPoints[i] && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
           numPointsToDraw++;
       }
     }
@@ -224,7 +226,7 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       laser_projected_scan *lscan = bot_ptr_circular_index(lchan->scans, scan_idx);
 
       for (int i = 0; i < lscan->npoints; i++) {
-        if (lscan->invalidPoints[i] || lscan->points[i].z > self->param_max_draw_z) {
+        if (lscan->invalidPoints[i] || lscan->points[i].z < self->param_min_draw_z|| lscan->points[i].z > self->param_max_draw_z) {
           continue;
         }
         else {
@@ -508,6 +510,7 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
   self->param_color_mode_z_max_z = bot_gtk_param_widget_get_double(self->pw, PARAM_COLOR_MODE_Z_MAX_Z);
   self->param_color_mode_z_min_z = bot_gtk_param_widget_get_double(self->pw, PARAM_COLOR_MODE_Z_MIN_Z);
   self->param_max_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MAX_DRAW_Z);
+  self->param_min_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MIN_DRAW_Z);
   self->param_alpha = bot_gtk_param_widget_get_double(self->pw, PARAM_ALPHA);
 
   for (int i = 0; i < self->channels->len; i++) {
@@ -569,6 +572,7 @@ BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam * param
   self->param_color_mode_z_max_z = COLOR_MODE_Z_MAX_Z;
   self->param_color_mode_z_min_z = COLOR_MODE_Z_MIN_Z;
   self->param_max_draw_z = COLOR_MODE_Z_MAX_Z;
+  self->param_min_draw_z = COLOR_MODE_Z_MIN_Z;
   self->param_alpha = 1;
 
   if (viewer) {
@@ -593,6 +597,8 @@ BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam * param
         COLOR_MODE_Z_MIN_Z, COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_color_mode_z_max_z);
     bot_gtk_param_widget_add_double(self->pw, PARAM_COLOR_MODE_Z_MIN_Z, BOT_GTK_PARAM_WIDGET_SPINBOX,
         COLOR_MODE_Z_MIN_Z, COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_color_mode_z_min_z);
+    bot_gtk_param_widget_add_double(self->pw, PARAM_MIN_DRAW_Z, BOT_GTK_PARAM_WIDGET_SPINBOX, COLOR_MODE_Z_MIN_Z,
+        COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_min_draw_z);
     bot_gtk_param_widget_add_double(self->pw, PARAM_MAX_DRAW_Z, BOT_GTK_PARAM_WIDGET_SPINBOX, COLOR_MODE_Z_MIN_Z,
         COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_max_draw_z);
 
