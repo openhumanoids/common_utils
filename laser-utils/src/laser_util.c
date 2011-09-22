@@ -88,6 +88,13 @@ void laser_projector_destroy(Laser_projector * to_destroy)
 
 int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame)
 {
+  double zeros[3] = { 0 };
+  return laser_update_projected_scan_with_motion(projector, proj_scan, dest_frame, zeros, zeros);
+}
+
+int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_projected_scan * proj_scan,
+    const char * dest_frame, const double laser_angular_rate[3], const double laser_velocity[3])
+{
   if (!bot_frames_get_trans_with_utime(projector->bot_frames, projector->coord_frame, dest_frame, proj_scan->utime,
       &proj_scan->origin)) {
     return proj_scan->projection_status;
@@ -114,6 +121,13 @@ int laser_update_projected_scan(Laser_projector * projector, laser_projected_sca
   double aveRange = 0;
   double aveRangeSq = 0;
   double surroundCount = 0;
+
+  //values for motion correcting the scan
+  double timestep = (proj_scan->rawScan->radstep / (2 * M_PI)) / proj_scan->projector->laser_frequency;
+  double scan_time = proj_scan->rawScan->nranges * timestep;
+  double dt;
+  BotTrans laser_hit_time_to_laser_current_time;
+  BotTrans laser_hit_time_to_dest;
 
   /* convert the range data to the local frame */
   for (int i = 0; i < proj_scan->npoints; i++) {
@@ -160,7 +174,14 @@ int laser_update_projected_scan(Laser_projector * projector, laser_projected_sca
       proj_scan->numValidPoints++;
     }
     /* convert to local frame */
-    bot_trans_apply_vec(&proj_scan->origin, sensor_xyz, point3d_as_array(&proj_scan->points[i]));
+
+    //dt will be negative since we start farthest back in time (points[0]) and step forward to the last point
+    //todo: check for 0 velocities and don't do set_from_velocities step to save computation
+    dt = -scan_time + timestep * i;
+    bot_trans_set_from_velocities(&laser_hit_time_to_laser_current_time, laser_angular_rate, laser_velocity, dt);
+    bot_trans_apply_trans_to(&proj_scan->origin, &laser_hit_time_to_laser_current_time, &laser_hit_time_to_dest);
+
+    bot_trans_apply_vec(&laser_hit_time_to_dest, sensor_xyz, point3d_as_array(&proj_scan->points[i]));
   }
   aveRange /= surroundCount;
   aveRangeSq /= surroundCount;
@@ -180,7 +201,7 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
             > spatial_decimation
         || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), lscan->origin.trans_vec)
             > (lscan->aveSurroundRange + 1.8 * lscan->stddevSurroundRange) ||
-            i < lscan->projector->surroundRegion[0]
+        i < lscan->projector->surroundRegion[0]
         || i > lscan->projector->surroundRegion[1]) {
       lastAdd = i;
     }
@@ -191,8 +212,9 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
   }
 }
 
-laser_projected_scan *laser_create_projected_scan_from_planar_lidar(Laser_projector * projector,
-    const bot_core_planar_lidar_t *msg, const char * dest_frame)
+laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(Laser_projector * projector,
+    const bot_core_planar_lidar_t *msg, const char * dest_frame, const double laser_angular_rate[3],
+    const double laser_velocity[3])
 {
   laser_projected_scan * proj_scan = (laser_projected_scan *) calloc(1, sizeof(laser_projected_scan));
   proj_scan->npoints = msg->nranges;
@@ -211,7 +233,8 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar(Laser_projec
     return NULL;
   }
   else {
-    if (laser_update_projected_scan(projector, proj_scan, dest_frame) == -1) { //scan is arriving way late
+    if (laser_update_projected_scan_with_motion(projector, proj_scan, dest_frame, laser_angular_rate, laser_velocity)
+        == -1) { //scan is arriving way late
       laser_destroy_projected_scan(proj_scan);
       return NULL;
     }
@@ -219,16 +242,24 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar(Laser_projec
 
   return proj_scan;
 }
+
+laser_projected_scan *laser_create_projected_scan_from_planar_lidar(Laser_projector * projector,
+    const bot_core_planar_lidar_t *msg, const char * dest_frame)
+{
+  double zeros[3] = { 0 };
+  return laser_create_projected_scan_from_planar_lidar_with_motion(projector, msg, dest_frame, zeros, zeros);
+}
+
 void laser_destroy_projected_scan(laser_projected_scan * proj_scan)
 {
   if (proj_scan->points != NULL
-    )
+  )
     free(proj_scan->points);
   if (proj_scan->invalidPoints != NULL
-    )
+  )
     free(proj_scan->invalidPoints);
   if (proj_scan->rawScan != NULL
-    )
+  )
     bot_core_planar_lidar_t_destroy(proj_scan->rawScan);
   free(proj_scan);
 }

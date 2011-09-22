@@ -76,10 +76,22 @@ extern "C" {
       const bot_core_planar_lidar_t *msg, const char * dest_frame);
 
   /*
+   * motion corrects the projection for laser_angular_rate and laser_angular_velocity expressed in laser frame
+   */
+  laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(Laser_projector * projector,
+      const bot_core_planar_lidar_t *msg, const char * dest_frame, const double laser_angular_rate[3],
+      const double laser_velocity[3]);
+
+  /*
    * update the scan with the current transform...
    */
   int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame);
 
+  /*
+   * motion corrects the projection for laser_angular_rate and laser_angular_velocity expressed in laser frame
+   */
+  int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_projected_scan * proj_scan,
+      const char * dest_frame, const double laser_angular_rate[3], const double laser_velocity[3]);
 
   void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation);
 
