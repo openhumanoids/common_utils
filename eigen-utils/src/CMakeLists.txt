@@ -41,3 +41,7 @@ pods_install_pkg_config_file(eigen-utils
     LIBS -leigen-utils
     REQUIRES ${REQUIRED_LIBS}
     VERSION 0.0.1)
+    
+    
+add_subdirectory(test-eigen)
+    
