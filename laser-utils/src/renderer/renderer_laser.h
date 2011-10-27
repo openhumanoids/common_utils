@@ -9,9 +9,6 @@ extern "C" {
 
   void laser_util_add_renderer_to_viewer(BotViewer *viewer, int render_priority, lcm_t * lcm, BotParam * param,
       BotFrames * frames);
-  void laser_util_add_fancy_renderer_to_viewer(BotViewer *viewer, int render_priority, lcm_t * lcm, BotParam * param,
-        BotFrames * frames);
-
 
 #ifdef __cplusplus
 }
