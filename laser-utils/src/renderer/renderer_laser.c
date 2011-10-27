@@ -539,7 +539,7 @@ static void on_save_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
   bot_gtk_param_widget_save_to_key_file(self->pw, keyfile, RENDERER_NAME);
 }
 
-BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFrames * frames)
+static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFrames * frames)
 {
   RendererLaser *self = (RendererLaser*) calloc(1, sizeof(RendererLaser));
   g_assert(self);

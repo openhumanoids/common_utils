@@ -13,7 +13,8 @@ find_package(OpenGL REQUIRED)
 add_definitions(-std=gnu99)
 
 add_library(laser-util-renderer SHARED
-    renderer_laser.c)
+    renderer_laser.c
+    renderer_laser_fancy.c)
 
 target_link_libraries(laser-util-renderer ${OPENGL_LIBRARIES})
 
