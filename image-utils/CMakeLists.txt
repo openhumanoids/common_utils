@@ -10,3 +10,10 @@ include(cmake/pods.cmake)
 
 add_subdirectory(src)
 add_subdirectory(src/renderer)
+
+
+# install all python packages in the python dir
+pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
+
+# executable scripts:  script-name  python-module
+pods_install_python_script(image-util-extract-jpgs image_utils.extract_jpgs.py)
