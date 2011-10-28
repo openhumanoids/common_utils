@@ -5,7 +5,7 @@
 #include <lcmtypes/octomap_file_t.h>
 #include <iostream>
 #include <fstream>
-
+#include <bot_core/bot_core.h>
 using namespace std;
 using namespace occ_map;
 
@@ -117,7 +117,6 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
   float res = ocTree->getResolution();
 
   //normalize sigma from meteres to cell resolution
-  blurSigma = blurSigma;
   double blurVar = blurSigma * blurSigma;
   //compute the size of the gaussian kernel assuming max likelihood of 255, and min of 32
   double det_var = pow(blurVar, 3); //covariance is diagonal

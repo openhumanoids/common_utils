@@ -51,5 +51,10 @@ int main(int argc, char ** argv)
     }
   }
   fprintf(stderr, "done! \n");
+
+  BotTrans trans;
+  bot_trans_invert(&trans); //force the linker to link in bot_trans (compiler bug in ubuntu 11.10/GCC 4.6.1?)
+
+  return 0;
 }
 

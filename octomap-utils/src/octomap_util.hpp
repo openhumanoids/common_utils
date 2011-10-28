@@ -4,6 +4,8 @@
 #include <occ_map/VoxelMap.hpp>
 #include <octomap/octomap.h>
 #include <laser_utils/laser_util.h>
+#include <bot_core/bot_core.h>
+
 
 
 

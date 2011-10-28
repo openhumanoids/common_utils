@@ -1,5 +1,5 @@
 #include "octomap_util.hpp"
-
+#include <bot_core/bot_core.h>
 using namespace std;
 using namespace octomap;
 using namespace occ_map;
@@ -34,6 +34,10 @@ int main(int argc, char ** argv)
   octomap::OcTree * ocTree_blurred = octomapBlur(ocTree, blur_sigma, &minNegLogLike);
   printf("Saving blurred map to: %s\n", blurred_fname.c_str());
   saveOctomap(ocTree_blurred, blurred_fname.c_str(), minNegLogLike);
+
+  BotTrans trans;
+  bot_trans_invert(&trans); //force the linker to link in bot_trans (compiler bug in ubuntu 11.10/GCC 4.6.1?)
+
 
   return 0;
 }
