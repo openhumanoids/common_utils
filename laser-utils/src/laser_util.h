@@ -28,8 +28,9 @@ extern "C" {
     char * laser_name;
     char * coord_frame;
 
-    double max_range; /* max sensor range (from param file) */
-    double min_range; /* min sensor range (from param file) */
+    double max_range; /* max sensor range (from param) */
+    double max_range_free_dist; /*project max_range readings out this far (from param) */
+    double min_range; /* min sensor range (from param) */
 
     int heightDownRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int heightUpRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/

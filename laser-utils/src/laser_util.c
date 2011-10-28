@@ -31,6 +31,14 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
     self->max_range = LASER_MAX_SENSOR_RANGE_DEFAULT;
   }
 
+  sprintf(key, "%s.max_range_free_dist", param_prefix);
+    if (0 != bot_param_get_double(self->param, key, &self->max_range_free_dist)) {
+      fprintf(stderr, "Error: Missing max_range_free_dist configuration parameter "
+        "for planar LIDAR configuration key: '%s'\n", key);
+      self->max_range_free_dist = self->max_range;
+    }
+
+
   sprintf(key, "%s.min_range", param_prefix);
   if (0 != bot_param_get_double(self->param, key, &self->min_range)) {
     fprintf(stderr, "Error: Missing or funny min_range configuration parameter "
@@ -135,8 +143,10 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double theta = proj_scan->rawScan->rad0 + proj_scan->rawScan->radstep * i;
 
     /* point is invalid if range exceeds maximum sensor range */
-    if (range >= projector->max_range)
+    if (range >= projector->max_range){
       proj_scan->invalidPoints[i] = 1;
+      range = projector->max_range_free_dist;
+    }
     else if (range <= projector->min_range)
       proj_scan->invalidPoints[i] = 2;
     double s, c;
