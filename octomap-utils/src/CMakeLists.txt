@@ -9,6 +9,10 @@ endif()
 add_library(octomap-util SHARED
     octomap_util.cpp)
 
+set(REQUIRED_PACKAGES occ-map octomap laser-util lcmtypes_octomap-utils)
+pods_use_pkg_config_packages(octomap-util ${REQUIRED_PACKAGES})
+
+
 # make the header public
 # install it to include/octomap-util
 pods_install_headers(octomap_util.hpp DESTINATION octomap_utils)
@@ -21,12 +25,11 @@ pods_install_libraries(octomap-util)
 pods_install_pkg_config_file(octomap-util
     CFLAGS
     LIBS -loctomap-util
-    REQUIRES occ-map octomap laser-util lcmtypes_octomap-utils
+    REQUIRES ${REQUIRED_PACKAGES}
     VERSION 0.0.1)
 
     
 add_executable(octomap2voxelmap octomap2voxelmap.cpp)
-target_link_libraries(octomap2voxelmap -Wl,--no-as-needed)
 pods_use_pkg_config_packages(octomap2voxelmap octomap-util)
 pods_install_executables(octomap2voxelmap)
 
