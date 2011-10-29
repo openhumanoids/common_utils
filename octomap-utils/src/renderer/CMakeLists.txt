@@ -12,7 +12,9 @@ add_library(octomap-renderer SHARED
 # install it to include/octomap-renderer
 pods_install_headers(renderer_octomap.h DESTINATION octomap_utils)
 
-pods_use_pkg_config_packages(octomap-renderer bot2-vis)
+set(REQUIRED_PACKAGES bot2-vis octomap-util)
+pods_use_pkg_config_packages(octomap-renderer ${REQUIRED_PACKAGES})
+
 
 # make the library public
 pods_install_libraries(octomap-renderer)
@@ -22,5 +24,5 @@ pods_install_libraries(octomap-renderer)
 pods_install_pkg_config_file(octomap-renderer
     CFLAGS
     LIBS -loctomap-renderer
-    REQUIRES octomap-util
+    REQUIRES ${REQUIRED_PACKAGES}
     VERSION 0.0.1)
