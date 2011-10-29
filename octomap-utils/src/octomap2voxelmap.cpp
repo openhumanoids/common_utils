@@ -28,8 +28,6 @@ int main(int argc, char ** argv)
   printf("Saving voxmap to: %s\n", voxmap_fname);
   voxmap->saveToFile(voxmap_fname);
 
-  BotTrans trans;
-  bot_trans_invert(&trans); //force the linker to link in bot_trans (compiler bug in ubuntu 11.10/GCC 4.6.1?)
-
+ 
   return 0;
 }

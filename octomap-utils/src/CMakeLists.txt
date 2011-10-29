@@ -26,6 +26,7 @@ pods_install_pkg_config_file(octomap-util
 
     
 add_executable(octomap2voxelmap octomap2voxelmap.cpp)
+target_link_libraries(octomap2voxelmap -Wl,--no-as-needed)
 pods_use_pkg_config_packages(octomap2voxelmap octomap-util)
 pods_install_executables(octomap2voxelmap)
 

@@ -35,9 +35,5 @@ int main(int argc, char ** argv)
   printf("Saving blurred map to: %s\n", blurred_fname.c_str());
   saveOctomap(ocTree_blurred, blurred_fname.c_str(), minNegLogLike);
 
-  BotTrans trans;
-  bot_trans_invert(&trans); //force the linker to link in bot_trans (compiler bug in ubuntu 11.10/GCC 4.6.1?)
-
-
-  return 0;
+   return 0;
 }
