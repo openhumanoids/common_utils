@@ -20,7 +20,21 @@ public:
   bot_core_planar_lidar_t laser_msg;
   float laser_max_range;
 
-  bot_core_planar_lidar_t * simulate(BotTrans * curr_pose);
+  const bot_core_planar_lidar_t * simulate(BotTrans * curr_pose, int64_t utime = 0);
+  const bot_core_planar_lidar_t * simulate(double x, double y, double t, int64_t utime = 0)
+  {
+    BotTrans trans;
+    trans.trans_vec[0] = x;
+    trans.trans_vec[1] = y;
+    trans.trans_vec[2] = 0;
+    double rpy[3] = { 0, 0, t };
+    bot_roll_pitch_yaw_to_quat(rpy, trans.rot_quat);
+    simulate(&trans, utime);
+  }
+  const bot_core_planar_lidar_t * simulate(double xyt[3], int64_t utime = 0)
+  {
+    return simulate(xyt[0], xyt[1], xyt[2], utime);
+  }
 
 };
 

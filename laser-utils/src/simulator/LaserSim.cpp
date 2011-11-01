@@ -55,7 +55,7 @@ bool LaserSim::getMapBorderInstersection(const double P0[2], const double P1[2],
 
 
 
-bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose)
+const bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose, int64_t utime)
 {
   bot_tictoc("publishLaser");
   bool nearMapBorder = isNearMapBorder(curr_pose->trans_vec, laser_max_range);
@@ -82,7 +82,7 @@ bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose)
       laser_msg.ranges[i] = laser_max_range;
     }
   }
-
+  laser_msg.utime = utime;
   return &laser_msg;
 
 }

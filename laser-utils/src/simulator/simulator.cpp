@@ -41,10 +41,12 @@ static gboolean pub_handler(gpointer userdata)
   BotTrans curr_pose;
   bot_frames_get_trans(self->frames, self->laser_name, bot_frames_get_root_name(self->frames), &curr_pose);
 
-  bot_core_planar_lidar_t * laser_msg = self->sim->simulate(&curr_pose);
-
+  int64_t utime;
   bot_frames_get_trans_latest_timestamp(self->frames, self->laser_name, bot_frames_get_root_name(self->frames),
-      &laser_msg->utime);
+      &utime);
+
+  const bot_core_planar_lidar_t * laser_msg = self->sim->simulate(&curr_pose, utime);
+
   bot_core_planar_lidar_t_publish(self->lcm, self->laser_channel, laser_msg);
   bot_tictoc("publishLaser");
 
