@@ -29,7 +29,7 @@ public:
     trans.trans_vec[2] = 0;
     double rpy[3] = { 0, 0, t };
     bot_roll_pitch_yaw_to_quat(rpy, trans.rot_quat);
-    simulate(&trans, utime);
+    return simulate(&trans, utime);
   }
   const bot_core_planar_lidar_t * simulate(double xyt[3], int64_t utime = 0)
   {
