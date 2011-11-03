@@ -1,4 +1,4 @@
-#include "LaserSim.hpp"
+#include "LaserSim2D.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +12,7 @@ using namespace occ_map;
 using namespace laser_util;
 
 
-bool LaserSim::isNearMapBorder(const double location[2], double range)
+bool LaserSim2D::isNearMapBorder(const double location[2], double range)
 {
   return location[0] - map->xy0[0] < range ||
       map->xy1[0] - location[0] < range ||
@@ -21,7 +21,7 @@ bool LaserSim::isNearMapBorder(const double location[2], double range)
 
 }
 
-bool LaserSim::getMapBorderInstersection(const double P0[2], const double P1[2], double intersect[2])
+bool LaserSim2D::getMapBorderInstersection(const double P0[2], const double P1[2], double intersect[2])
 {
 
   double P2[2], P3[2];
@@ -55,7 +55,7 @@ bool LaserSim::getMapBorderInstersection(const double P0[2], const double P1[2],
 
 
 
-const bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose, int64_t utime)
+const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64_t utime)
 {
   bot_tictoc("publishLaser");
   bool nearMapBorder = isNearMapBorder(curr_pose->trans_vec, laser_max_range);
@@ -76,7 +76,7 @@ const bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose, int64_t
     }
 
     if (map->collisionCheck(curr_pose->trans_vec, local_xyz, occupancy_thresh, hitPoint)) {
-      laser_msg.ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint) + bot_gauss_rand(0, .004); //TODO: add noise
+      laser_msg.ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint) + bot_gauss_rand(0, .004); //TODO: reasonable noise?
     }
     else {
       laser_msg.ranges[i] = laser_max_range;
@@ -87,7 +87,7 @@ const bot_core_planar_lidar_t * LaserSim::simulate(BotTrans * curr_pose, int64_t
 
 }
 
-LaserSim::LaserSim(occ_map::FloatPixelMap * _map, int nranges, float rad0, float radstep, float max_range)
+LaserSim2D::LaserSim2D(occ_map::FloatPixelMap * _map, int nranges, float rad0, float radstep, float max_range)
 {
 
   laser_msg.nranges = nranges;

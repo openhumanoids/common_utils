@@ -1,4 +1,4 @@
-#include "LaserSim.hpp"
+#include "LaserSim2D.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,7 +25,7 @@ typedef struct {
   char * laser_name;
   char * laser_channel;
 
-  laser_util::LaserSim * sim;
+  laser_util::LaserSim2D * sim;
 
 } app_t;
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
   //TODO: remove hardcoded parameters for a hokuyo UTM
   FloatPixelMap * map = new FloatPixelMap(map_fname);
 
-  app.sim = new laser_util::LaserSim(map, 1081, -0.75 * M_PI, bot_to_radians(0.25), 40.0);
+  app.sim = new laser_util::LaserSim2D(map, 1081, -0.75 * M_PI, bot_to_radians(0.25), 40.0);
 
   g_timeout_add((guint) 1.0 / publish_freq * 1000.0, pub_handler, &app);
 

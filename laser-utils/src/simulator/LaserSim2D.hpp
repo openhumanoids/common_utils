@@ -1,15 +1,15 @@
-#ifndef LASERSIM_H_
-#define LASERSIM_H_
+#ifndef LASERSIM2D_H_
+#define LASERSIM2D_H_
 
 #include <occ_map/PixelMap.hpp>
 #include <bot_core/bot_core.h>
 
 namespace laser_util {
 
-class LaserSim {
+class LaserSim2D {
 public:
-  LaserSim(occ_map::FloatPixelMap * map, int nranges, float rad0, float radstep, float max_range);
-  ~LaserSim();
+  LaserSim2D(occ_map::FloatPixelMap * map, int nranges, float rad0, float radstep, float max_range);
+  ~LaserSim2D();
   bool isNearMapBorder(const double location[2], double range);
   bool getMapBorderInstersection(const double P0[2], const double P1[2], double intersect[2]);
 
