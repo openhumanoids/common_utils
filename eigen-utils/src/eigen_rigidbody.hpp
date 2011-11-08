@@ -6,12 +6,6 @@
 
 namespace eigen_utils {
 
-double atan2Vec(const Eigen::Vector2d & vec);
-
-Eigen::Vector2d angleToVec(double angle);
-
-void angleToVec(double angle, Eigen::Vector2d & unit_vec);
-
 /*
  * returns the skew symmetric matrix corresponding to vec.cross(<other vector>)
  */

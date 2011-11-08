@@ -1,4 +1,5 @@
-#include "eigen_utils.hpp"
+#include "eigen_gl.hpp"
+#include "eigen_utils_common.hpp"
 
 namespace eigen_utils {
 

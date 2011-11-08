@@ -7,6 +7,11 @@
 #include <iostream>
 #include <bot_lcmgl_client/lcmgl.h>
 #include <bot_core/bot_core.h>
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
 
 namespace eigen_utils {
 
