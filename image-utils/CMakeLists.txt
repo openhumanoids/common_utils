@@ -8,6 +8,16 @@ find_package(OpenGL REQUIRED)
 # This lets us use the pods cmake macros
 include(cmake/pods.cmake)
 
+if( NOT (CMAKE_SYSTEM_PROCESSOR STREQUAL "x64" OR 
+    	CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" OR
+	CMAKE_SYSTEM_PROCESSOR STREQUAL "amd64" OR 
+	CMAKE_SYSTEM_PROCESSOR STREQUAL "x86"))
+  message("\n--- Image util requires sse instructions to be availabe. ${CMAKE_SYSTEM_PROCESSOR} doesn't have them.")
+  message("--- Not building the image-utils\n")
+  return()
+endif()
+
+
 add_subdirectory(src)
 add_subdirectory(src/renderer)
 
