@@ -8,16 +8,16 @@ namespace laser_util {
 
 class LaserSim2D {
 public:
-  LaserSim2D(occ_map::FloatPixelMap * map, int nranges, float rad0, float radstep, float max_range);
+  LaserSim2D(const occ_map::FloatPixelMap * map, int nranges, float rad0, float radstep, float max_range);
   ~LaserSim2D();
   bool isNearMapBorder(const double location[2], double range);
   bool getMapBorderInstersection(const double P0[2], const double P1[2], double intersect[2]);
 
-  occ_map::FloatPixelMap * map;
+  const occ_map::FloatPixelMap * map;
   float occupancy_thresh;
 
   double * laserFramePoints;
-  bot_core_planar_lidar_t laser_msg;
+  bot_core_planar_lidar_t * laser_msg;
   float laser_max_range;
 
   const bot_core_planar_lidar_t * simulate(BotTrans * curr_pose, int64_t utime = 0);

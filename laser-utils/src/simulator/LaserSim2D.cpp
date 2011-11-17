@@ -6,11 +6,9 @@
 #include <geom_utils/geometry.h>
 #include <occ_map/PixelMap.hpp>
 
-
 using namespace std;
 using namespace occ_map;
 using namespace laser_util;
-
 
 bool LaserSim2D::isNearMapBorder(const double location[2], double range)
 {
@@ -53,8 +51,6 @@ bool LaserSim2D::getMapBorderInstersection(const double P0[2], const double P1[2
 
 }
 
-
-
 const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64_t utime)
 {
   bot_tictoc("publishLaser");
@@ -64,7 +60,7 @@ const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64
   double local_xyz[3];
   double hitPoint[2];
   double s, c;
-  for (int i = 0; i < laser_msg.nranges; i++) {
+  for (int i = 0; i < laser_msg->nranges; i++) {
     double * laser_xyz = laserFramePoints + 3 * i;
     bot_trans_apply_vec(curr_pose, laser_xyz, local_xyz);
 
@@ -76,36 +72,42 @@ const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64
     }
 
     if (map->collisionCheck(curr_pose->trans_vec, local_xyz, occupancy_thresh, hitPoint)) {
-      laser_msg.ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint) + bot_gauss_rand(0, .004); //TODO: reasonable noise?
+      laser_msg->ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint) + bot_gauss_rand(0, .004); //TODO: reasonable noise?
     }
     else {
-      laser_msg.ranges[i] = laser_max_range;
+      laser_msg->ranges[i] = laser_max_range;
     }
   }
-  laser_msg.utime = utime;
-  return &laser_msg;
+  laser_msg->utime = utime;
+  return laser_msg;
 
 }
 
-LaserSim2D::LaserSim2D(occ_map::FloatPixelMap * _map, int nranges, float rad0, float radstep, float max_range)
+LaserSim2D::LaserSim2D(const occ_map::FloatPixelMap * _map, int nranges, float rad0, float radstep, float max_range)
 {
-
-  laser_msg.nranges = nranges;
-  laser_msg.ranges = new float[nranges];
-  laser_msg.nintensities = 0;
-  laser_msg.rad0 = rad0;
-  laser_msg.radstep = radstep;
+  laser_msg = (bot_core_planar_lidar_t *) calloc(1, sizeof(bot_core_planar_lidar_t));
+  laser_msg->nranges = nranges;
+  laser_msg->ranges = (float *) calloc(nranges, sizeof(float));
+  laser_msg->nintensities = 0;
+  laser_msg->rad0 = rad0;
+  laser_msg->radstep = radstep;
   laser_max_range = max_range;
 
   map = _map;
   occupancy_thresh = .85; //TODO:
 
-  laserFramePoints = (double *) calloc(3 * laser_msg.nranges, sizeof(double));
-  for (int i = 0; i < laser_msg.nranges; i++) {
+  laserFramePoints = (double *) calloc(3 * laser_msg->nranges, sizeof(double));
+  for (int i = 0; i < laser_msg->nranges; i++) {
     double * laser_xyz = laserFramePoints + 3 * i;
-    double theta = laser_msg.rad0 + laser_msg.radstep * i;
+    double theta = laser_msg->rad0 + laser_msg->radstep * i;
     laser_xyz[0] = laser_max_range * cos(theta);
     laser_xyz[1] = laser_max_range * sin(theta);
     laser_xyz[2] = 0;
   }
+}
+
+LaserSim2D::~LaserSim2D()
+{
+  free(laserFramePoints);
+  bot_core_planar_lidar_t_destroy(laser_msg);
 }
