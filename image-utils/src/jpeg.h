@@ -71,7 +71,7 @@ jpeg_get_dimensions (const uint8_t * src, int src_size, int *width, int *height)
 
 #if 0
 int
-jpeg_decompress_to_8u_rgb_IPP (const uint8_t * src, int src_size,
+jpeg_decompress_8u_rgb_IPP (const uint8_t * src, int src_size,
         uint8_t * dest, int width, int height, int stride);
 #endif
 
