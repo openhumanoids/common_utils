@@ -529,7 +529,7 @@ static int cam_renderer_prepare_texture(cam_renderer_t *cr)
         cr->uncompresed_buffer = realloc(cr->uncompresed_buffer, buf_size);
         cr->uncompressed_buffer_size = buf_size;
       }
-      jpeg_decompress_to_8u_rgb(msg->data, msg->size, cr->uncompresed_buffer, msg->width, msg->height, stride);
+      jpeg_decompress_8u_rgb(msg->data, msg->size, cr->uncompresed_buffer, msg->width, msg->height, stride);
 
       gl_format = GL_RGB;
       tex_src = cr->uncompresed_buffer;

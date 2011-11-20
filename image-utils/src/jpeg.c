@@ -31,15 +31,42 @@ term_source (j_decompress_ptr cinfo)
 {
 }
 
-int
-jpeg_decompress_to_8u_rgb (const uint8_t * src, int src_size,
+static void 
+jpeg_err_emit_message(j_common_ptr cinfo, int msg_level)
+{
+    // suppress warnings and errors
+}
+
+static int
+jpeg_decompress_8u (const uint8_t * src, int src_size,
+        uint8_t * dest, int width, int height, int stride, J_COLOR_SPACE ocs);
+
+int 
+jpeg_decompress_8u_rgb (const uint8_t * src, int src_size,
         uint8_t * dest, int width, int height, int stride)
+{
+    return jpeg_decompress_8u (src, src_size, dest, width, height,
+            stride, JCS_RGB);
+}
+
+int 
+jpeg_decompress_8u_gray (const uint8_t * src, int src_size,
+        uint8_t * dest, int width, int height, int stride)
+{
+    return jpeg_decompress_8u (src, src_size, dest, width, height,
+            stride, JCS_GRAYSCALE);
+}
+
+int
+jpeg_decompress_8u (const uint8_t * src, int src_size,
+        uint8_t * dest, int width, int height, int stride, J_COLOR_SPACE ocs)
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     struct jpeg_source_mgr jsrc;
 
     cinfo.err = jpeg_std_error (&jerr);
+    jerr.emit_message = jpeg_err_emit_message;
     jpeg_create_decompress (&cinfo);
 
     jsrc.next_input_byte = src;
@@ -52,7 +79,7 @@ jpeg_decompress_to_8u_rgb (const uint8_t * src, int src_size,
     cinfo.src = &jsrc;
 
     jpeg_read_header (&cinfo, TRUE);
-    cinfo.out_color_space = JCS_RGB;
+    cinfo.out_color_space = ocs;
     jpeg_start_decompress (&cinfo);
 
     if (cinfo.output_height != height || cinfo.output_width != width) {
@@ -203,7 +230,7 @@ jpeg_compress_8u_bgra (const uint8_t * src, int width, int height, int stride,
 
 #if 0
 int
-jpeg_decompress_to_8u_rgb_IPP (const uint8_t * src, int src_size,
+jpeg_decompress_8u_rgb_IPP (const uint8_t * src, int src_size,
         uint8_t * dest, int width, int height, int stride)
 {
     struct jpeg_decompress_struct cinfo;
@@ -431,6 +458,7 @@ jpeg_dimensions (const uint8_t * src, int src_size, int *width, int *height)
 
     *width = cinfo.output_width;
     *height = cinfo.output_height;
+    //    *cs = cinfo.out_color_space; //TODO: should get the color space info...
     jpeg_destroy_decompress (&cinfo);
     return 0;
 }
