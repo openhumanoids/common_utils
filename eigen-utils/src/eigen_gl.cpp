@@ -102,38 +102,64 @@ void bot_gl_draw_axes_cov(Eigen::Matrix3d & chi_cov, double nsigma)
 
 void bot_gl_cov_ellipse_3d(const Eigen::Matrix3d & pos_cov, const Eigen::Vector3d & mu, double nsigma)
 {
+  //new way does it with reoriented and scaled orthcircles which looks better but doesn't give marginal ellipses in each plane
+  bool new_way = true;
 
-  glPushMatrix();
-  glTranslated(mu(0), mu(1), mu(2));
+  if (new_way) {
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigen_solver(pos_cov);
+    Eigen::Vector3d eig_vals = eigen_solver.eigenvalues();
+    Eigen::Matrix3d eig_vecs = eigen_solver.eigenvectors();
 
-  Matrix2d plane_cov;
+    double a = sqrt(eig_vals(0)) * nsigma;
+    double b = sqrt(eig_vals(1)) * nsigma;
+    double c = sqrt(eig_vals(2)) * nsigma;
 
-  //xy covariance
-  plane_cov = pos_cov.topLeftCorner<2, 2>();
-  bot_gl_cov_ellipse(plane_cov, nsigma);
+    eig_vecs.col(0).normalize();
+    eig_vecs.col(1).normalize();
+    eig_vecs.col(2) = eig_vecs.col(0).cross(eig_vecs.col(1));
+    Transform<double, 3, Affine> trans(Transform<double, 3, Affine>::Identity());
+    trans.linear() = eig_vecs;
 
-  //xz covariance
-  plane_cov(0, 0) = pos_cov(0, 0);
-  plane_cov(1, 1) = pos_cov(2, 2);
-  plane_cov(1, 0) = pos_cov(2, 0);
-  plane_cov(0, 1) = pos_cov(0, 2);
-  glPushMatrix();
-  glRotated(90, 1, 0, 0);
+
+    glPushMatrix();
+    glTranslated(mu(0), mu(1), mu(2));
+    glMultMatrixd(trans.data());
+    glScaled(a, b, c);
+    bot_gl_draw_ortho_circles_3d();
+    glPopMatrix();
+  }
+  else {
+    glPushMatrix();
+    glTranslated(mu(0), mu(1), mu(2));
+    Matrix2d plane_cov;
+
+    //xy covariance
+    plane_cov = pos_cov.topLeftCorner<2, 2>();
+    bot_gl_cov_ellipse(plane_cov, nsigma);
+
+    //xz covariance
+    plane_cov(0, 0) = pos_cov(0, 0);
+    plane_cov(1, 1) = pos_cov(2, 2);
+    plane_cov(1, 0) = pos_cov(2, 0);
+    plane_cov(0, 1) = pos_cov(0, 2);
+    glPushMatrix();
+    glRotated(90, 1, 0, 0);
 //  glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
-  bot_gl_cov_ellipse(plane_cov, nsigma);
-  glPopMatrix();
+    bot_gl_cov_ellipse(plane_cov, nsigma);
+    glPopMatrix();
 
-  //yz covariance
-  plane_cov = pos_cov.bottomRightCorner<2, 2>();
-  plane_cov(1, 0) *= -1;
-  plane_cov(0, 1) *= -1;
-  glPushMatrix();
-  glRotated(90, 0, 1, 0);
-  glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
-  bot_gl_cov_ellipse(plane_cov, nsigma);
-  glPopMatrix();
+    //yz covariance
+    plane_cov = pos_cov.bottomRightCorner<2, 2>();
+    plane_cov(1, 0) *= -1;
+    plane_cov(0, 1) *= -1;
+    glPushMatrix();
+    glRotated(90, 0, 1, 0);
+    glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
+    bot_gl_cov_ellipse(plane_cov, nsigma);
+    glPopMatrix();
 
-  glPopMatrix();
+    glPopMatrix();
+  }
 }
 
 void bot_gl_mult_quat_pos(const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos)
