@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 2.6.0)
 set(POD_NAME eigen-utils)
 include(cmake/pods.cmake)
 
+include(cmake/lcmtypes.cmake)
+lcmtypes_build()
+
 # Necessary to build on OSX
 find_package(OpenGL REQUIRED)
 

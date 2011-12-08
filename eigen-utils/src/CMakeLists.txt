@@ -20,7 +20,7 @@ add_library(eigen-utils SHARED
 
 target_link_libraries(eigen-utils ${OPENGL_LIBRARIES})
 
-set(REQUIRED_LIBS eigen3 bot2-lcmgl-client bot2-core bot2-vis)
+set(REQUIRED_LIBS eigen3 bot2-lcmgl-client bot2-core bot2-vis lcmtypes_eigen-utils)
 
 pods_use_pkg_config_packages(eigen-utils ${REQUIRED_LIBS})
 

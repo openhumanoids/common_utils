@@ -104,27 +104,14 @@ void bot_lcmgl_mult_quat_pos(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & ori
   lcmglMultMatrixd(trans.data());
 }
 
-void bot_lcmgl_rotate_frame(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & quat, const Eigen::Vector3d & pos)
+void bot_lcmgl_draw_axes(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos,
+    double scale)
 {
-  Matrix3d rot_mat = quat.toRotationMatrix();
-  Affine3d trans;
-  trans.linear() = rot_mat;
-  trans.translation() = pos;
-
-  lcmglPushMatrix();
-  lcmglMultMatrixd(trans.data());
-}
-
-void bot_lcmgl_rotate_frame_from_ned_to_enu(bot_lcmgl_t * lcmgl)
-{
-  Matrix3d rot_mat;
-  rot_mat << 0, 1, 0,
-      1, 0, 0,
-      0, 0, -1;
-  Vector3d pos = Vector3d::Zero();
-  Quaterniond quat(rot_mat);
-  bot_lcmgl_rotate_frame(lcmgl, quat, pos);
-
+  bot_lcmgl_push_matrix(lcmgl);
+  bot_lcmgl_mult_quat_pos(lcmgl, orientation, pos);
+  bot_lcmgl_scalef(lcmgl, scale, scale, scale);
+  bot_lcmgl_draw_axes(lcmgl);
+  bot_lcmgl_pop_matrix(lcmgl);
 }
 
 }
