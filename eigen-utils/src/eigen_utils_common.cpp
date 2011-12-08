@@ -19,5 +19,37 @@ void angleToVec(double angle, Eigen::Vector2d & unit_vec)
   unit_vec << cos(angle), sin(angle);
 }
 
+Eigen::VectorXd flattenSymmetric(Eigen::MatrixXd symm)
+{
+  //todo: other data types?
+  //todo: safety/square matrix checking?
+  int num_entries = symm.rows() * (symm.rows() + 1) / 2;
+  Eigen::VectorXd flat(num_entries);
+  int count = 0;
+  for (int i = 0; i < symm.cols(); i++) {
+    int ltcsz = symm.cols() - i;
+    flat.block(count, 0, ltcsz, 1) = symm.block(i, i, ltcsz, 1);
+    count += ltcsz;
+  }
+  return flat;
+}
+
+Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat)
+{
+  //todo: other data types?
+  //todo: safety/size checking?
+
+  int num_rows = (-1 + sqrt(1 + 4 * 2 * flat.rows())) / 2; //solve for number of rows using quadratic eq
+  Eigen::MatrixXd symm(num_rows, num_rows);
+  int count = 0;
+  for (int i = 0; i < num_rows; i++) {
+    int ltcsz = num_rows - i;
+    symm.block(i, i, ltcsz, 1) = flat.block(count, 0, ltcsz, 1);
+    symm.block(i, i, 1, ltcsz) = flat.block(count, 0, ltcsz, 1).transpose();
+    count += ltcsz;
+  }
+  return symm;
+}
+
 }
 

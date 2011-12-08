@@ -18,6 +18,9 @@ Eigen::Vector2d angleToVec(double angle);
 
 void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 
-}
+//utilities for flattening an symmetric matrices (ie cov matrices)
+Eigen::VectorXd flattenSymmetric(Eigen::MatrixXd symm);
+Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat);
 
+}
 #endif
