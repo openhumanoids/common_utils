@@ -432,7 +432,7 @@ jpeg_compress_8u_rgb_IPP (const uint8_t * src, int width, int height,
 
 
 int
-jpeg_dimensions (const uint8_t * src, int src_size, int *width, int *height)
+jpeg_get_dimensions (const uint8_t * src, int src_size, int *width, int *height)
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
