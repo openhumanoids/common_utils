@@ -45,6 +45,15 @@ void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[
   eig_quat.coeffs()(2) = bot_quat[3];
 }
 
+Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers)
+{
+  Eigen::Quaterniond quat = Eigen::AngleAxisd(eulers(2), Eigen::Vector3d::UnitZ())
+      * Eigen::AngleAxisd(eulers(1), Eigen::Vector3d::UnitY())
+      * Eigen::AngleAxisd(eulers(0), Eigen::Vector3d::UnitX());
+
+  return quat;
+}
+
 
 
 }

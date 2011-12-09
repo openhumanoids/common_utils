@@ -1,7 +1,6 @@
 #ifndef __eigen_rigidbody_h__
 #define __eigen_rigidbody_h__
 
-
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <bot_core/bot_core.h>
@@ -24,9 +23,10 @@ void quaternionToBotDouble(double bot_quat[4], const Eigen::Quaterniond & eig_qu
 
 void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[4]);
 
+Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers);
 
 const double g_val = 9.80665; //gravity
-const double rho_val = 1.2;  //air density kg/m^3
+const double rho_val = 1.2; //air density kg/m^3
 const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity vector
 
 /**
@@ -47,32 +47,36 @@ public:
   Eigen::VectorXd vec;
   int64_t utime;
 
-  RigidBodyState(int state_dim = basic_num_states) :
-  vec(state_dim)
+protected:
+  RigidBodyState(int state_dim) :
+      vec(Eigen::VectorXd::Zero(state_dim)), utime(0), quat(Eigen::Quaterniond::Identity())
   {
-    vec.setZero();
-    quat = Eigen::Quaterniond::Identity();
-    utime = 0;
+
+  }
+
+public:
+  RigidBodyState() :
+      vec(Eigen::VectorXd::Zero(basic_num_states)), utime(0), quat(Eigen::Quaterniond::Identity())
+  {
+
   }
 
   RigidBodyState(const Eigen::VectorXd & arg_vec) :
-  vec(arg_vec)
+      vec(arg_vec)
   {
-    assert(arg_vec.rows()==basic_num_states);
     quat = Eigen::Quaterniond::Identity();
     this->chiToQuat();
     utime = 0;
   }
 
   RigidBodyState(const Eigen::VectorXd & arg_vec, const Eigen::Quaterniond & arg_quat) :
-  vec(arg_vec), quat(arg_quat)
+      vec(arg_vec), quat(arg_quat)
   {
     utime = 0;
-    assert(arg_vec.rows()==basic_num_states);
   }
 
   RigidBodyState(const rigid_body_pose_t * pose) :
-  vec(basic_num_states)
+      vec(basic_num_states)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
     Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
@@ -104,9 +108,7 @@ public:
    */
   void setQuatEulerAngles(const Eigen::Vector3d & eulers)
   {
-    this->quat = Eigen::AngleAxisd(eulers(2), Eigen::Vector3d::UnitZ())
-    * Eigen::AngleAxisd(eulers(1), Eigen::Vector3d::UnitY())
-    * Eigen::AngleAxisd(eulers(0), Eigen::Vector3d::UnitX());
+    this->quat = eigen_utils::setQuatEulerAngles(eulers);
   }
 
   void getPose(rigid_body_pose_t * pose)
@@ -220,7 +222,7 @@ public:
   }
 
   void getBotTrans(BotTrans * bot_trans) const
-  {
+      {
     Eigen::Vector3d delta_vec = this->position();
     memcpy(bot_trans->trans_vec, delta_vec.data(), 3 * sizeof(double));
 
@@ -231,13 +233,31 @@ public:
   {
     for (int ii = 0; ii < vec.rows(); ii++) {
       if (isnan(this->vec(ii)))
-      return true;
+        return true;
     }
     return false;
   }
 
-};
+  static Eigen::Vector3i angularVelocityInds()
+  {
+    return Eigen::Vector3i::LinSpaced(angular_velocity_ind, angular_velocity_ind + 2);
+  }
 
+  static Eigen::Vector3i velocityInds()
+  {
+    return Eigen::Vector3i::LinSpaced(velocity_ind, velocity_ind + 2);
+  }
+
+  static Eigen::Vector3i chiInds()
+  {
+    return Eigen::Vector3i::LinSpaced(chi_ind, chi_ind + 2);
+  }
+
+  static Eigen::Vector3i positionInds()
+  {
+    return Eigen::Vector3i::LinSpaced(position_ind, position_ind + 2);
+  }
+};
 
 }
 

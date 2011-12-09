@@ -77,7 +77,7 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
     if (!Q_prime_RR_decomp.isInvertible()) {
       fprintf(stderr, "Warning: Q_primer_RR matrix in quadProgEliminationSolve in %s is not invertible, line %d\n",
           __FILE__, __LINE__);
-      eigen_matlab_dump(Q_prime_RR);
+//      eigen_matlab_dump(Q_prime_RR);
     }
 
     //    x_R_star = -(2*Q_prime_RR)\f_prime_RR';
