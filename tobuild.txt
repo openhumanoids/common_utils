@@ -8,3 +8,4 @@ octomap-utils
 path-util
 eigen-utils
 marshall-utils
+stl-utils
