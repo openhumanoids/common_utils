@@ -36,12 +36,14 @@ const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity v
  */
 class RigidBodyState {
 public:
-  const static int angular_velocity_ind = 0;
-  const static int velocity_ind = 3;
-  const static int chi_ind = 6;
-  const static int position_ind = 9;
-  const static int acceleration_ind = 12;
-  const static int basic_num_states = 15;
+  enum{
+    angular_velocity_ind = 0,
+    velocity_ind = 3,
+    chi_ind = 6,
+    position_ind = 9,
+    acceleration_ind = 12,
+    basic_num_states = 15
+  };
 
   Eigen::Quaterniond quat;
   Eigen::VectorXd vec;

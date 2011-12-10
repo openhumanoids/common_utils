@@ -54,7 +54,5 @@ Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers)
   return quat;
 }
 
-
-
 }
 
