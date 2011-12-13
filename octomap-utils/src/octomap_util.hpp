@@ -9,7 +9,7 @@
 
 
 
-namespace octomap {
+namespace octomap_utils {
 static const float LOGLIKE_HITS_EMPTY = -12;
 
 //our own save/load
@@ -22,6 +22,8 @@ void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLi
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth);
 
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double * minNegLogLike);
+
+octomap::OcTree * createZPlane(double resolution, double xy0[2],double xy1[2], double z_plane_height);
 
 double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans, double minNegLogLike);
 

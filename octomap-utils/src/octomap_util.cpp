@@ -8,8 +8,9 @@
 #include <bot_core/bot_core.h>
 using namespace std;
 using namespace occ_map;
+using namespace octomap;
 
-namespace octomap {
+namespace octomap_utils {
 
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth)
 {
@@ -112,6 +113,7 @@ double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_sca
   return logLike;
 }
 
+//TODO: add verbose flag/disable printing?
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double *minNegLogLike)
 {
 
@@ -288,6 +290,22 @@ octomap::OcTree * loadOctomap(const char * fname, double * minNegLogLike)
   octomap_file_t_destroy(saved_msg);
   return ocTree;
 
+}
+
+octomap::OcTree * createZPlane(double resolution, double xy0[2], double xy1[2], double z_plane_height)
+{
+  octomap::OcTree * ocTree = new octomap::OcTree(resolution);
+
+  double xy[0];
+  for (xy[0] = xy0[0]; xy[0] < xy1[1]; xy[0] += resolution) {
+    for (xy[1] = xy0[1]; xy[1] < xy1[1]; xy[1] += resolution) {
+      ocTree->updateNode(point3d(xy[0], xy[1], z_plane_height), true, false);
+    }
+  }
+
+  ocTree->toMaxLikelihood();
+  ocTree->expand();
+  return ocTree;
 }
 
 }

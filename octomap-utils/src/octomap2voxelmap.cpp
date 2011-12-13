@@ -3,6 +3,7 @@
 using namespace std;
 using namespace octomap;
 using namespace occ_map;
+using namespace octomap_utils;
 
 int main(int argc, char ** argv)
 {
