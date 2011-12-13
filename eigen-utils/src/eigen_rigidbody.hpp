@@ -101,8 +101,9 @@ public:
    */
   Eigen::Vector3d getEulerAngles() const
   {
-    Eigen::Vector3d eulers = this->quat.toRotationMatrix().eulerAngles(2, 1, 0);
-    return eulers;
+    Eigen::Vector3d eulers = this->quat.toRotationMatrix().eulerAngles(2, 1, 0); //ypr
+    Eigen::Vector3d ret_eulers(eulers(2), eulers(1), eulers(0)); //rpy
+    return ret_eulers;
   }
 
   /**
@@ -128,27 +129,27 @@ public:
 
   inline Block3Element velocity()
   {
-    return vec.block < 3, 1 > (RigidBodyState::velocity_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
   }
 
   inline Block3Element chi()
   {
-    return vec.block < 3, 1 > (RigidBodyState::chi_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
   }
 
   inline Block3Element position()
   {
-    return vec.block < 3, 1 > (RigidBodyState::position_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
   }
 
   inline Block3Element angularVelocity()
   {
-    return vec.block < 3, 1 > (RigidBodyState::angular_velocity_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline Block3Element acceleration()
   {
-    return vec.block < 3, 1 > (RigidBodyState::acceleration_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
   }
 
   inline Eigen::Quaterniond & orientation()
@@ -164,27 +165,27 @@ public:
   //const returns
   inline ConstBlock3Element velocity() const
   {
-    return vec.block < 3, 1 > (RigidBodyState::velocity_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
   }
 
   inline ConstBlock3Element chi() const
   {
-    return vec.block < 3, 1 > (RigidBodyState::chi_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
   }
 
   inline ConstBlock3Element position() const
   {
-    return vec.block < 3, 1 > (RigidBodyState::position_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
   }
 
   inline ConstBlock3Element angularVelocity() const
   {
-    return vec.block < 3, 1 > (RigidBodyState::angular_velocity_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline ConstBlock3Element acceleration() const
   {
-    return vec.block < 3, 1 > (RigidBodyState::acceleration_ind, 0);
+    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
   }
 
   void chiToQuat()
