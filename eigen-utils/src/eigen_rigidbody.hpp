@@ -113,7 +113,7 @@ public:
     this->quat = eigen_utils::setQuatEulerAngles(eulers);
   }
 
-  void getPose(rigid_body_pose_t * pose)
+  void getPose(rigid_body_pose_t * pose) const
   {
     memcpy(pose->rotation_rate, this->angularVelocity().data(), 3 * sizeof(double));
     memcpy(pose->vel, this->velocity().data(), 3 * sizeof(double));
@@ -231,7 +231,7 @@ public:
     eigen_utils::quaternionToBotDouble(bot_trans->rot_quat, this->quat);
   }
 
-  bool hasNan()
+  bool hasNan() const
   {
     for (int ii = 0; ii < vec.rows(); ii++) {
       if (isnan(this->vec(ii)))
