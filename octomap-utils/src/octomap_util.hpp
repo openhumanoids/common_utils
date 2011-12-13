@@ -25,7 +25,7 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
 
 double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans, double minNegLogLike);
 
-static inline double getOctomapLogLikelihood(octomap::OcTree *oc, double xyz[3])
+static inline double getOctomapLogLikelihood(octomap::OcTree *oc, const double xyz[3])
 {
   //check map bounds :-/
   double minxyz[3];
