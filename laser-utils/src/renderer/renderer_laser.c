@@ -201,7 +201,7 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       }
       //count number of points we want to draw
       for (int i = 0; i < lscan->npoints; i++) {
-        if (!lscan->invalidPoints[i] && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
+        if (lscan->point_status[i]<laser_valid_projection && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
           numPointsToDraw++;
       }
     }
@@ -226,7 +226,7 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       laser_projected_scan *lscan = bot_ptr_circular_index(lchan->scans, scan_idx);
 
       for (int i = 0; i < lscan->npoints; i++) {
-        if (lscan->invalidPoints[i] || lscan->points[i].z < self->param_min_draw_z|| lscan->points[i].z > self->param_max_draw_z) {
+        if (lscan->point_status[i]>laser_valid_projection || lscan->points[i].z < self->param_min_draw_z|| lscan->points[i].z > self->param_max_draw_z) {
           continue;
         }
         else {
@@ -450,7 +450,7 @@ static int save_points_to_file(RendererLaser *self, FILE *file)
       for (int i = 0; i < lscan->npoints; i++) {
         fprintf(file, "%0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %d %d %d "
             "%d\n", lscan->points[i].x, lscan->points[i].y, lscan->points[i].z, lscan->origin.trans_vec[0],
-            lscan->origin.trans_vec[1], lscan->origin.trans_vec[2], lscan->invalidPoints[i], chan_idx, scan_idx, i);
+            lscan->origin.trans_vec[1], lscan->origin.trans_vec[2], lscan->point_status[i], chan_idx, scan_idx, i);
         count++;
       }
     }

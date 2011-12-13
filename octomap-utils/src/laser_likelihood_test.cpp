@@ -60,7 +60,7 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
   if (counter++ % (scan_skip + 1) != 0)
     return;
 
-  laser_projected_scan * lscan = laser_create_projected_scan_from_planar_lidar(proj, msg,"body");
+  laser_projected_scan * lscan = laser_create_projected_scan_from_planar_lidar(proj, msg, "body");
   if (lscan != NULL
   )
     self->addProjectedScan(lscan);
@@ -85,8 +85,8 @@ LaserLikelihooder::LaserLikelihooder(char * octomapFname) :
 //    lcm_recv = lcm_create(provider_buf);
 //  }
 //  else {
-    printf("running mapping from LCM\n");
-    lcm_recv = lcm_pub;
+  printf("running mapping from LCM\n");
+  lcm_recv = lcm_pub;
 
 //  }
   param = bot_param_get_global(lcm_pub, 0);
@@ -95,7 +95,6 @@ LaserLikelihooder::LaserLikelihooder(char * octomapFname) :
 
   //  ocTree = new OcTree("/home/abachrac/stuff/pods_stuff/Quad/build/bin/octomap.bt");
   ocTree = new OcTree(octomapFname);
-
 
   fprintf(stderr, "Publishing map... ");
   double minX, minY, minZ, maxX, maxY, maxZ;
@@ -159,7 +158,7 @@ void LaserLikelihooder::processScansInQueue()
     //decimate the scan
     int lastAdd = -1e6;
     for (int i = 0; i < lscan->npoints; i++) {
-      if (lscan->invalidPoints[i])
+      if (lscan->invalidPoints[i] > laser_valid_projection)
         continue;
       if ((i - lastAdd) > beam_skip
           || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), point3d_as_array(&lscan->points[lastAdd]))
@@ -170,7 +169,7 @@ void LaserLikelihooder::processScansInQueue()
         lastAdd = i;
       }
       else {
-        lscan->invalidPoints[i] = 3;
+        lscan->invalidPoints[i] = laser_invalid_projection;
         lscan->numValidPoints--;
       }
     }
@@ -228,14 +227,14 @@ void LaserLikelihooder::processScansInQueue()
     bot_lcmgl_color3f(lcmgl, bot_color_util_yellow[0], bot_color_util_yellow[1], bot_color_util_yellow[2]);
     bot_lcmgl_begin(lcmgl, GL_POINTS);
 
-    for (int i=0;i<lscan->npoints;i++){
-       if (lscan->invalidPoints[i]!=0)
-         continue;
-       double proj_xyz[3];
-       double llike = getOctomapLogLikelihood(ocTree,proj_xyz);
-       lcmglColor3fv(bot_color_util_jet(llike/3.511031));
-       bot_trans_apply_vec(&body_to_local,point3d_as_array(&lscan->points[i]),proj_xyz);
-       bot_lcmgl_vertex3f(lcmgl, proj_xyz[0], proj_xyz[1], proj_xyz[2]);
+    for (int i = 0; i < lscan->npoints; i++) {
+      if (lscan->invalidPoints[i] > laser_valid_projection)
+        continue;
+      double proj_xyz[3];
+      double llike = getOctomapLogLikelihood(ocTree, proj_xyz);
+      lcmglColor3fv(bot_color_util_jet(llike/3.511031));
+      bot_trans_apply_vec(&body_to_local, point3d_as_array(&lscan->points[i]), proj_xyz);
+      bot_lcmgl_vertex3f(lcmgl, proj_xyz[0], proj_xyz[1], proj_xyz[2]);
 
     }
 

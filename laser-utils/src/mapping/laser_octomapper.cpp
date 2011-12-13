@@ -152,9 +152,9 @@ void LaserOctomapper::processScansInQueue()
       octomap::point3d origin(lscan->origin.trans_vec[0], lscan->origin.trans_vec[1], lscan->origin.trans_vec[2]);
       for (int i = 0; i < lscan->npoints; i += (beam_skip + 1)) {
         double max_range = lscan->projector->max_range - 1.0;
-        if (lscan->invalidPoints[i] > 1)
+        if (lscan->point_status[i] >= laser_min_range)
           continue;
-        else if (lscan->invalidPoints[i] == 1) { //maxrange
+        else if (lscan->point_status[i] == laser_max_range) { //maxrange
           //          octomap::point3d endpoint(lscan->points[i].x, lscan->points[i].y, lscan->points[i].z);
           //    ocTree->insertRay(origin, endpoint, lscan->projector->max_range-10);
           //TODO:

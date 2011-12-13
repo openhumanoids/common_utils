@@ -88,20 +88,21 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   return voxMap;
 }
 
-double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans, double minNegLogLike)
+double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans,
+    double minNegLogLike)
 {
 
   double logLike = 0;
   for (int i = 0; i < lscan->npoints; i++) {
-    if (lscan->invalidPoints[i] != 0)
+    if (lscan->point_status[i] > laser_valid_projection)
       continue;
     double proj_xyz[3];
     bot_trans_apply_vec(trans, point3d_as_array(&lscan->points[i]), proj_xyz);
     logLike += getOctomapLogLikelihood(oc, proj_xyz);
   }
-  double MAX_LOG_LIKE = -minNegLogLike* (double) lscan->numValidPoints;
-  double MIN_LOG_LIKE = LOGLIKE_HITS_EMPTY* (double) lscan->numValidPoints;
-  double percent_hit = (logLike-MIN_LOG_LIKE) / (MAX_LOG_LIKE-MIN_LOG_LIKE);
+  double MAX_LOG_LIKE = -minNegLogLike * (double) lscan->numValidPoints;
+  double MIN_LOG_LIKE = LOGLIKE_HITS_EMPTY * (double) lscan->numValidPoints;
+  double percent_hit = (logLike - MIN_LOG_LIKE) / (MAX_LOG_LIKE - MIN_LOG_LIKE);
 
   double abes_magic_exponent = 2.0;
   double abe_hack = pow(percent_hit, abes_magic_exponent);
@@ -120,7 +121,7 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
   double blurVar = blurSigma * blurSigma;
   //compute the size of the gaussian kernel assuming max likelihood of 255, and min of 32
   double det_var = pow(blurVar, 3); //covariance is diagonal
-  double normalizer = pow(2 * M_PI,-3 / 2) * pow(det_var, -1 / 2);
+  double normalizer = pow(2 * M_PI, -3 / 2) * pow(det_var, -1 / 2);
   int sz = 0;
   float val = 1;
   while (val > .1) {

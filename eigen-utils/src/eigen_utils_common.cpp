@@ -51,5 +51,25 @@ Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat)
   return symm;
 }
 
+bool hasNan(const Eigen::MatrixXd &m)
+{
+  for (int ii = 0; ii < m.rows(); ii++) {
+    for (int jj = 0; jj < m.cols(); jj++) {
+      if (isnan(m(ii, jj)))
+        return true;
+    }
+  }
+  return false;
+}
+
+void assertNoNan(const Eigen::MatrixXd &m)
+{
+  if (hasNan(m)) {
+    std::cerr << "ERROR: m has a NAN!\n";
+    eigen_dump(m);
+    assert(false);
+  }
+}
+
 }
 

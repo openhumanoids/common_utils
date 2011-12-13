@@ -36,7 +36,7 @@ const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity v
  */
 class RigidBodyState {
 public:
-  enum{
+  enum {
     angular_velocity_ind = 0,
     velocity_ind = 3,
     chi_ind = 6,
@@ -128,27 +128,27 @@ public:
 
   inline Block3Element velocity()
   {
-    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::velocity_ind, 0);
   }
 
   inline Block3Element chi()
   {
-    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::chi_ind, 0);
   }
 
   inline Block3Element position()
   {
-    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::position_ind, 0);
   }
 
   inline Block3Element angularVelocity()
   {
-    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline Block3Element acceleration()
   {
-    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::acceleration_ind, 0);
   }
 
   inline Eigen::Quaterniond & orientation()
@@ -164,27 +164,27 @@ public:
   //const returns
   inline ConstBlock3Element velocity() const
   {
-    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::velocity_ind, 0);
   }
 
   inline ConstBlock3Element chi() const
   {
-    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::chi_ind, 0);
   }
 
   inline ConstBlock3Element position() const
   {
-    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::position_ind, 0);
   }
 
   inline ConstBlock3Element angularVelocity() const
   {
-    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline ConstBlock3Element acceleration() const
   {
-    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
+    return vec.block < 3, 1 > (RigidBodyState::acceleration_ind, 0);
   }
 
   void chiToQuat()
@@ -237,6 +237,11 @@ public:
       if (isnan(this->vec(ii)))
         return true;
     }
+    for (int ii = 0; ii < 4; ii++) {
+      if (isnan(this->quat.coeffs()(ii)))
+        return true;
+    }
+
     return false;
   }
 

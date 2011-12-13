@@ -32,12 +32,11 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
   }
 
   sprintf(key, "%s.max_range_free_dist", param_prefix);
-    if (0 != bot_param_get_double(self->param, key, &self->max_range_free_dist)) {
-      fprintf(stderr, "Error: Missing max_range_free_dist configuration parameter "
+  if (0 != bot_param_get_double(self->param, key, &self->max_range_free_dist)) {
+    fprintf(stderr, "Error: Missing max_range_free_dist configuration parameter "
         "for planar LIDAR configuration key: '%s'\n", key);
-      self->max_range_free_dist = self->max_range;
-    }
-
+    self->max_range_free_dist = self->max_range;
+  }
 
   sprintf(key, "%s.min_range", param_prefix);
   if (0 != bot_param_get_double(self->param, key, &self->min_range)) {
@@ -143,12 +142,12 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double theta = proj_scan->rawScan->rad0 + proj_scan->rawScan->radstep * i;
 
     /* point is invalid if range exceeds maximum sensor range */
-    if (range >= projector->max_range){
-      proj_scan->invalidPoints[i] = 1;
+    if (range >= projector->max_range) {
+      proj_scan->point_status[i] = laser_max_range;
       range = projector->max_range_free_dist;
     }
     else if (range <= projector->min_range)
-      proj_scan->invalidPoints[i] = 2;
+      proj_scan->point_status[i] = laser_min_range;
     double s, c;
     bot_fasttrig_sincos(theta, &s, &c);
 
@@ -162,25 +161,29 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       aveRange += range;
       aveRangeSq += range * range;
       surroundCount++;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);
     }
     else if (projector->project_height && projector->heightDownRegion[0] <= i && i <= projector->heightDownRegion[1]) {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
       sensor_xyz[2] = -range;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_down);
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
       sensor_xyz[2] = range;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
       sensor_xyz[2] = 0;
-      proj_scan->invalidPoints[i] = 3;
+      proj_scan->point_status[i] = 3;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_invalid_projection);
     }
 
-    if (!proj_scan->invalidPoints[i]) {
+    if (proj_scan->point_status[i] < laser_valid_projection) {
       proj_scan->numValidPoints++;
     }
     /* convert to local frame */
@@ -204,7 +207,7 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
 {
   int lastAdd = -1e6;
   for (int i = 0; i < lscan->npoints; i++) {
-    if (lscan->invalidPoints[i])
+    if (lscan->point_status[i] > laser_valid_projection)
       continue;
     if ((i - lastAdd) > beam_skip
         || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), point3d_as_array(&lscan->points[lastAdd]))
@@ -216,7 +219,7 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
       lastAdd = i;
     }
     else {
-      lscan->invalidPoints[i] = 3;
+      lscan->point_status[i] = laser_invalid_projection;
       lscan->numValidPoints--;
     }
   }
@@ -235,8 +238,8 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(
 
   proj_scan->points = (point3d_t*) calloc(proj_scan->npoints, sizeof(point3d_t));
   g_assert(proj_scan->points);
-  proj_scan->invalidPoints = (uint8_t *) calloc(proj_scan->npoints, sizeof(char));
-  g_assert(proj_scan->invalidPoints);
+  proj_scan->point_status = (uint8_t *) calloc(proj_scan->npoints, sizeof(uint8_t));
+  g_assert(proj_scan->point_status);
 
   if (!bot_frames_have_trans(projector->bot_frames, projector->coord_frame, dest_frame)) {
     laser_destroy_projected_scan(proj_scan);
@@ -265,11 +268,9 @@ void laser_destroy_projected_scan(laser_projected_scan * proj_scan)
   if (proj_scan->points != NULL
   )
     free(proj_scan->points);
-  if (proj_scan->invalidPoints != NULL
-  )
-    free(proj_scan->invalidPoints);
-  if (proj_scan->rawScan != NULL
-  )
+  if (proj_scan->point_status != NULL)
+    free(proj_scan->point_status);
+  if (proj_scan->rawScan != NULL)
     bot_core_planar_lidar_t_destroy(proj_scan->rawScan);
   free(proj_scan);
 }

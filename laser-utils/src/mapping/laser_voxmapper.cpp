@@ -161,7 +161,7 @@ void LaserVoxmapper::processScansInQueue()
       double origin[3] = { lscan->origin.trans_vec[0], lscan->origin.trans_vec[1], lscan->origin.trans_vec[2] };
       for (int i = 0; i < lscan->npoints; i += (beam_skip + 1)) {
         double max_range = lscan->projector->max_range - 1.0;
-        if (lscan->invalidPoints[i] > 1)
+        if (lscan->point_status[i] > laser_min_range)
           continue;
         else if (lscan->points[i].z < voxmap->xyz0[2]) { //discard rays below this to the map
           continue;
@@ -175,7 +175,7 @@ void LaserVoxmapper::processScansInQueue()
           bot_vector_add_3d(lscan->origin.trans_vec, ray, endpoint);
           voxmap->raytrace(origin, endpoint, MISS_INC, MISS_INC);
         }
-        else if (lscan->invalidPoints[i] == 1) {
+        else if (lscan->point_status[i] == laser_max_range) {
           double endpoint[3] = { lscan->points[i].x, lscan->points[i].y, lscan->points[i].z };
           voxmap->raytrace(origin, endpoint, MISS_INC, MISS_INC);
         }

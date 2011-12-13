@@ -40,6 +40,16 @@ extern "C" {
     char * laser_type;
   } Laser_projector;
 
+  typedef enum{
+    laser_surround=0,
+    laser_height_down=1,
+    laser_height_up=2,
+    laser_valid_projection=3, //less than this is a valid point
+    laser_max_range=4,
+    laser_min_range=5,
+    laser_invalid_projection=6
+  }laser_point_projection_status;
+
   /*
    * structure that a projected laser scan
    */
@@ -50,7 +60,7 @@ extern "C" {
     BotTrans body;    /* local frame body pose */
     BotTrans origin;  /* scan origin relative to requested dest frame*/
     point3d_t *points; /* points relative to requested dest frame */
-    uint8_t *invalidPoints; /* 0 if the point is good; 1 if max_range; 2 if min_range; 3 otherwise */
+    uint8_t *point_status; /* status of point. One of laser_point_projection_status enum values */
     int npoints; /* total number of points in arrays above */
     int numValidPoints; /*number of points that are valid*/
 

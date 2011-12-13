@@ -11,7 +11,6 @@ namespace eigen_utils {
 
 #define var_dump(VAR) std::cout << #VAR << std::endl << (VAR) << std::endl
 
-
 double atan2Vec(const Eigen::Vector2d & vec);
 
 Eigen::Vector2d angleToVec(double angle);
@@ -22,5 +21,9 @@ void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 Eigen::VectorXd flattenSymmetric(Eigen::MatrixXd symm);
 Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat);
 
-}
+bool hasNan(const Eigen::MatrixXd &m);
+void assertNoNan(const Eigen::MatrixXd &m);
+
+
+}  //namespace eigen_utils
 #endif

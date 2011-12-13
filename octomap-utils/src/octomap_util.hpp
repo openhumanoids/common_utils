@@ -27,6 +27,17 @@ double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_sca
 
 static inline double getOctomapLogLikelihood(octomap::OcTree *oc, double xyz[3])
 {
+  //check map bounds :-/
+  double minxyz[3];
+  oc->getMetricMin(minxyz[0], minxyz[1], minxyz[2]);
+  if (xyz[0] < minxyz[0] || xyz[1] < minxyz[1] || xyz[2] < minxyz[2])
+    return LOGLIKE_HITS_EMPTY;
+
+  double maxxyz[3];
+  oc->getMetricMax(maxxyz[0], maxxyz[1], maxxyz[2]);
+  if (xyz[0] > maxxyz[0] || xyz[1] > maxxyz[1] || xyz[2] > maxxyz[2])
+    return LOGLIKE_HITS_EMPTY;
+
   octomap::OcTreeNode* node = oc->search(xyz[0], xyz[1], xyz[2]);
   if (node != NULL) {
     return -node->getLogOdds();
