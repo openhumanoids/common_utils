@@ -36,6 +36,7 @@ const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity v
  */
 class RigidBodyState {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   enum {
     angular_velocity_ind = 0,
     velocity_ind = 3,
