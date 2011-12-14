@@ -6,3 +6,6 @@ pods_use_pkg_config_packages(eigen-test-linalg eigen-utils)
 
 add_executable(eigen-test-geom test_geom.cpp)
 pods_use_pkg_config_packages(eigen-test-geom eigen-utils)
+
+add_executable(eigen-test-rigidbody test_rigidbody.cpp)
+pods_use_pkg_config_packages(eigen-test-rigidbody eigen-utils)
