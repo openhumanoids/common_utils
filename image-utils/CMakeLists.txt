@@ -8,6 +8,13 @@ find_package(OpenGL REQUIRED)
 # This lets us use the pods cmake macros
 include(cmake/pods.cmake)
 
+include(cmake/sse.cmake)
+if (NOT SSE3_FOUND)
+  message("\n--- Image util requires sse instructions to be availabe. ${CMAKE_SYSTEM_PROCESSOR} doesn't have them.")
+  message("--- Not building the image-utils\n")
+  return()
+endif()
+
 add_subdirectory(src)
 add_subdirectory(src/renderer)
 
