@@ -26,7 +26,7 @@ const bot_core_planar_lidar_t * LaserSim3D::simulate(BotTrans * curr_pose, int64
     point3d hitPoint;
 
     if (map->castRay(origin, direction, hitPoint, true, laser_max_range)) {
-      laser_msg->ranges[i] = origin.distance(hitPoint) + bot_gauss_rand(0, .004); //TODO: resonable noise?
+      laser_msg->ranges[i] = origin.distance(hitPoint); //TODO: resonable noise?
     }
     else {
       laser_msg->ranges[i] = laser_max_range;

@@ -72,7 +72,7 @@ const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64
     }
 
     if (map->collisionCheck(curr_pose->trans_vec, local_xyz, occupancy_thresh, hitPoint)) {
-      laser_msg->ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint) + bot_gauss_rand(0, .004); //TODO: reasonable noise?
+      laser_msg->ranges[i] = bot_vector_dist_2d(curr_pose->trans_vec, hitPoint); //TODO: reasonable noise?
     }
     else {
       laser_msg->ranges[i] = laser_max_range;
