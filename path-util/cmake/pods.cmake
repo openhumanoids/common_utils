@@ -26,7 +26,7 @@
 #
 # ----
 # File: pods.cmake
-# Distributed with pods version: 11.11.01
+# Distributed with pods version: 11.11.11
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -202,7 +202,6 @@ function(pods_install_python_packages py_src_dir)
     else()
         # get a list of all .py files
         file(GLOB_RECURSE py_files RELATIVE ${py_src_dir} ${py_src_dir}/*.py)
-        message(py_files: ${py_files})
 
         #install all the .py files
         foreach(py_file ${py_files})
