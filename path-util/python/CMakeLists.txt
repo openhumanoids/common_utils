@@ -9,11 +9,8 @@ file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/path_util/path_util.py "def getBasePath()
 # install the python file
 pods_install_python_packages(path_util)
 
-
-
-
-
-# create a generic python script launcher
+# create a generic python launcher script launcher that sets the PYTHONPATH to the pods
+# python module install path
 set(script_name "python-pods")
 # which python version?
 execute_process(COMMAND 

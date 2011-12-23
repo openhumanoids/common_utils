@@ -143,19 +143,22 @@ function(pods_install_pkg_config_file)
 endfunction(pods_install_pkg_config_file)
 
 
-# pods_install_python_script(<script_name> <python_module>)
+# pods_install_python_script(<script_name> <python_module_or_file>)
 #
 # Create and install a script that invokes the python interpreter with a
-# specified module.
+# specified python module or script.
 #
-# A script will be installed to bin/<script_name>.  The script simply
+# A launcher script will be installed to bin/<script_name>. The script simply
 # adds <install-prefix>/lib/pythonX.Y/dist-packages and 
 # <install-prefix>/lib/pythonX.Y/site-packages to the python path, and
-# then invokes `python -m <python_module>`.
+# then invokes `python -m <python_module>` if <python_module_or_file> is a module
+#
+# or invokes `python python_file` if <python_module_or_file> is a script (ends in .py). 
 #
 # example:
 #    pods_install_python_script(run-pdb pdb)
-function(pods_install_python_script script_name py_module)
+#    pods_install_python_script(run-py-script py_script.py)
+function(pods_install_python_script script_name python_module_or_file)
     find_package(PythonInterp REQUIRED)
 
     # which python version?
@@ -168,12 +171,32 @@ function(pods_install_python_script script_name py_module)
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/dist-packages)
     set(python_old_install_dir 
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/site-packages)
+        
+    set(pods_scripts_dir "${python_install_dir}/pods_python_scripts") #misc scripts will get installed here
+    if (python_module_or_file MATCHES ".+\\.py") #ends with a .py
+        if (IS_ABSOLUTE ${python_module_or_file})
+            set(py_file ${python_module_or_file})        
+        else()
+            set(py_file ${CMAKE_CURRENT_SOURCE_DIR}/${python_module_or_file})
+        endif()
+        if (NOT EXISTS ${py_file})
+            message(FATAL_ERROR "${python_module_or_file} is not an absolute or relative path to a python script")
+        endif()
+        # install the python file
+         install(FILES ${py_file}
+                DESTINATION "${pods_scripts_dir}")
 
-    # write the script file
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} "#!/bin/sh\n"
-        "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
-        "exec ${PYTHON_EXECUTABLE} -m ${py_module} $*\n")
-
+        get_filename_component(py_script_name ${py_file} NAME)
+        # write the script file
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} "#!/bin/sh\n"
+            "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
+            "exec ${PYTHON_EXECUTABLE} ${pods_scripts_dir}/${py_script_name} $*\n")    
+    else()
+        # write the script file
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} "#!/bin/sh\n"
+            "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
+            "exec ${PYTHON_EXECUTABLE} -m ${python_module_or_file} $*\n")
+    endif()
     # install it...
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script_name} DESTINATION bin)
 endfunction()
