@@ -169,45 +169,48 @@ function(pods_install_python_script script_name python_module_or_file)
     # where do we install .py files to?
     set(python_install_dir 
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/dist-packages)
-    set(python_old_install_dir 
+    set(python_old_install_dir #todo: when do we get rid of this? 
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/site-packages)
         
-    set(pods_scripts_dir "${python_install_dir}/pods_python_scripts") #misc scripts will get installed here
     if (python_module_or_file MATCHES ".+\\.py") #ends with a .py
-        if (IS_ABSOLUTE ${python_module_or_file})
-            set(py_file ${python_module_or_file})        
-        else()
-            set(py_file ${CMAKE_CURRENT_SOURCE_DIR}/${python_module_or_file})
-        endif()
+        get_filename_component(py_file ${python_module_or_file} ABSOLUTE)     
+            
         if (NOT EXISTS ${py_file})
             message(FATAL_ERROR "${python_module_or_file} is not an absolute or relative path to a python script")
         endif()
-        # install the python file
-         install(FILES ${py_file}
-                DESTINATION "${pods_scripts_dir}")
+        
+        #get the directory where we'll install the script ${sanitized_POD_NAME}_scripts
+        string(REGEX REPLACE "[^a-zA-Z0-9]" "_" __sanitized_pod_name "${POD_NAME}")
+        set(pods_scripts_dir "${python_install_dir}/${__sanitized_pod_name}_scripts")
+                
+        # install the python script file
+        install(FILES ${py_file}  DESTINATION "${pods_scripts_dir}")
 
         get_filename_component(py_script_name ${py_file} NAME)
-        # write the script file
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} "#!/bin/sh\n"
+        # write the bash script file
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} 
+            "#!/bin/sh\n"
             "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
             "exec ${PYTHON_EXECUTABLE} ${pods_scripts_dir}/${py_script_name} $*\n")    
     else()
-        # write the script file
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} "#!/bin/sh\n"
+        get_filename_component(py_module ${python_module_or_file} NAME) #todo: check whether module exists?
+        # write the bash script file
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} 
+            "#!/bin/sh\n"
             "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
-            "exec ${PYTHON_EXECUTABLE} -m ${python_module_or_file} $*\n")
+            "exec ${PYTHON_EXECUTABLE} -m ${py_module} $*\n")
     endif()
     # install it...
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script_name} DESTINATION bin)
 endfunction()
 
-# _pods_install_python_package(<src_dir> <dest_dir>)
+# _pods_install_python_package(<py_src_dir> <py_module_name>)
 #
 # Internal helper function
-# Install python module in <src_dir> to lib/pythonX.Y/dist-packages/<dest_dir>,
+# Install python module in <py_src_dir> to lib/pythonX.Y/dist-packages/<py_module_name>,
 # where X.Y refers to the current python version (e.g., 2.6)
 #
-function(_pods_install_python_package py_src_dir py_dest_dir)
+function(_pods_install_python_package py_src_dir py_module_name)
     find_package(PythonInterp REQUIRED)
     # which python version?
     execute_process(COMMAND 
@@ -225,7 +228,7 @@ function(_pods_install_python_package py_src_dir py_dest_dir)
             file(RELATIVE_PATH __tmp_path ${py_src_dir} ${py_file})
             get_filename_component(__tmp_dir ${__tmp_path} PATH)
             install(FILES ${py_file}
-                DESTINATION "${python_install_dir}/${py_dest_dir}/${__tmp_dir}")
+                DESTINATION "${python_install_dir}/${py_module_name}/${__tmp_dir}")
         endforeach()
     else()
         message(FATAL_ERROR "${py_src_dir} is not a python package!\n")
@@ -241,20 +244,16 @@ endfunction()
 # Recursively searches <src_dir> for .py files, byte-compiles them, and
 # installs them
 function(pods_install_python_packages py_src_dir)
-    if (IS_ABSOLUTE ${py_src_dir})
-        set(py_src_abs_dir ${py_src_dir})        
-    else()
-        set(py_src_abs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${py_src_dir})
-    endif()
-
+    get_filename_component(py_src_abs_dir ${py_src_dir} ABSOLUTE)
     if(ARGC GREATER 1)
-        foreach(py_module ${ARGV}) #install each module seperately
+        #install each module seperately 
+        foreach(py_module ${ARGV}) 
             pods_install_python_packages(${py_module})
         endforeach()
     elseif(EXISTS "${py_src_abs_dir}/__init__.py")
-        #install the single module by its name
-        get_filename_component(py_dest_dir ${py_src_abs_dir} NAME) 
-        _pods_install_python_package(${py_src_abs_dir} ${py_dest_dir})            
+        #install the single module by name
+        get_filename_component(py_module_name ${py_src_abs_dir} NAME) 
+        _pods_install_python_package(${py_src_abs_dir} ${py_module_name})            
     else()
         # install any packages within the passed in py_src_dir 
         set(_installed_a_package FALSE)

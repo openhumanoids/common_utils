@@ -7,7 +7,7 @@ file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/path_util/path_util.py "def getBasePath()
                                "def getModelsPath(): return '${CMAKE_INSTALL_PREFIX}/models'\n")
 
 # install the python file
-pods_install_python_packages(path_util)
+pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR})
 
 # create a generic python launcher script launcher that sets the PYTHONPATH to the pods
 # python module install path
