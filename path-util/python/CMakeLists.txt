@@ -5,8 +5,11 @@ file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/path_util/path_util.py "def getBasePath()
                                "def getDataPath(): return '${CMAKE_INSTALL_PREFIX}/data'\n"
                                "def getConfigPath(): return '${CMAKE_INSTALL_PREFIX}/config'\n"
                                "def getModelsPath(): return '${CMAKE_INSTALL_PREFIX}/models'\n")
+
 # install the python file
-pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR})
+pods_install_python_packages(path_util)
+
+
 
 
 

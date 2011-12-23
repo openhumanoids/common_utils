@@ -178,16 +178,14 @@ function(pods_install_python_script script_name py_module)
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script_name} DESTINATION bin)
 endfunction()
 
-# pods_install_python_packages(<src_dir>)
+# _pods_install_python_package(<src_dir> <dest_dir>)
 #
-# Install python packages to lib/pythonX.Y/dist-packages, where X.Y refers to
-# the current python version (e.g., 2.6)
+# Internal helper function
+# Install python module in <src_dir> to lib/pythonX.Y/dist-packages/<dest_dir>,
+# where X.Y refers to the current python version (e.g., 2.6)
 #
-# Recursively searches <src_dir> for .py files, byte-compiles them, and
-# installs them
-function(pods_install_python_packages py_src_dir)
+function(_pods_install_python_package py_src_dir py_dest_dir)
     find_package(PythonInterp REQUIRED)
-
     # which python version?
     execute_process(COMMAND 
         ${PYTHON_EXECUTABLE} -c "import sys; sys.stdout.write(sys.version[:3])"
@@ -197,18 +195,56 @@ function(pods_install_python_packages py_src_dir)
     set(python_install_dir 
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/dist-packages)
 
-    if(ARGC GREATER 1)
-        message(FATAL_ERROR "NYI")
-    else()
-        # get a list of all .py files
-        file(GLOB_RECURSE py_files RELATIVE ${py_src_dir} ${py_src_dir}/*.py)
-
-        #install all the .py files
+    if(EXISTS "${py_src_dir}/__init__.py")
+        #install the single module
+        file(GLOB_RECURSE py_files   ${py_src_dir}/*.py)
         foreach(py_file ${py_files})
-            get_filename_component(py_dirname ${py_file} PATH)
-            install(FILES ${py_src_dir}/${py_file}
-                DESTINATION "${python_install_dir}/${py_dirname}")
+            file(RELATIVE_PATH __tmp_path ${py_src_dir} ${py_file})
+            get_filename_component(__tmp_dir ${__tmp_path} PATH)
+            install(FILES ${py_file}
+                DESTINATION "${python_install_dir}/${py_dest_dir}/${__tmp_dir}")
         endforeach()
+    else()
+        message(FATAL_ERROR "${py_src_dir} is not a python package!\n")
+    endif()
+endfunction()
+
+
+# pods_install_python_packages(<src_dir>)
+#
+# Install python packages to lib/pythonX.Y/dist-packages, where X.Y refers to
+# the current python version (e.g., 2.6)
+#
+# Recursively searches <src_dir> for .py files, byte-compiles them, and
+# installs them
+function(pods_install_python_packages py_src_dir)
+    if (IS_ABSOLUTE ${py_src_dir})
+        set(py_src_abs_dir ${py_src_dir})        
+    else()
+        set(py_src_abs_dir ${CMAKE_CURRENT_SOURCE_DIR}/${py_src_dir})
+    endif()
+
+    if(ARGC GREATER 1)
+        foreach(py_module ${ARGV}) #install each module seperately
+            pods_install_python_packages(${py_module})
+        endforeach()
+    elseif(EXISTS "${py_src_abs_dir}/__init__.py")
+        #install the single module by its name
+        get_filename_component(py_dest_dir ${py_src_abs_dir} NAME) 
+        _pods_install_python_package(${py_src_abs_dir} ${py_dest_dir})            
+    else()
+        # install any packages within the passed in py_src_dir 
+        set(_installed_a_package FALSE)
+        file(GLOB sub-dirs RELATIVE ${py_src_abs_dir} *)
+        foreach(sub-dir ${sub-dirs})
+            if(EXISTS "${py_src_abs_dir}/${sub-dir}/__init__.py")
+                _pods_install_python_package(${py_src_abs_dir}/${sub-dir} ${sub-dir})
+                set(_installed_a_package TRUE)
+            endif()
+        endforeach()
+        if (NOT _installed_a_package)
+            message(FATAL_ERROR "${py_src_dir} does not contain any python packages!\n")
+        endif()
     endif()
 endfunction()
 
