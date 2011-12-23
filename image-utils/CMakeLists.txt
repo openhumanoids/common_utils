@@ -23,4 +23,4 @@ add_subdirectory(src/renderer)
 pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
 # executable scripts:  script-name  python-module
-pods_install_python_script(image-util-extract-jpgs image_utils.extract_jpgs.py)
+pods_install_python_script(image-util-extract-jpgs image_utils.extract_jpgs)
