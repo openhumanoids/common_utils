@@ -1,13 +1,4 @@
-template<typename Derived>
-int numNonZeros(const Eigen::DenseBase<Derived> & m)
-{
-  int nnz = 0;
-  for (int i = 0; i < m.size(); i++) {
-    if (m(i))
-      nnz++;
-  }
-  return nnz;
-}
+namespace eigen_utils {
 
 template<typename DerivedData, typename DerivedInd>
 typename DerivedData::PlainObject selectRowsByIndices(const Eigen::DenseBase<DerivedData> & m,
@@ -99,3 +90,5 @@ typename DerivedData::PlainObject selectBlockByIndicators(const Eigen::DenseBase
   }
   return ret;
 }
+
+} //namespace eigen_utils

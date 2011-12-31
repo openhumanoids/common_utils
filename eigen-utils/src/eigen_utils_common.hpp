@@ -24,6 +24,29 @@ Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat);
 bool hasNan(const Eigen::MatrixXd &m);
 void assertNoNan(const Eigen::MatrixXd &m);
 
+template<typename Derived>
+int numNonZeros(const Eigen::DenseBase<Derived> & m)
+{
+  int nnz = 0;
+  for (int i = 0; i < m.size(); i++) {
+    if (m(i))
+      nnz++;
+  }
+  return nnz;
+}
+
+template<typename Derived>
+Eigen::ArrayXi findNonZeros(const Eigen::DenseBase<Derived> & arr)
+{
+  int nnz = numNonZeros(arr);
+  Eigen::ArrayXi nz(nnz);
+  int cnt = 0;
+  for (int i = 0; i < arr.size(); i++) {
+    if (arr(i))
+      nz(cnt++) = i;
+  }
+  return nz;
+}
 
 }  //namespace eigen_utils
 #endif
