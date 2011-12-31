@@ -14,6 +14,7 @@ endif()
 
 file(GLOB cpp_files *.cpp)
 file(GLOB hpp_files *.hpp)
+file(GLOB hxx_files *.hxx)
 
 add_library(eigen-utils SHARED
     ${cpp_files})
@@ -29,7 +30,7 @@ pods_use_pkg_config_packages(eigen-utils ${REQUIRED_LIBS})
 set_target_properties(eigen-utils PROPERTIES SOVERSION 1)
 
 # make the header public
-pods_install_headers(${hpp_files} DESTINATION eigen_utils)
+pods_install_headers(${hpp_files} ${hxx_files} DESTINATION eigen_utils)
 
 # make the library public
 pods_install_libraries(eigen-utils)

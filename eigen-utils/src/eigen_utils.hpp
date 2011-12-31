@@ -7,5 +7,6 @@
 #include "eigen_rand.hpp"
 #include "eigen_rigidbody.hpp"
 #include "eigen_numerical.hpp"
+#include "eigen_select_block.hpp"
 
 #endif
