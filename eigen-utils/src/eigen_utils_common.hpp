@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include <iostream>
+#include <algorithm>
 
 namespace eigen_utils {
 #define eigen_dump(MAT) std::cout << #MAT << std::endl << (MAT) << std::endl
@@ -46,6 +47,82 @@ Eigen::ArrayXi findNonZeros(const Eigen::DenseBase<Derived> & arr)
       nz(cnt++) = i;
   }
   return nz;
+}
+
+
+/**
+ * Compute the median of the values stored in this eigen array.
+ * NOTE: This may swap the order of the data!!
+ * Use the const version below if that is a problem.
+ */
+template<typename Derived>
+typename Derived::Scalar median(Eigen::DenseBase<Derived> & arr)
+{
+    int low, high;
+    int median;
+    int middle, ll, hh;
+
+    low = 0;
+    high = arr.size() - 1;
+    median = (low + high) / 2;
+    while(1) {
+        if (high <= low) /* One element only */
+            return arr[median];
+
+        if (high == low + 1) { /* Two elements only */
+            if (arr[low] > arr[high])
+                std::swap(arr[low], arr[high]);
+            return arr[median];
+        }
+
+        /* Find median of low, middle and high items; swap into position low */
+        middle = (low + high) / 2;
+        if (arr[middle] > arr[high])
+            std::swap(arr[middle], arr[high]);
+        if (arr[low] > arr[high])
+            std::swap(arr[low], arr[high]);
+        if (arr[middle] > arr[low])
+            std::swap(arr[middle], arr[low]);
+
+        /* Swap low item (now in position middle) into position (low+1) */
+        std::swap(arr[middle], arr[low+1]);
+
+        /* Nibble from each end towards middle, swapping items when stuck */
+        ll = low + 1;
+        hh = high;
+        while(1) {
+            do
+                ll++;
+            while (arr[low] > arr[ll]);
+            do
+                hh--;
+            while (arr[hh] > arr[low]);
+
+            if (hh < ll)
+                break;
+
+            std::swap(arr[ll], arr[hh]);
+        }
+
+        /* Swap middle item (in position low) back into correct position */
+        std::swap(arr[low], arr[hh]);
+
+        /* Re-set active partition */
+        if (hh <= median)
+            low = ll;
+        if (hh >= median)
+            high = hh - 1;
+    }
+}
+
+/**
+ * Compute the median without changing the data.
+ */
+template<typename Derived>
+typename Derived::Scalar median(const Eigen::DenseBase<Derived> & arr)
+{
+  typename Derived::PlainObject tmp = arr; //make a local copy
+  return median(tmp);
 }
 
 }  //namespace eigen_utils
