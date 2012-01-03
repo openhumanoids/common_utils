@@ -54,6 +54,14 @@ Eigen::ArrayXi findNonZeros(const Eigen::DenseBase<Derived> & arr)
  * Compute the median of the values stored in this eigen array.
  * NOTE: This may swap the order of the data!!
  * Use the const version below if that is a problem.
+ *
+ *
+ *
+ *  This Quickselect routine is based on the algorithm described in
+ *  "Numerical recipes in C", Second Edition,
+ *  Cambridge University Press, 1992, Section 8.5, ISBN 0-521-43108-5
+ *  This code was originally by Nicolas Devillard - 1998. Public domain.
+ *
  */
 template<typename Derived>
 typename Derived::Scalar median(Eigen::DenseBase<Derived> & arr)
