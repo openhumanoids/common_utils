@@ -49,13 +49,11 @@ Eigen::ArrayXi findNonZeros(const Eigen::DenseBase<Derived> & arr)
   return nz;
 }
 
-
 /**
  * Compute the median of the values stored in this eigen array.
- * NOTE: This may swap the order of the data!!
- * Use the const version below if that is a problem.
  *
- *
+ * This spares the copy required in the normal version, and therefore will be
+ * faster for large datasets.
  *
  *  This Quickselect routine is based on the algorithm described in
  *  "Numerical recipes in C", Second Edition,
@@ -64,73 +62,75 @@ Eigen::ArrayXi findNonZeros(const Eigen::DenseBase<Derived> & arr)
  *
  */
 template<typename Derived>
-typename Derived::Scalar median(Eigen::DenseBase<Derived> & arr)
+typename Derived::Scalar median_non_const(Eigen::DenseBase<Derived> & arr)
 {
-    int low, high;
-    int median;
-    int middle, ll, hh;
+  int low, high;
+  int median;
+  int middle, ll, hh;
 
-    low = 0;
-    high = arr.size() - 1;
-    median = (low + high) / 2;
-    while(1) {
-        if (high <= low) /* One element only */
-            return arr[median];
+  low = 0;
+  high = arr.size() - 1;
+  median = (low + high) / 2;
+  while (1) {
+    if (high <= low) /* One element only */
+      return arr(median);
 
-        if (high == low + 1) { /* Two elements only */
-            if (arr[low] > arr[high])
-                std::swap(arr[low], arr[high]);
-            return arr[median];
-        }
-
-        /* Find median of low, middle and high items; swap into position low */
-        middle = (low + high) / 2;
-        if (arr[middle] > arr[high])
-            std::swap(arr[middle], arr[high]);
-        if (arr[low] > arr[high])
-            std::swap(arr[low], arr[high]);
-        if (arr[middle] > arr[low])
-            std::swap(arr[middle], arr[low]);
-
-        /* Swap low item (now in position middle) into position (low+1) */
-        std::swap(arr[middle], arr[low+1]);
-
-        /* Nibble from each end towards middle, swapping items when stuck */
-        ll = low + 1;
-        hh = high;
-        while(1) {
-            do
-                ll++;
-            while (arr[low] > arr[ll]);
-            do
-                hh--;
-            while (arr[hh] > arr[low]);
-
-            if (hh < ll)
-                break;
-
-            std::swap(arr[ll], arr[hh]);
-        }
-
-        /* Swap middle item (in position low) back into correct position */
-        std::swap(arr[low], arr[hh]);
-
-        /* Re-set active partition */
-        if (hh <= median)
-            low = ll;
-        if (hh >= median)
-            high = hh - 1;
+    if (high == low + 1) { /* Two elements only */
+      if (arr(low) > arr(high))
+        std::swap(arr(low), arr(high));
+      return arr(median);
     }
+
+    /* Find median of low, middle and high items; swap into position low */
+    middle = (low + high) / 2;
+    if (arr(middle) > arr(high))
+      std::swap(arr(middle), arr(high));
+    if (arr(low) > arr(high))
+      std::swap(arr(low), arr(high));
+    if (arr(middle) > arr(low))
+      std::swap(arr(middle), arr(low));
+
+    /* Swap low item (now in position middle) into position (low+1) */
+    std::swap(arr(middle), arr(low + 1));
+
+    /* Nibble from each end towards middle, swapping items when stuck */
+    ll = low + 1;
+    hh = high;
+    while (1) {
+      do
+        ll++;
+      while (arr(low) > arr(ll));
+      do
+        hh--;
+      while (arr(hh) > arr(low));
+
+      if (hh < ll)
+        break;
+
+      std::swap(arr(ll), arr(hh));
+    }
+
+    /* Swap middle item (in position low) back into correct position */
+    std::swap(arr(low), arr(hh));
+
+    /* Re-set active partition */
+    if (hh <= median)
+      low = ll;
+    if (hh >= median)
+      high = hh - 1;
+  }
 }
 
 /**
- * Compute the median without changing the data.
+ * Compute the median of the values stored in this eigen array.
+ *
  */
 template<typename Derived>
-typename Derived::Scalar median(const Eigen::DenseBase<Derived> & arr)
+typename Derived::Scalar median(const Eigen::DenseBase<Derived> & const_arr)
 {
-  typename Derived::PlainObject tmp = arr; //make a local copy
-  return median(tmp);
+
+  typename Derived::PlainObject arr = const_arr; //make a local copy... would be nice if this wasn't necessary :-/
+  return median_non_const(arr);
 }
 
 }  //namespace eigen_utils
