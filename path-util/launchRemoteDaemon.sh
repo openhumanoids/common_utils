@@ -8,7 +8,7 @@ function kill_daemon {
     KILLED=TRUE
     #end the remote screen session
     echo -e "\nKilling screen session $SESSION_NAME on host $REMOTE_HOST"
-    ssh -q -t -o BatchMode=yes $REMOTE_HOST "screen -Rd -S $SESSION_NAME -X kill" 
+    ( ssh -f -q -t -o BatchMode=yes $REMOTE_HOST "screen -Rd -S $SESSION_NAME -X kill" & ) 
     echo "remote session stopped"
 }
 
