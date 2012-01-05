@@ -7,8 +7,10 @@ function kill_daemon {
     fi
     KILLED=TRUE
     #end the remote screen session
-    echo -e "\nKilling screen session $SESSION_NAME on host $REMOTE_HOST"
-    ssh -q -t -o BatchMode=yes $REMOTE_HOST "screen -Rd -S $SESSION_NAME -X kill"
+    echo -e "\nKilling session $SESSION_NAME on host $REMOTE_HOST"
+    nohup ssh -f -o BatchMode=yes $REMOTE_HOST "bash -c 'kill \`cat $PID_FILE\` && rm $DAEMON_OUTFILE $PID_FILE' " &>/dev/null </dev/null &
+    disown
+    ps &> /dev/null #dunno why, but calling ps seems to be necessary for ssh to background properly :-/
     echo "kill-ssh exited with code $?" 
 }
 
@@ -22,22 +24,30 @@ function usage {
 if [ $# -lt 3 ]; then
 	usage
 fi
-SESSION_NAME=session_$RANDOM
+SESSION_NAME=session_${RANDOM}
 REMOTE_HOST=$1
 WORKING_DIR=$2
 DAEMON=$3
 shift;shift;shift
 DAEMON_ARGS="$@"
 
+DAEMON_OUTFILE=/tmp/${SESSION_NAME}_OUT
+PID_FILE=/tmp/${SESSION_NAME}_PID
+
 #trap signals so we can cleanup later
 trap kill_daemon SIGHUP SIGINT SIGTERM
 
 #launch the daemon on the remote host
 echo "Launching $DAEMON from $WORKING_DIR on remote host: $REMOTE_HOST"
-echo "Using screen session name $SESSION_NAME"
-autossh -M 0 -- -t -o BatchMode=yes -o ServerAliveInterval=5 -o serverAliveCountMax=3 $REMOTE_HOST "screen -q -Rd -S $SESSION_NAME bash -c \"echo && cd $WORKING_DIR && ./$DAEMON $DAEMON_ARGS\" " 
+echo "Using session name $SESSION_NAME"
+ssh -o BatchMode=yes $REMOTE_HOST "bash -c 'cd $WORKING_DIR; ./$DAEMON $DAEMON_ARGS &>$DAEMON_OUTFILE < /dev/null & echo \$! > $PID_FILE' " 
 
-#todo: use ssh directly, and keep trying to reconnect on exit code 255?
-#ssh -t -o BatchMode=yes -o ServerAliveInterval=5 -o serverAliveCountMax=3 $REMOTE_HOST "screen -q -Rd -S $SESSION_NAME bash -c \"echo && cd $WORKING_DIR && ./$DAEMON $DAEMON_ARGS\" " 
+echo "launch-ssh exited with code $?"
 
-echo "ssh ended in main with exit code $?"
+#monitor it using autossh for persistance
+echo -e "Monitoring output:\n"
+autossh -M 0 -- -t -o BatchMode=yes -o ServerAliveInterval=5 -o serverAliveCountMax=3 $REMOTE_HOST "tail -f $DAEMON_OUTFILE"
+
+echo "monitor-ssh exited with code $?" 
+
+kill_daemon
