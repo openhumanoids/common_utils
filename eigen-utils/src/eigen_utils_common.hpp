@@ -28,12 +28,7 @@ void assertNoNan(const Eigen::MatrixXd &m);
 template<typename Derived>
 int numNonZeros(const Eigen::DenseBase<Derived> & m)
 {
-  int nnz = 0;
-  for (int i = 0; i < m.size(); i++) {
-    if (m(i))
-      nnz++;
-  }
-  return nnz;
+  return m.count();
 }
 
 template<typename Derived>
