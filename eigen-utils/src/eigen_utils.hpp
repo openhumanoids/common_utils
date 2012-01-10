@@ -8,5 +8,6 @@
 #include "eigen_rigidbody.hpp"
 #include "eigen_numerical.hpp"
 #include "eigen_select_block.hpp"
+#include "eigen_lcm.hpp"
 
 #endif
