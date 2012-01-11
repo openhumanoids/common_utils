@@ -29,6 +29,8 @@ typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg)
   //ugly hack to treat the vector as a C-style array
   const typename Derived::Scalar* dataP = (const typename Derived::Scalar*) &msg->data[0];
 
+  assert(msg->data_sz == ret_msg.rows * ret_msg.cols * sizeof(typename Derived::Scalar));
+
   //let eigen do the copying :-)
   ret = Eigen::Map<const typename Derived::PlainObject>(dataP, msg->rows, msg->cols);
   return ret;
