@@ -5,6 +5,15 @@
 #include <iostream>
 #include <algorithm>
 
+// Define isnan() function for OSX
+#if defined(__APPLE__)
+#if (__GNUC__ >= 4)
+#define isnan(X) __inline_isnan(X)
+#else
+#define isnan(X) __isnan(X)
+#endif
+#endif
+
 namespace eigen_utils {
 #define eigen_dump(MAT) std::cout << #MAT << std::endl << (MAT) << std::endl
 

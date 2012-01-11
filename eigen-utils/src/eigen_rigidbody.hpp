@@ -6,6 +6,15 @@
 #include <bot_core/bot_core.h>
 #include <lcmtypes/rigid_body_pose_t.h>
 
+// Define isnan() function for OSX
+#if defined(__APPLE__)
+#if (__GNUC__ >= 4)
+#define isnan(X) __inline_isnan(X)
+#else
+#define isnan(X) __isnan(X)
+#endif
+#endif
+
 namespace eigen_utils {
 
 /*
