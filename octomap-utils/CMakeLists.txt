@@ -9,6 +9,11 @@ lcmtypes_build()
 
 
 find_package(PkgConfig REQUIRED)
+
+find_package(OpenGL REQUIRED)
+
+list(APPEND OPENGL_LIBRARIES GL)
+
 pkg_check_modules(OCTOMAP octomap)
 if(NOT OCTOMAP_FOUND)
   message("\n\n---- noctomap not found. Not building octomap-utils\n")

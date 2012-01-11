@@ -12,6 +12,8 @@ add_library(octomap-renderer SHARED
 # install it to include/octomap-renderer
 pods_install_headers(renderer_octomap.h DESTINATION octomap_utils)
 
+target_link_libraries(octomap-renderer ${OPENGL_LIBRARIES})
+
 set(REQUIRED_PACKAGES bot2-vis octomap-util)
 pods_use_pkg_config_packages(octomap-renderer ${REQUIRED_PACKAGES})
 
