@@ -1,39 +1,27 @@
-#ifndef EIGEN_LCM_HPP_
-#define EIGEN_LCM_HPP_
+#ifndef __EIGEN_LCM_HPP_
+#define __EIGEN_LCM_HPP_
 
+#include <lcm/lcm-cpp.hpp>
 #include <lcmtypes/eigen_utils/eigen_dense_t.hpp>
+#include <vector>
+#include <string>
 
 namespace eigen_utils {
 
 template<typename Derived>
-eigen_dense_t toLcmMsg(Eigen::DenseBase<Derived> & mat)
-{
-  eigen_dense_t ret_msg; //make use of return value optimization?
-  ret_msg.rows = mat.rows();
-  ret_msg.cols = mat.cols();
-  ret_msg.data_sz = ret_msg.rows * ret_msg.cols * sizeof(typename Derived::Scalar);
-  ret_msg.data.resize(ret_msg.data_sz);
-
-  //ugly hack to treat the vector as a C-style array
-  typename Derived::Scalar* dataP = (typename Derived::Scalar*) &ret_msg.data[0];
-  //let eigen do the copying :-)
-  Eigen::Map<typename Derived::PlainObject>(dataP, ret_msg.rows, ret_msg.cols) = mat;
-
-  return ret_msg;
-}
+eigen_dense_t toLcmMsg(Eigen::DenseBase<Derived> & mat);
 
 template<typename Derived>
-typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg)
-{
-  typename Derived::PlainObject ret;
-  //ugly hack to treat the vector as a C-style array
-  const typename Derived::Scalar* dataP = (const typename Derived::Scalar*) &msg->data[0];
+typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg);
 
-  assert(msg->data_sz == msg->rows * msg->cols * sizeof(typename Derived::Scalar));
+template<typename LcmType>
+typename std::vector<LcmType> loadMsgsFromLog(const char * logfileName, const char * channel);
 
-  //let eigen do the copying :-)
-  ret = Eigen::Map<const typename Derived::PlainObject>(dataP, msg->rows, msg->cols);
-  return ret;
+template<typename T> const std::string typenameToStr();
+
+
+//include the actual implimentations
+#define __EIGEN_LCM_DIRECT_INCLUDE__
+#include "eigen_lcm.hxx"
 }
-}
-#endif /* EIGEN_LCM_HPP_ */
+#endif /* __EIGEN_LCM_HPP_ */

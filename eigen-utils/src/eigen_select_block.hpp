@@ -34,7 +34,12 @@ template<typename DerivedData, typename DerivedInd>
 typename DerivedData::PlainObject selectColsByIndicator(const Eigen::DenseBase<DerivedData> & m,
     const Eigen::DenseBase<DerivedInd> & inds);
 
+//include the actual implimentations
+#define __EIGEN_SELECT_BLOCK_DIRECT_INCLUDE__
+#include "eigen_select_block.hxx"
+
+
 } //namespace eigen_utils
 
-#include "eigen_select_block.hxx"
+
 #endif /* EIGEN_SELECT_BLOCK_HPP_ */

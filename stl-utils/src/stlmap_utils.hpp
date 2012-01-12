@@ -1,5 +1,6 @@
 #ifndef __stl_utils_hpp__
 #define __stl_utils_hpp__
+#include <map>
 
 namespace stl_utils {
 

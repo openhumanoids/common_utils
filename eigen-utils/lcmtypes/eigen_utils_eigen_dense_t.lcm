@@ -6,5 +6,6 @@ struct eigen_dense_t
 	int32_t cols;
     int32_t data_sz;
     byte data[data_sz];
+    string type;
 
 }

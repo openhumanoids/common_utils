@@ -1,4 +1,6 @@
-namespace eigen_utils {
+#ifndef __EIGEN_SELECT_BLOCK_DIRECT_INCLUDE__
+#error "\nThis .hxx should not be included directly -- Include the .hpp instead!\n"
+#endif
 
 template<typename DerivedData, typename DerivedInd>
 typename DerivedData::PlainObject selectRowsByIndices(const Eigen::DenseBase<DerivedData> & m,
@@ -91,4 +93,3 @@ typename DerivedData::PlainObject selectBlockByIndicators(const Eigen::DenseBase
   return ret;
 }
 
-} //namespace eigen_utils
