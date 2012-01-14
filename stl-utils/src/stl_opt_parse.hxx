@@ -106,11 +106,12 @@ void OptType<bool>::print(int longOptWidth)
 }
 
 OptParse::OptParse(int _argc, char ** _argv, const std::string & _extra_args, const std::string & _description) :
-    extra_args(_extra_args), description(_description)
+    extra_args(_extra_args), description(_description), showHelp(false)
 {
   progName = _argv[0];
   for (int i = 1; i < _argc; i++)
     argv.push_back(std::string(_argv[i]));
+  add("h", "help", showHelp, "Display this help message");
 }
 
 OptParse::~OptParse()
@@ -196,6 +197,8 @@ std::list<std::string> OptParse::parse()
       usage(true);
     }
   }
+  if (showHelp)
+    usage(true);
   return argv;
 }
 void OptParse::usage(bool ext)

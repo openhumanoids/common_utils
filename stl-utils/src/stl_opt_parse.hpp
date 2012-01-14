@@ -19,7 +19,8 @@ public:
   ~OptParse();
   //Add an argument handler
   template<class T>
-  void add(const std::string & shortName, const std::string & longName, T & var_ref, const std::string & description ="",
+  void add(const std::string & shortName, const std::string & longName, T & var_ref, const std::string & description =
+      "",
       bool required = false);
 
   //do the actual parsing. The unparsed arguments will be returned
@@ -35,6 +36,7 @@ private:
   std::list<std::string> argv;
   class OptBase;
   std::list<OptBase *> opts;
+  bool showHelp;
 };
 
 #define __STL_OPT_PARSE_DIRECT_INCLUDE__
