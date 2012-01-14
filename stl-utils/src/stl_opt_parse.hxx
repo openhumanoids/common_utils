@@ -119,10 +119,9 @@ OptParse::~OptParse()
     delete *oit;
 }
 
-
 template<class T>
-void OptParse::add(const std::string & shortName, const std::string & longName, const std::string & description,
-    T & var_ref, bool required)
+void OptParse::add(const std::string & shortName, const std::string & longName, T & var_ref,
+    const std::string & description, bool required)
 {
   opts.push_back(new OptType<T>(shortName, longName, description, var_ref, required));
 }

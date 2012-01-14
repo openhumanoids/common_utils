@@ -19,7 +19,7 @@ public:
   ~OptParse();
   //Add an argument handler
   template<class T>
-  void add(const std::string & shortName, const std::string & longName, const std::string & description, T & var_ref,
+  void add(const std::string & shortName, const std::string & longName, T & var_ref, const std::string & description ="",
       bool required = false);
 
   //do the actual parsing. The unparsed arguments will be returned

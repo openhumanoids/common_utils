@@ -12,10 +12,10 @@ int main(int argc, char ** argv)
   bool b = false;
   float f = -9;
   std::string s = "asdf";
-  parser.add("i", "iiii", "ayyy maytey", i, true);
-  parser.add("b", "bbbbasdfasdf", "bzzz", b);
-  parser.add("f", "ffff", "fpfppff", f);
-  parser.add("s", "ssss", "strings?", s);
+  parser.add("i", "iiii", i, "ayyy maytey", true);
+  parser.add("b", "bzzz", b, "bbbbasdfasdf");
+  parser.add("f", "ffff", f);
+  parser.add("s", "ssss", s, "do strings work ?");
 
   std::list<std::string> remaining = parser.parse();
 
