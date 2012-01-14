@@ -96,6 +96,10 @@ template<>
 void OptType<bool>::print(int longOptWidth)
 {
   using namespace std;
+  if (shortName.size() == 0) {
+    cerr << "\n";
+    return;
+  }
   string req = "[REQ]";
   string req_msg = required ? req : "";
 
@@ -111,7 +115,7 @@ OptParse::OptParse(int _argc, char ** _argv, const std::string & _extra_args, co
   progName = _argv[0];
   for (int i = 1; i < _argc; i++)
     argv.push_back(std::string(_argv[i]));
-  add("h", "help", showHelp, "Display this help message");
+  add(showHelp, "h", "help", "Display this help message");
 }
 
 OptParse::~OptParse()
@@ -121,7 +125,7 @@ OptParse::~OptParse()
 }
 
 template<class T>
-void OptParse::add(const std::string & shortName, const std::string & longName, T & var_ref,
+void OptParse::add(T & var_ref, const std::string & shortName, const std::string & longName,
     const std::string & description, bool required)
 {
   opts.push_back(new OptType<T>(shortName, longName, description, var_ref, required));
@@ -134,6 +138,8 @@ std::list<std::string> OptParse::parse()
   bool swallowed = false;
   for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
     OptBase * opt = *oit;
+    if (opt->shortName.size() == 0 && opt->longName.size() == 0)
+      continue;
     for (list<string>::iterator ait = argv.begin(); ait != argv.end(); ait++) {
       const string & str = *ait;
 
@@ -217,10 +223,10 @@ void OptParse::usage(bool ext)
   }
 
   cerr << "Usage:\n";
-  cerr << "  $ " << progName << " [opts] " << extra_args << "\n";
-
-  cerr << " " << description << "\n";
-  cerr << "   Options are:\n";
+  cerr << "  " << progName << " [opts] " << extra_args << "\n";
+  if (description.size() > 0)
+    cerr << " " << description << "\n";
+  cerr << "   Options:\n";
   for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
     OptBase * opt = *oit;
     opt->print(maxLongOptLen);
@@ -232,3 +238,15 @@ void OptParse::usage(bool ext)
 
 }
 
+bool OptParse::wasParsed(const std::string & name)
+{
+  using namespace std;
+  for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
+    OptBase * opt = *oit;
+    if (opt->shortName == name || opt->longName == name)
+      return opt->parsed;
+  }
+  cerr << "ERROR checking whether '" << name << "' was parsed. Not a valid option\n";
+  usage(true);
+
+}

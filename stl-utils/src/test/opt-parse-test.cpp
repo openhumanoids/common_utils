@@ -6,16 +6,19 @@ using namespace stl_utils;
 
 int main(int argc, char ** argv)
 {
-  OptParse parser(argc, argv, "map-name", "HURRAY!");
+  OptParse parser(argc, argv, "map-name");
 
   int i = -9;
   bool b = false;
   float f = -9;
   std::string s = "asdf";
-  parser.add("i", "iiii", i, "ayyy maytey", true);
-  parser.add("b", "bzzz", b, "bbbbasdfasdf");
-  parser.add("f", "ffff", f);
-  parser.add("s", "ssss", s, "do strings work ?");
+  parser.add(i, "i", "iiii", "ayyy maytey", true);
+  parser.add(b, "b", "bzzz", "bbbbasdfasdf");
+  parser.add(b, "");
+  parser.add(f, "f", "ffff");
+  parser.add(s, "s", "ssss", "do strings work ?");
+
+
 
   std::list<std::string> remaining = parser.parse();
 
@@ -25,6 +28,17 @@ int main(int argc, char ** argv)
     std::cerr << *it << " ";
   }
   std::cerr << "\n";
+
+  if (parser.wasParsed("b")) {
+    std::cerr << "b was parsed!\n";
+  }
+  else {
+    std::cerr << "b was NOT parsed!\n";
+  }
+
+  if (parser.wasParsed("ssss")) {
+    std::cerr << "ssss was parsed! \n";
+  }
 
   return 0;
 }
