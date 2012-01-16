@@ -59,14 +59,14 @@ typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg)
 }
 
 template<typename LcmType>
-typename std::vector<LcmType> loadMsgsFromLog(const char * logfileName, const char * channel)
+typename std::vector<LcmType> loadMsgsFromLog(const std::string& logfileName, const std::string & channel)
 {
   typename std::vector<LcmType> ret;
   // Open the log file.
-  lcm::LogFile log(logfileName, "r");
+  lcm::LogFile log(logfileName.c_str(), "r");
   if (!log.good()) {
     perror("LogFile");
-    fprintf(stderr, "couldn't open log file %s\n", logfileName);
+    std::cerr << "couldn't open log file: " << logfileName << std::endl;
     return ret;
   }
 
@@ -82,12 +82,18 @@ typename std::vector<LcmType> loadMsgsFromLog(const char * logfileName, const ch
 
     // Try to decode the message.
     LcmType msg;
-    if (msg.decode(event->data, 0, event->datalen) != event->datalen)
+    if (msg.decode(event->data, 0, event->datalen) != event->datalen) {
+      std::cerr << "WARNING: Could not decode msg on channel: " << channel << " incorrect template arg?\n";
       continue;
+    }
 
     ret.push_back(msg);
   }
   // Log file is closed automatically when the log variable goes out of scope.
+
+  if (ret.empty()) {
+    std::cerr << "WARNING: No Messages found/decoded on channel: " << channel << std::endl;
+  }
 
   return ret;
 }
