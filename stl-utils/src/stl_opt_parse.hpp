@@ -19,7 +19,9 @@ public:
   //extra_args and description are only used for printing the usage.
   // Extra args should have the non option arguments that are expected
   // Description is a short blurb about the program
-  OptParse(int _argc, char ** _argv, const std::string & _extra_args = "", const std::string & _description = "");
+  // addHelpOption automatically add a -h/--help option that prints the usage
+  OptParse(int _argc, char ** _argv, const std::string & _extra_args = "", const std::string & _description = "",
+      bool addHelpOption = true);
   ~OptParse();
 
   //Add an argument handler
