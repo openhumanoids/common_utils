@@ -130,6 +130,23 @@ template<class T>
 void OptParse::add(T & var_ref, const std::string & shortName, const std::string & longName,
     const std::string & description, bool required)
 {
+  using namespace std;
+  for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
+    OptBase * opt = *oit;
+    if (opt->shortName == shortName) {
+      cerr << "ERROR: adding option (" << shortName << ", " << longName
+          << "): conflicts with previous shortname in option:\n";
+      opt->print(opt->longName.size());
+      exit(1);
+    }
+    if (opt->longName == longName) {
+      cerr << "ERROR: adding option (" << shortName << ", " << longName
+          << "): conflicts with previous longName in option:\n";
+      opt->print(opt->longName.size());
+      exit(1);
+    }
+  }
+
   opts.push_back(new OptType<T>(shortName, longName, description, var_ref, required));
 }
 
