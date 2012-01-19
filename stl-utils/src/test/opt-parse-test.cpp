@@ -8,17 +8,18 @@ int main(int argc, char ** argv)
 {
   OptParse parser(argc, argv, "map-name");
 
-  int i = -9;
+  int i = -8;
   bool b = false;
   float f = -9;
+  char c = 'o';
   std::string s = "asdf";
-  parser.add(i, "i", "iiii", "ayyy maytey", true);
-  parser.add(b, "b", "bzzz", "bbbbasdfasdf");
+  parser.add(i, "i", "ints", "ayyy maytey", true);
+  parser.add(i, "j", "ints2", "ayyy maytey");
+  parser.add(b, "b", "bools", "bbbbasdfasdf");
   parser.add(b, "");
-  parser.add(f, "f", "ffff");
-  parser.add(s, "s", "ssss", "do strings work ?");
-
-
+  parser.add(f, "f", "floats");
+  parser.add(s, "s", "strings", "do strings work ?");
+  parser.add(c, "c", "chars", "do chars work ?");
 
   std::list<std::string> remaining = parser.parse();
 

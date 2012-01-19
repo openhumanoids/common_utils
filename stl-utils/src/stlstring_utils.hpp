@@ -8,7 +8,7 @@ template<class T>
 inline const std::string to_string(const T& t)
 {
   std::stringstream ss;
-  ss << t;
+  ss << std::boolalpha << std::showpoint << t;
   return ss.str();
 }
 
@@ -17,7 +17,7 @@ template<>
 inline const std::string to_string<std::string>(const std::string & t)
 {
   std::stringstream ss;
-  ss << """" << t << """";
+  ss << "\"" << t << "\"";
   return ss.str();
 }
 template<>
@@ -25,15 +25,6 @@ inline const std::string to_string<char>(const char & t)
 {
   std::stringstream ss;
   ss << "'" << t << "'";
-  return ss.str();
-}
-
-//specialize for bool
-template<>
-inline const std::string to_string<bool>(const bool& t)
-{
-  std::stringstream ss;
-  ss << std::boolalpha << t;
   return ss.str();
 }
 
