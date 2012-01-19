@@ -16,13 +16,14 @@ public:
   bool parsed;
   virtual bool parse(const std::string & next, bool &swallowed)=0;
   virtual void print(int longOptWidth)=0;
+  virtual std::string makeLongNameStr(int min_width = 0)=0;
 };
 
 //Generic type
 template<typename T>
 inline const std::string typenameToStr()
 {
-  return std::string("not_implemented");
+  return std::string("unkown");
 }
 // macro to implement specializations for given types
 #define OPT_PARSE_MAKE_TYPENAME_TO_STRING( type ) \
@@ -68,16 +69,28 @@ public:
       return false;
     }
   }
+  std::string makeLongNameStr(int min_width = 0)
+  {
+    using namespace std;
+    string var_msg;
+    if (required)
+      var_msg = "--" + longName + " = <" + typenameToStr<T>() + ">";
+    else
+      var_msg = "--" + longName + " = [" + to_string(var_ref) + "]";
+
+    stringstream s;
+    s << left << setw(min_width) << var_msg << " ";
+    string msg = s.str();
+    return msg;
+  }
   void print(int longOptWidth)
   {
     using namespace std;
-    string req = "[REQ]";
-    string req_msg = required ? req : "";
-    string typeStr = typenameToStr<T>();
-    cerr << left << "    -" << shortName << ", --" <<
-        longName << "=<" << typeStr << ">"
-        << right << setw(longOptWidth - longName.size() + req.size() + 8 - typeStr.size()) <<
-        req_msg << " : " << description << "\n";
+    string req_msg = required ? "(REQ)" : "";
+    string var_str = to_string(var_ref);
+    cerr << "  -" << shortName << ", ";
+    cerr << makeLongNameStr(longOptWidth);
+    cerr << " : " << description << "\n"; // (def: [" << var_ref << "])\n";
   }
 
   T & var_ref;
@@ -89,24 +102,8 @@ bool OptType<bool>::parse(const std::string & next, bool & swallowed)
 {
   parsed = true;
   swallowed = false;
-  var_ref = true;
+  var_ref = !var_ref;
   return true;
-}
-template<>
-void OptType<bool>::print(int longOptWidth)
-{
-  using namespace std;
-  if (shortName.size() == 0) {
-    cerr << "\n";
-    return;
-  }
-  string req = "[REQ]";
-  string req_msg = required ? req : "";
-
-  cerr << left << "    -" << shortName << ", --" <<
-      longName <<
-      right << setw(longOptWidth - longName.size() + req.size() + 11) <<
-      req_msg << " : " << description << "\n";
 }
 
 OptParse::OptParse(int _argc, char ** _argv, const std::string & _extra_args, const std::string & _description,
@@ -237,18 +234,22 @@ void OptParse::usage(bool ext)
   int maxLongOptLen = 0;
   for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
     OptBase * opt = *oit;
-    if (opt->longName.size() > maxLongOptLen)
-      maxLongOptLen = opt->longName.size();
+    int optPrintLen = opt->makeLongNameStr(0).size();
+    if (optPrintLen > maxLongOptLen)
+      maxLongOptLen = optPrintLen;
   }
 
   cerr << "Usage:\n";
   cerr << "  " << progName << " [opts] " << extra_args << "\n";
   if (description.size() > 0)
     cerr << " " << description << "\n";
-  cerr << "   Options:\n";
+  cerr << "Options:\n";
   for (list<OptBase *>::iterator oit = opts.begin(); oit != opts.end(); oit++) {
     OptBase * opt = *oit;
-    opt->print(maxLongOptLen);
+    if (opt->shortName.size() == 0 && opt->longName.size() == 0)
+      cerr << opt->description << "\n";
+    else
+      opt->print(maxLongOptLen);
   }
   cerr << "\n";
   if (ext) {

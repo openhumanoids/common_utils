@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <stdint.h>
 #include <map>
+#include "stlstring_utils.hpp"
 //TODO: COMMENT ME BETTER!!!!!
 
 namespace stl_utils {
