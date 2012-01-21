@@ -66,36 +66,65 @@ void bot_lcmgl_cov_ellipse(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, con
 void bot_lcmgl_cov_ellipse_3d(bot_lcmgl_t * lcmgl, const Eigen::Matrix3d & pos_cov, const Eigen::Vector3d & mu,
     double nsigma)
 {
-  Matrix2d plane_cov;
-  Vector2d zero_vec = Vector2d::Zero();
 
-  lcmglTranslated(mu(0), mu(1), mu(2));
+  //new way does it with reoriented and scaled orthcircles which looks better but doesn't give marginal ellipses in each plane
+  bool new_way = true;
 
-  //xy covariance
-  plane_cov = pos_cov.topLeftCorner<2, 2>();
-  bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
+  if (new_way) {
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigen_solver(pos_cov);
+    Eigen::Vector3d eig_vals = eigen_solver.eigenvalues();
+    Eigen::Matrix3d eig_vecs = eigen_solver.eigenvectors();
 
-  //xz covariance
-  plane_cov(0, 0) = pos_cov(0, 0);
-  plane_cov(1, 1) = pos_cov(2, 2);
-  plane_cov(1, 0) = pos_cov(2, 0);
-  plane_cov(0, 1) = pos_cov(0, 2);
-  lcmglPushMatrix();
-  lcmglRotated(90, 1, 0, 0);
-//  glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
-  bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
-  lcmglPopMatrix();
+    double a = sqrt(eig_vals(0)) * nsigma;
+    double b = sqrt(eig_vals(1)) * nsigma;
+    double c = sqrt(eig_vals(2)) * nsigma;
 
-  //yz covariance
-  plane_cov = pos_cov.bottomRightCorner<2, 2>();
-  plane_cov(1, 0) *= -1;
-  plane_cov(0, 1) *= -1;
-  lcmglPushMatrix();
-  lcmglRotated(90, 0, 1, 0);
-  lcmglRotated(180, 1, 1, 0);
-  //switch the xy axes in our drawing frame
-  bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
-  lcmglPopMatrix();
+    eig_vecs.col(0).normalize();
+    eig_vecs.col(1).normalize();
+    eig_vecs.col(2) = eig_vecs.col(0).cross(eig_vecs.col(1));
+    Transform<double, 3, Affine> trans(Transform<double, 3, Affine>::Identity());
+    trans.linear() = eig_vecs;
+
+    lcmglPushMatrix();
+    lcmglTranslated(mu(0), mu(1), mu(2));
+    lcmglMultMatrixd(trans.data());
+    lcmglScalef(a, b, c);
+    bot_lcmgl_draw_ortho_circles_3d(lcmgl);
+    lcmglPopMatrix();
+  }
+  else {
+    Matrix2d plane_cov;
+    Vector2d zero_vec = Vector2d::Zero();
+
+    lcmglTranslated(mu(0), mu(1), mu(2));
+
+    //xy covariance
+    plane_cov = pos_cov.topLeftCorner<2, 2>();
+    bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
+
+    //xz covariance
+    plane_cov(0, 0) = pos_cov(0, 0);
+    plane_cov(1, 1) = pos_cov(2, 2);
+    plane_cov(1, 0) = pos_cov(2, 0);
+    plane_cov(0, 1) = pos_cov(0, 2);
+    lcmglPushMatrix();
+    lcmglRotated(90, 1, 0, 0);
+    //  glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
+    bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
+    lcmglPopMatrix();
+
+    //yz covariance
+    plane_cov = pos_cov.bottomRightCorner<2, 2>();
+    plane_cov(1, 0) *= -1;
+    plane_cov(0, 1) *= -1;
+    lcmglPushMatrix();
+    lcmglRotated(90, 0, 1, 0);
+    lcmglRotated(180, 1, 1, 0);
+    //switch the xy axes in our drawing frame
+    bot_lcmgl_cov_ellipse(lcmgl, plane_cov, zero_vec, nsigma);
+    lcmglPopMatrix();
+  }
+
 }
 
 void bot_lcmgl_mult_quat_pos(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos)

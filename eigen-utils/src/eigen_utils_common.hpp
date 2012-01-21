@@ -31,8 +31,28 @@ void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 Eigen::VectorXd flattenSymmetric(Eigen::MatrixXd symm);
 Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat);
 
-bool hasNan(const Eigen::MatrixXd &m);
-void assertNoNan(const Eigen::MatrixXd &m);
+template<typename Derived>
+bool hasNan(const Eigen::DenseBase<Derived> & m)
+{
+  for (int ii = 0; ii < m.rows(); ii++) {
+    for (int jj = 0; jj < m.cols(); jj++) {
+      if (isnan(m(ii, jj)))
+        return true;
+    }
+  }
+  return false;
+}
+
+template<typename Derived>
+bool assertNoNan(const Eigen::DenseBase<Derived> & m)
+{
+  if (hasNan(m)) {
+    std::cerr << "ERROR: m has a NAN!\n";
+    eigen_dump(m);
+    assert(false);
+  }
+}
+
 
 template<typename Derived>
 int numNonZeros(const Eigen::DenseBase<Derived> & m)

@@ -48,8 +48,8 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
     B_transpose_decomp.compute(B.transpose());
 
     if (!B_decomp.isInvertible()) {
-      fprintf(stderr, "Warning: B matrix in A=[B R] for quadProgEliminationSolve in %s is not invertible, line %d\n",
-          __FILE__, __LINE__);
+//      fprintf(stderr, "Warning: B matrix in A=[B R] for quadProgEliminationSolve in %s is not invertible, line %d\n",
+//          __FILE__, __LINE__);
     }
 
     Eigen::MatrixXd B_inv_R = B_decomp.solve(R);
@@ -75,8 +75,8 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
     Eigen::ColPivHouseholderQR<Eigen::MatrixXd> Q_prime_RR_decomp;
     Q_prime_RR_decomp.compute(Q_prime_RR);
     if (!Q_prime_RR_decomp.isInvertible()) {
-      fprintf(stderr, "Warning: Q_primer_RR matrix in quadProgEliminationSolve in %s is not invertible, line %d\n",
-          __FILE__, __LINE__);
+//      fprintf(stderr, "Warning: Q_primer_RR matrix in quadProgEliminationSolve in %s is not invertible, line %d\n",
+//          __FILE__, __LINE__);
 //      eigen_matlab_dump(Q_prime_RR);
     }
 
