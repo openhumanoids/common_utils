@@ -9,3 +9,4 @@ octomap-utils
 path-util
 eigen-utils
 marshall-utils
+lcmgl-utils
