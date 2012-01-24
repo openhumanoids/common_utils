@@ -65,7 +65,8 @@ public:
       return true;
     }
     else {
-      std::cerr << "ERROR: Could not parse '" << next << "' as value for '" << longName << "'\n";
+      std::cerr << "ERROR: Could not parse '" << next << "' as " << typenameToStr<T>() << " value for '" << longName
+          << "'\n";
       return false;
     }
   }
@@ -147,7 +148,7 @@ void OptParse::add(T & var_ref, const std::string & shortName, const std::string
   opts.push_back(new OptType<T>(shortName, longName, description, var_ref, required));
 }
 
-std::list<std::string> OptParse::parse()
+std::list<std::string> OptParse::parseVarArg(int numRequired)
 {
   using namespace std;
   size_t found;
@@ -221,8 +222,53 @@ std::list<std::string> OptParse::parse()
   }
   if (showHelp)
     usage(true);
+  if (numRequired >= 0 && argv.size() != numRequired) {
+    cerr << "ERROR: there are " << argv.size() << " arguments without flags, but " << numRequired
+        << "  required arguments\n";
+    usage(true);
+  }
   return argv;
 }
+
+void OptParse::parse()
+{
+  parseVarArg(0);
+}
+template<class T1>
+void OptParse::parse(T1 & var_ref1)
+{
+  bool swallowed;
+  std::list < std::string > req = parseVarArg(1);
+  std::list<std::string>::iterator it = req.begin();
+  if (!OptType < T1 > ("", "Required Argument 1", "", var_ref1, true).parse(*it++, swallowed))
+    usage(true);
+}
+template<class T1, class T2>
+void OptParse::parse(T1 & var_ref1, T2 & var_ref2)
+{
+  bool swallowed;
+  std::list < std::string > req = parseVarArg(2);
+  std::list<std::string>::iterator it = req.begin();
+  if (!OptType < T1 > ("", "Required Argument 1", "", var_ref1, true).parse(*it++, swallowed))
+    usage(true);
+  if (!OptType < T2 > ("", "Required Argument 2", "", var_ref2, true).parse(*it++, swallowed))
+    usage(true);
+
+}
+template<class T1, class T2, class T3>
+void OptParse::parse(T1 & var_ref1, T2 & var_ref2, T3 & var_ref3)
+{
+  bool swallowed;
+  std::list < std::string > req = parseVarArg(3);
+  std::list<std::string>::iterator it = req.begin();
+  if (!OptType < T1 > ("", "Required Argument 1", "", var_ref1, true).parse(*it++, swallowed))
+    usage(true);
+  if (!OptType < T2 > ("", "Required Argument 2", "", var_ref2, true).parse(*it++, swallowed))
+    usage(true);
+  if (!OptType < T3 > ("", "Required Argument 3", "", var_ref3, true).parse(*it++, swallowed))
+    usage(true);
+}
+
 void OptParse::usage(bool ext)
 {
   using namespace std;

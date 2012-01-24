@@ -21,8 +21,11 @@ int main(int argc, char ** argv)
   parser.add(s, "s", "strings", "do strings work ?");
   parser.add(c, "c", "chars", "do chars work ?");
 
-  std::list<std::string> remaining = parser.parse();
-
+  std::string req1;
+  int req2;
+  parser.parse(req1, req2);
+  std::cerr << "req1 is :" << req1 << " req2 is :" << req2 << "\n";
+  std::list<std::string> remaining = parser.parseVarArg();
   std::cerr << "i:" << i << " b:" << b << " f:" << f << " s:" << s << "\n";
   std::cerr << "Remaining: ";
   for (std::list<std::string>::iterator it = remaining.begin(); it != remaining.end(); it++) {

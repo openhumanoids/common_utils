@@ -20,12 +20,8 @@ int main(int argc, char ** argv)
   opt_parse.add(blurred_map, "b", "blurred",
       "map file contains a blurred map, load with loadOctomap instead of default", false);
 
-  std::list<string> remaining = opt_parse.parse();
-
-  if (remaining.size() != 1)
-    opt_parse.usage(true);
-
-  string octomap_fname = remaining.front();
+  string octomap_fname;
+  opt_parse.parse(octomap_fname);
 
   lcm_t * lcm = lcm_create(NULL);
 

@@ -30,8 +30,20 @@ public:
   void add(T & var_ref, const std::string & shortName, const std::string & longName = "",
       const std::string & description = "", bool required = false);
 
-  //do the actual parsing. The unparsed arguments will be returned
-  std::list<std::string> parse();
+  // do the parsing of flags, expecting handle 0-3 required arguments (IN ORDER) that don't have options flags
+  // calls parseVarArg internally with the apropriate number of remaining arguments
+  void parse();
+  template<class T1>
+  void parse(T1 & reqArg1);
+  template<class T1, class T2>
+  void parse(T1 & reqArg1, T2 & reqArg2);
+  template<class T1, class T2, class T3>
+  void parse(T1 & reqArg1, T2 & reqArg2, T3 & reqArg3);
+
+  // do the actual parsing. The unparsed arguments will be returned
+  // numRequired specifies the expected number of arguments that don't need a flag
+  // if numRequired >=0, usage will be printed if the number of strings returned doesn't match
+  std::list<std::string> parseVarArg(int numRequired = -1);
 
   // Check whether an option was parsed so that you could print something/do something special if it is/isn't
   // Must be a valid option.
