@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <lcmtypes/octomap_utils.h>
-#include <stl_utils/stl_opt_parse.hpp>
+#include <ConciseArgs/ConciseArgs.hpp>
 
 using namespace std;
 using namespace octomap;
@@ -11,7 +11,7 @@ using namespace occ_map;
 int main(int argc, char ** argv)
 {
 
-  stl_utils::OptParse opt_parse(argc, argv, "map_file_name", "loads an octomap and publishes it to lcm");
+  ConciseArgs opt_parse(argc, argv, "map_file_name", "loads an octomap and publishes it to lcm");
 
   double repeat_period = -1;
   bool blurred_map = false;
