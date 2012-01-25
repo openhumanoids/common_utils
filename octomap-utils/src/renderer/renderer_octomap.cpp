@@ -27,7 +27,8 @@
 #define PARAM_SHOW_GRID "Show Grid"
 #define PARAM_TREE_DEPTH "Tree Depth"
 #define PARAM_POINT_SIZE "Point Size"
-#define PARAM_Z_CUTOFF "Z Cutoff"
+#define PARAM_Z_MAX "Z max"
+#define PARAM_Z_MIN "Z min"
 
 namespace octomap {
 
@@ -38,7 +39,7 @@ public:
   void clear();
   void draw() const;
   /// sets a new OcTree that should be drawn by this drawer
-  void setOcTree(const octomap::OcTree &octree, double maxDrawZ);
+  void setOcTree(const octomap::OcTree &octree, double minDrawZ, double maxDrawZ);
 
   /// sets a new selection of the current OcTree to be drawn
   void setOcTreeSelection(const std::list<octomap::OcTreeVolume>& selectedPoints);
@@ -127,14 +128,16 @@ public:
   unsigned int m_max_tree_depth;
   double m_alphaOccupied;
 
+  double minX, minY, minZ, maxX, maxY, maxZ;
+
 };
 }
 
 namespace octomap {
 
 MyOcTreeDrawer::MyOcTreeDrawer() :
-  m_occupiedThresSize(0), m_freeThresSize(0), m_occupiedSize(0), m_freeSize(0), m_selectionSize(0),
-      octree_grid_vertex_size(0), m_alphaOccupied(0.8)
+    m_occupiedThresSize(0), m_freeThresSize(0), m_occupiedSize(0), m_freeSize(0), m_selectionSize(0),
+        octree_grid_vertex_size(0), m_alphaOccupied(0.8)
 {
   m_octree_grid_vis_initialized = false;
   m_drawOccupied = false;
@@ -165,10 +168,9 @@ void MyOcTreeDrawer::setAlphaOccupied(double alpha)
   m_alphaOccupied = alpha;
 }
 
-void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double maxDrawZ)
+void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, double maxDrawZ)
 {
 
-  double minX, minY, minZ, maxX, maxY, maxZ;
   octree.getMetricMin(minX, minY, minZ);
   octree.getMetricMax(maxX, maxY, maxZ);
   printf("map bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
@@ -185,15 +187,16 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double maxDrawZ)
     int size1 = occupiedVoxels.size();
     int size2 = occupiedThresVoxels.size();
     for (std::list<octomap::OcTreeVolume>::iterator it = occupiedVoxels.begin(); it != occupiedVoxels.end();) {
-      if (it->first.z() > maxDrawZ) {
+      if (it->first.z() > maxDrawZ || it->first.z() < minDrawZ) {
         it = occupiedVoxels.erase(it);
         numremoved++;
       }
       else
         it++;
     }
-    for (std::list<octomap::OcTreeVolume>::iterator it = occupiedThresVoxels.begin(); it != occupiedThresVoxels.end();) {
-      if (it->first.z() > maxDrawZ){
+    for (std::list<octomap::OcTreeVolume>::iterator it = occupiedThresVoxels.begin(); it != occupiedThresVoxels.end();
+        ) {
+      if (it->first.z() > maxDrawZ || it->first.z() < minDrawZ) {
         it = occupiedThresVoxels.erase(it);
         numremoved++;
       }
@@ -202,7 +205,8 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double maxDrawZ)
     }
     int size3 = occupiedVoxels.size();
     int size4 = occupiedThresVoxels.size();
-    printf("thresh=%f, numremoved=%d, sizes %d %d %d %d\n", maxDrawZ, numremoved, size1, size2, size3, size4);
+    printf("thresh=[%f,%f], numremoved=%d, sizes %d %d %d %d\n", minDrawZ, maxDrawZ, numremoved, size1, size2, size3,
+        size4);
   }
 
   if (m_drawFree)
@@ -248,12 +252,13 @@ void MyOcTreeDrawer::generateCubes(const std::list<octomap::OcTreeVolume>& voxel
     (*glArray)[i] = new GLfloat[glArraySize];
   }
 
-  if (glColorArray != NULL)
+  if (glColorArray != NULL
+  )
     *glColorArray = new GLfloat[glArraySize * 4 * 4];
 
-  // epsilon to be substracted from cube size so that neighboring planes don't overlap
-  // seems to introduce strange artifacts nevertheless...
-  double eps = 1e-5;
+    // epsilon to be substracted from cube size so that neighboring planes don't overlap
+    // seems to introduce strange artifacts nevertheless...
+double  eps = 1e-5;
 
   // generate the cubes, 6 quads each
   // min and max-values are computed on-the-fly
@@ -590,7 +595,7 @@ void MyOcTreeDrawer::drawOccupiedVoxels() const
 
   // draw binary occupied cells
   if (m_occupiedThresSize != 0) {
-    glColor4f(0.0, 0.0, 1.0, m_alphaOccupied);
+    glColor4f(0.0, 0.0, 0.0, m_alphaOccupied);
     drawCubes(m_occupiedThresArray, m_occupiedThresSize, m_occupiedThresColorArray);
   }
 
@@ -627,7 +632,7 @@ void MyOcTreeDrawer::drawSelection() const
 }
 
 void MyOcTreeDrawer::drawCubes(GLfloat** cubeArray, unsigned int cubeArraySize, GLfloat* cubeColorArray) const
-{
+    {
   if (cubeArraySize == 0 || cubeArray == NULL) {
     std::cerr << "Warning: GLfloat array to draw cubes appears to be empty, nothing drawn.\n";
     return;
@@ -751,7 +756,8 @@ static void Octomap_free(BotRenderer *renderer)
 static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, void *user)
 {
   BotRendererOctomap *self = (BotRendererOctomap*) user;
-  if (self->octd == NULL)
+  if (self->octd == NULL
+  )
     return;
 
   int color_mod = bot_gtk_param_widget_get_enum(self->pw, PARAM_COLOR_MODE);
@@ -762,7 +768,7 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
     }
     break;
   case COLOR_MODE_DRAB:
-  default:
+    default:
     self->octd->m_heightColorMode = false;
     break;
   }
@@ -777,7 +783,8 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
   if (self->ocTree != NULL && (strcmp(name, PARAM_COLOR_MODE_Z_MIN_Z) == 0 || strcmp(name, PARAM_COLOR_MODE_Z_MAX_Z)
       == 0 || strcmp(name, PARAM_TREE_DEPTH) == 0 || strcmp(name, PARAM_SHOW_FREE) || strcmp(name, PARAM_SHOW_OCC)
       || strcmp(name, PARAM_SHOW_GRID)))
-    self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_CUTOFF)); //regenerate cubes etc..
+    self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MIN),
+        bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MAX)); //regenerate cubes etc..
 
   bot_viewer_request_redraw(self->viewer);
 }
@@ -787,7 +794,8 @@ static void on_clear_button(GtkWidget *button, BotRendererOctomap *self)
   if (!self->viewer)
     return;
 
-  if (self->ocTree != NULL)
+  if (self->ocTree != NULL
+  )
     delete self->ocTree;
   self->ocTree = NULL;
 
@@ -816,7 +824,8 @@ static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const bo
 {
   fprintf(stderr, "got new octomap\n");
   BotRendererOctomap *self = (BotRendererOctomap*) user_data;
-  if (self->ocTree != NULL)
+  if (self->ocTree != NULL
+  )
     delete self->ocTree;
   self->octd->clear();
 
@@ -828,8 +837,32 @@ static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const bo
   self->ocTree->getMetricMin(minX, minY, minZ);
   self->ocTree->getMetricMax(maxX, maxY, maxZ);
   printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
-  self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_CUTOFF));
+  self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MIN),
+      bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MAX));
   fprintf(stderr, "loadedOctomap\n");
+}
+
+static void on_find_button(GtkWidget *button, BotRendererOctomap *self)
+{
+  BotViewHandler *vhandler = self->viewer->view_handler;
+
+  double eye[3];
+  double lookat[3];
+  double up[3];
+
+  double octomap_center[3] = { (self->octd->minX + self->octd->maxX) / 2,
+      (self->octd->minY + self->octd->maxY) / 2,
+      (self->octd->minZ + self->octd->maxZ) / 2 };
+
+  vhandler->get_eye_look(vhandler, eye, lookat, up);
+  double diff[3];
+  bot_vector_subtract_3d(eye, lookat, diff);
+
+  bot_vector_add_3d(octomap_center, diff, eye);
+
+  vhandler->set_look_at(vhandler, eye, octomap_center, up);
+
+  bot_viewer_request_redraw(self->viewer);
 }
 
 BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t * lcm)
@@ -859,7 +892,6 @@ BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t 
 
   //  bot_gtk_param_widget_add_int(self->pw, PARAM_POINT_SIZE, BOT_GTK_PARAM_WIDGET_SLIDER, 1, 20, 1, 4);
 
-
   bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_OCC, 0, NULL);
   bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_FREE, 0, NULL);
   bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_GRID, 0, NULL);
@@ -871,8 +903,15 @@ BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t 
   bot_gtk_param_widget_add_double(self->pw, PARAM_COLOR_MODE_Z_MAX_Z, BOT_GTK_PARAM_WIDGET_SPINBOX, round(
       self->octd->m_zMin - 2), round(self->octd->m_zMax + 5), .5, round(self->octd->m_zMax));
 
-  bot_gtk_param_widget_add_double(self->pw, PARAM_Z_CUTOFF, BOT_GTK_PARAM_WIDGET_SPINBOX,
+  bot_gtk_param_widget_add_double(self->pw, PARAM_Z_MIN, BOT_GTK_PARAM_WIDGET_SPINBOX,
+      round(self->octd->m_zMin - 5), round(self->octd->m_zMax + 2), .5, round(self->octd->m_zMin));
+
+  bot_gtk_param_widget_add_double(self->pw, PARAM_Z_MAX, BOT_GTK_PARAM_WIDGET_SPINBOX,
       round(self->octd->m_zMin - 2), round(self->octd->m_zMax + 5), .5, round(self->octd->m_zMax));
+
+  GtkWidget *find_button = gtk_button_new_with_label("Find");
+  gtk_box_pack_start(GTK_BOX(renderer->widget), find_button, FALSE, FALSE, 0);
+  g_signal_connect(G_OBJECT(find_button), "clicked", G_CALLBACK(on_find_button), self);
 
   GtkWidget *clear_button = gtk_button_new_with_label("Clear memory");
   gtk_box_pack_start(GTK_BOX(renderer->widget), clear_button, FALSE, FALSE, 0);
