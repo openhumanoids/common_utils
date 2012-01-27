@@ -209,8 +209,33 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, d
         size4);
   }
 
-  if (m_drawFree)
+  if (m_drawFree) {
     octree.getFreespace(freeThresVoxels, freeVoxels, m_max_tree_depth);
+    int numremoved = 0;
+    int size1 = freeVoxels.size();
+    int size2 = freeThresVoxels.size();
+    for (std::list<octomap::OcTreeVolume>::iterator it = freeVoxels.begin(); it != freeVoxels.end();) {
+      if (it->first.z() > maxDrawZ || it->first.z() < minDrawZ) {
+        it = freeVoxels.erase(it);
+        numremoved++;
+      }
+      else
+        it++;
+    }
+    for (std::list<octomap::OcTreeVolume>::iterator it = freeThresVoxels.begin(); it != freeThresVoxels.end();
+        ) {
+      if (it->first.z() > maxDrawZ || it->first.z() < minDrawZ) {
+        it = freeThresVoxels.erase(it);
+        numremoved++;
+      }
+      else
+        it++;
+    }
+    int size3 = freeVoxels.size();
+    int size4 = freeThresVoxels.size();
+    printf("free numremoved=%d, sizes %d %d %d %d\n", numremoved, size1, size2, size3,
+        size4);
+  }
 
   m_octree_grid_vis_initialized = false;
   if (m_drawOcTreeGrid && octree.size() < 10 * 1e6) {
