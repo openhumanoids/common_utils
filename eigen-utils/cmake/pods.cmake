@@ -26,7 +26,7 @@
 #
 # ----
 # File: pods.cmake
-# Distributed with pods version: 11.12.23
+# Distributed with pods version: 12.01.11
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -374,7 +374,9 @@ macro(pods_config_search_paths)
         
         # hack to force cmake always create install and clean targets 
         install(FILES DESTINATION)
-        add_custom_target(tmp)
+        string(RANDOM LENGTH 32 __rand_target__name__)
+        add_custom_target(${__rand_target__name__})
+        unset(__rand_target__name__)
 
         set(__pods_setup true)
     endif(NOT DEFINED __pods_setup)
