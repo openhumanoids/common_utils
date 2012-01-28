@@ -126,10 +126,10 @@ public:
 
   void getPose(rigid_body_pose_t * pose) const
   {
-    memcpy(pose->rotation_rate, this->angularVelocity().data(), 3 * sizeof(double));
-    memcpy(pose->vel, this->velocity().data(), 3 * sizeof(double));
-    memcpy(pose->pos, this->position().data(), 3 * sizeof(double));
-    memcpy(pose->accel, this->acceleration().data(), 3 * sizeof(double));
+    Eigen::Map<Eigen::Vector3d>(pose->rotation_rate)  = this->angularVelocity();
+    Eigen::Map<Eigen::Vector3d>(pose->vel)= this->velocity();
+    Eigen::Map<Eigen::Vector3d>(pose->pos)= this->position();
+    Eigen::Map<Eigen::Vector3d>(pose->accel)= this->acceleration();
     eigen_utils::quaternionToBotDouble(pose->orientation, this->quat);
     pose->utime = this->utime;
   }

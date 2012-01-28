@@ -10,83 +10,79 @@ namespace eigen_utils {
 
 //todo see about replacing templated functions with MatrixBase arguments and then checking for num rows and cols
 /**
- * generate random normal vector with mu=0, Sigma = I
+ * Fill an Eigen vector with gaussian random numbers with mu=0, Sigma = I
  */
-template<int N>
-void randn_identity(Eigen::Matrix<double, N, 1> & vec)
+template<typename scalarType, int N>
+void randn_identity(Eigen::Matrix<scalarType, N, 1> & vec)
 {
-  for (int ii = 0; ii < N; ii++) {
-    vec(ii, 0) = bot_gauss_rand(0, 1);
+  for (int ii = 0; ii < vec.size(); ii++) {
+    vec(ii) = bot_gauss_rand(0, 1);
   }
 }
 
-void randn_identity(Eigen::VectorXd & vec);
-
-template<int N>
-Eigen::Matrix<double, N, 1> randn(const Eigen::Matrix<double, N, N> & cov)
+template<typename scalarType, int N>
+Eigen::Matrix<scalarType, N, 1> randn(const Eigen::Matrix<scalarType, N, N> & cov)
 {
-  Eigen::Matrix<double, N, 1> vec;
+  Eigen::Matrix<scalarType, N, 1> vec;
   randn_identity(vec);
-  Eigen::Matrix<double, N, N> chol_decomp = cov.llt().matrixL();
+  Eigen::Matrix<scalarType, N, N> chol_decomp = cov.llt().matrixL();
   return chol_decomp * vec;
 }
 
 /**
  * unnormalized log likelihood
  */
-template<int N>
-double loglike_unnormalized(const Eigen::Matrix<double, N, 1> & x, const Eigen::Matrix<double, N, 1> & mu
-    , const Eigen::Matrix<double, N, N> & sigma)
+template<typename scalarType, int N>
+scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
+    , const Eigen::Matrix<scalarType, N, N> & sigma)
 {
-  Eigen::Matrix<double, N, 1> diff = mu - x;
+  Eigen::Matrix<scalarType, N, 1> diff = mu - x;
   return -0.5 * diff.transpose() * sigma.ldlt().solve(diff);
 }
 
 /**
  * unnormalized log likelhihood using information matrix
  */
-template<int N>
-double loglike_information_unnormalized(const Eigen::Matrix<double, N, 1> & x, const Eigen::Matrix<double, N, 1> & mu
-    , const Eigen::Matrix<double, N, N> & sigma_inv)
+template<typename scalarType, int N>
+scalarType loglike_information_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x
+    ,const Eigen::Matrix<scalarType, N, 1> & mu , const Eigen::Matrix<scalarType, N, N> & sigma_inv)
 {
-  Eigen::Matrix<double, N, 1> diff = mu - x;
+  Eigen::Matrix<scalarType, N, 1> diff = mu - x;
   return -0.5 * diff.transpose() * sigma_inv * diff;
 }
 
-template<int N>
-double normpdf(const Eigen::Matrix<double, N, 1> & x, const Eigen::Matrix<double, N, 1> & mu
-    , const Eigen::Matrix<double, N, N> & sigma)
+template<typename scalarType, int N>
+scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
+    , const Eigen::Matrix<scalarType, N, N> & sigma)
 {
-  Eigen::Matrix<double, N, 1> diff = mu - x;
+  Eigen::Matrix<scalarType, N, 1> diff = mu - x;
 
-  double exponent = -0.5 * diff.transpose() * sigma.ldlt().solve(diff);
+  scalarType exponent = -0.5 * diff.transpose() * sigma.ldlt().solve(diff);
 
-  return exp(exponent) / (pow(2 * M_PI,((double) N) / 2.0) * pow(sigma.determinant(), 0.5));
+  return exp(exponent) / (pow(2 * M_PI, ((scalarType) N) / 2.0) * pow(sigma.determinant(), 0.5));
 }
 
-template<int N>
-void fitParticles(
-    const Eigen::Matrix<double, N, Eigen::Dynamic> & state_samples, Eigen::VectorXd & weights
-    , Eigen::Matrix<double, N, 1> & mean, Eigen::Matrix<double, N, N> & covariance)
+template<typename scalarType, int Ndim, int Nsamples>
+void fitParticles(const Eigen::Matrix<scalarType, Ndim, Nsamples> & state_samples
+    , Eigen::Matrix<scalarType, Ndim, 1>& weights , Eigen::Matrix<scalarType, Ndim, 1> & mean
+    ,Eigen::Matrix<scalarType, Ndim, Ndim> & covariance)
 {
 
   int num_samples = state_samples.cols();
+  int N = state_samples.rows();
 
-  double sum_weights = weights.sum();
+  scalarType sum_weights = weights.sum();
   mean = state_samples * weights / sum_weights;
 
-  Eigen::Matrix<double, N, 1> diff;
-  covariance = Eigen::Matrix<double, N, N>::Zero();
+  Eigen::Matrix<scalarType, Ndim, 1> diff(N);
+  covariance.setZero(N, N);
   for (int ii = 0; ii < num_samples; ii++)
   {
-    diff = mean - state_samples.block(0, ii, N, 1);
+    diff = mean - state_samples.col(ii);
     covariance += diff * diff.transpose() * weights(ii);
   }
   covariance = covariance / sum_weights;
 }
 
-void fitParticles(const Eigen::MatrixXd & state_samples, Eigen::VectorXd & weights
-    , Eigen::VectorXd & mean, Eigen::MatrixXd & covariance);
 }
-
 #endif
