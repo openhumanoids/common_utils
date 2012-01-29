@@ -26,7 +26,7 @@
 #
 # ----
 # File: pods.cmake
-# Distributed with pods version: 11.12.23
+# Distributed with pods version: 12.01.11
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -88,7 +88,7 @@ endfunction(pods_install_libraries)
 function(pods_install_pkg_config_file)
     list(GET ARGV 0 pc_name)
     # TODO error check
-
+    
     set(pc_version 0.0.1)
     set(pc_description ${pc_name})
     set(pc_requires "")
@@ -149,14 +149,14 @@ endfunction(pods_install_pkg_config_file)
 # specified python module or script.
 #
 # A launcher script will be installed to bin/<script_name>. The script simply
-# adds <install-prefix>/lib/pythonX.Y/dist-packages and 
-# <install-prefix>/lib/pythonX.Y/site-packages to the python path, and
-# then invokes `python -m <python_module>` if <python_module_or_file> is a module
-#
-# or invokes `python python_file` if <python_module_or_file> is a script (ends in .py). 
+# adds <install-prefix>/lib/pythonX.Y/dist-packages
+# and  <install-prefix>/lib/pythonX.Y/site-packages 
+# to the PYTHONPATH, and then 
+# invokes `python -m <python_module>` or `python python_file` 
+# depending on whether the function was passed a module name or script file.
 #
 # example:
-#    pods_install_python_script(run-pdb pdb)
+#    pods_install_python_script(run-py-module py_pkg.py_module)
 #    pods_install_python_script(run-py-script py_script.py)
 function(pods_install_python_script script_name python_module_or_file)
     find_package(PythonInterp REQUIRED)
@@ -236,13 +236,16 @@ function(_pods_install_python_package py_src_dir py_module_name)
 endfunction()
 
 
-# pods_install_python_packages(<src_dir>)
+# pods_install_python_packages(<src_dir1> ...)
 #
 # Install python packages to lib/pythonX.Y/dist-packages, where X.Y refers to
 # the current python version (e.g., 2.6)
 #
-# Recursively searches <src_dir> for .py files, byte-compiles them, and
-# installs them
+# For each <src_dir> pass in, it will do the following:
+# If <src_dir> is a python package (it has a __init__.py file) it will be installed 
+# along with any .py files in subdirectories
+#
+# Otherwise the script searches for and installs any python packages in <src_dir>
 function(pods_install_python_packages py_src_dir)
     get_filename_component(py_src_abs_dir ${py_src_dir} ABSOLUTE)
     if(ARGC GREATER 1)
@@ -257,7 +260,7 @@ function(pods_install_python_packages py_src_dir)
     else()
         # install any packages within the passed in py_src_dir 
         set(_installed_a_package FALSE)
-        file(GLOB sub-dirs RELATIVE ${py_src_abs_dir} *)
+        file(GLOB sub-dirs RELATIVE ${py_src_abs_dir} ${py_src_abs_dir}/*)
         foreach(sub-dir ${sub-dirs})
             if(EXISTS "${py_src_abs_dir}/${sub-dir}/__init__.py")
                 _pods_install_python_package(${py_src_abs_dir}/${sub-dir} ${sub-dir})
@@ -309,12 +312,12 @@ macro(pods_use_pkg_config_packages target)
     # make the target depend on libraries that are cmake targets
     if (_pods_pkg_ldflags)
         string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
-        foreach(lib ${_split_ldflags})
-                string(REGEX REPLACE "^-l" "" libname ${lib})
-                get_target_property(IS_TARGET ${libname} LOCATION)
+        foreach(__ldflag ${_split_ldflags})
+                string(REGEX REPLACE "^-l" "" __depend_target_name ${__ldflag})
+                get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
                 if (NOT IS_TARGET STREQUAL "IS_TARGET-NOTFOUND")
                     #message("---- ${target} depends on  ${libname}")
-                    add_dependencies(${target} ${libname})
+                    add_dependencies(${target} ${__depend_target_name})
                 endif() 
         endforeach()
     endif()
@@ -371,7 +374,9 @@ macro(pods_config_search_paths)
         
         # hack to force cmake always create install and clean targets 
         install(FILES DESTINATION)
-        add_custom_target(tmp)
+        string(RANDOM LENGTH 32 __rand_target__name__)
+        add_custom_target(${__rand_target__name__})
+        unset(__rand_target__name__)
 
         set(__pods_setup true)
     endif(NOT DEFINED __pods_setup)
