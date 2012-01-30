@@ -9,5 +9,6 @@
 #include "eigen_numerical.hpp"
 #include "eigen_select_block.hpp"
 #include "eigen_lcm.hpp"
+#include "eigen_file_io.hpp"
 
 #endif

@@ -15,3 +15,6 @@ pods_use_pkg_config_packages(eigen-test-select-block eigen-utils)
 
 add_executable(eigen-test-lcm-marshalling test_lcm_marshalling.cpp)
 pods_use_pkg_config_packages(eigen-test-lcm-marshalling eigen-utils)
+
+add_executable(eigen-test-file-io test_file_io.cpp)
+pods_use_pkg_config_packages(eigen-test-file-io eigen-utils)
