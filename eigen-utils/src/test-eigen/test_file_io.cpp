@@ -12,29 +12,32 @@ int main(int argc, char * argv[])
   writeToFile("testEigen.eg", m);
   eigen_dump(m);
 
-  MatrixXd m2;
-  readFromFile("testEigen.eg", m2);
+  MatrixXd m2 = readFromFile<MatrixXd>("testEigen.eg");
 
   eigen_dump(m2);
 
   ofstream ofs("testMultiMat.eg", ios::binary);
+
   MatrixXd w1 = MatrixXd::Random(6, 8);
   MatrixXd w2 = MatrixXd::Random(2, 4);
   MatrixXd w3 = MatrixXd::Random(3, 8);
-  writeToFile(ofs, w1);
-  writeToFile(ofs, w2);
-  writeToFile(ofs, w3);
-  ofs.close();
-
   eigen_dump(w1);
   eigen_dump(w2);
   eigen_dump(w3);
 
-  ifstream ifs("testMultiMat.eg", ios::binary);
-  while (ifs.peek() != ifstream::traits_type::eof()) {
-    MatrixXd r;
-    readFromFile(ifs, r);
-    eigen_dump(r);
-  }
-  ifs.close();
+  std::vector<MatrixXd> wmats;
+  wmats.push_back(w1);
+  wmats.push_back(w2);
+  wmats.push_back(w3);
+  writeMultipleToFile<MatrixXd>("testMultiMat.eg", wmats);
+
+  std::vector<ArrayXXd> wmats2;
+  wmats2.push_back(w1);
+  wmats2.push_back(w2);
+  wmats2.push_back(w3);
+  writeMultipleToFile<ArrayXXd>("testMultiMat.eg", wmats2);
+
+  std::vector<MatrixXd> rmats = readMultipleFromFile<MatrixXd>("testMultiMat.eg");
+  for (int i = 0; i < rmats.size(); i++)
+    eigen_dump(rmats[i]);
 }
