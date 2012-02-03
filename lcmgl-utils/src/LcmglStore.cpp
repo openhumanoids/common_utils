@@ -4,8 +4,8 @@ namespace lcmgl_utils {
 
 using namespace std;
 
-LcmglStore::LcmglStore(lcm_t * lcm_) :
-    lcm(lcm_)
+LcmglStore::LcmglStore(lcm_t * lcm_,const  std::string & prefix_) :
+    lcm(lcm_), prefix(prefix_)
 {
 
 }
@@ -30,11 +30,17 @@ void LcmglStore::switchAllBuffers()
 
 bot_lcmgl_t * LcmglStore::getLcmgl(const std::string & name)
 {
+  std::string full_name;
+  if (prefix.size() > 0)
+    full_name = prefix + "-" + name;
+  else
+    full_name = name;
+
   std::map<string, bot_lcmgl_t *>::iterator it;
-  it = lcmgls.find(name);
+  it = lcmgls.find(full_name);
   if (it == lcmgls.end()) {
-    bot_lcmgl_t * lcmgl = bot_lcmgl_init(lcm, name.c_str());
-    lcmgls.insert(pair<string, bot_lcmgl_t *>(name, lcmgl));
+    bot_lcmgl_t * lcmgl = bot_lcmgl_init(lcm, full_name.c_str());
+    lcmgls.insert(pair<string, bot_lcmgl_t *>(full_name, lcmgl));
     return lcmgl;
   }
   else {

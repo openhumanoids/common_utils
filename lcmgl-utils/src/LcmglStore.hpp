@@ -10,20 +10,31 @@ namespace lcmgl_utils {
 
 class LcmglStore {
 public:
-  LcmglStore(lcm_t * lcm);
+  LcmglStore(lcm_t * lcm, const std::string & prefix = "");
   virtual ~LcmglStore();
 
   /**
    * Get an lcmgl object by name, creating it if necessary
    */
-  bot_lcmgl_t * getLcmgl(const std::string & name);
+  // conveniance operators to get an lcmgl object
+  bot_lcmgl_t * operator ()(const std::string & name)
+  {
+    return getLcmgl(name);
+  }
+  bot_lcmgl_t * operator [](const std::string & name)
+  {
+    return getLcmgl(name);
+  }
 
   /**
    * Call bot_lcmgl_switch_buffer() on all of the managed lcmgl objects
    */
   void switchAllBuffers();
 
+private:
+  bot_lcmgl_t * getLcmgl(const std::string & name);
   lcm_t * lcm;
+  std::string prefix;
   std::map<std::string, bot_lcmgl_t *> lcmgls;
 };
 
