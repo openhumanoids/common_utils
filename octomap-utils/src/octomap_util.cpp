@@ -262,6 +262,12 @@ octomap::OcTree * loadOctomap(const char * fname, double * minNegLogLike)
 {
 
   std::ifstream ifs(fname, std::ios::binary);
+
+  if (!ifs.good()) {
+    fprintf(stderr, "error: couldn't load octomap %s, dying!\n", fname);
+    exit(1);
+  }
+
   int sz;
   ifs >> sz;
   char * tmpdata = (char *) malloc(sz * sizeof(char));
