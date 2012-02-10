@@ -9,9 +9,10 @@
 namespace eigen_utils {
 
 template<typename Derived>
-void writeToFile(std::ofstream &ofs, const Eigen::DenseBase<Derived> & m)
+void writeToFile(std::ofstream &ofs, const Eigen::DenseBase<Derived> & m_expr)
 {
   using namespace std;
+  typename Derived::PlainObject m = m_expr; //copy it to a local variable to force memory to be contiguous
   int32_t rows = m.rows();
   int32_t cols = m.cols();
   string type = typenameToStr<typename Derived::Scalar>();
@@ -22,6 +23,7 @@ void writeToFile(std::ofstream &ofs, const Eigen::DenseBase<Derived> & m)
   ofs.write((char *) &cols, sizeof(int32_t));
   ofs.write((char *) &typelen, sizeof(int32_t));
   ofs.write(type.c_str(), typelen);
+  //todo:switch to for loops...
   ofs.write((char *) m.derived().data(), m.size() * sizeof(typename Derived::Scalar));
 }
 template<typename Derived>
