@@ -31,42 +31,15 @@ term_source (j_decompress_ptr cinfo)
 {
 }
 
-static void 
-jpeg_err_emit_message(j_common_ptr cinfo, int msg_level)
-{
-    // suppress warnings and errors
-}
-
-static int
-jpeg_decompress_8u (const uint8_t * src, int src_size,
-        uint8_t * dest, int width, int height, int stride, J_COLOR_SPACE ocs);
-
-int 
-jpeg_decompress_8u_rgb (const uint8_t * src, int src_size,
-        uint8_t * dest, int width, int height, int stride)
-{
-    return jpeg_decompress_8u (src, src_size, dest, width, height,
-            stride, JCS_RGB);
-}
-
-int 
-jpeg_decompress_8u_gray (const uint8_t * src, int src_size,
-        uint8_t * dest, int width, int height, int stride)
-{
-    return jpeg_decompress_8u (src, src_size, dest, width, height,
-            stride, JCS_GRAYSCALE);
-}
-
 int
-jpeg_decompress_8u (const uint8_t * src, int src_size,
-        uint8_t * dest, int width, int height, int stride, J_COLOR_SPACE ocs)
+jpeg_decompress_to_8u_rgb (const uint8_t * src, int src_size,
+        uint8_t * dest, int width, int height, int stride)
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
     struct jpeg_source_mgr jsrc;
 
     cinfo.err = jpeg_std_error (&jerr);
-    jerr.emit_message = jpeg_err_emit_message;
     jpeg_create_decompress (&cinfo);
 
     jsrc.next_input_byte = src;
@@ -79,7 +52,48 @@ jpeg_decompress_8u (const uint8_t * src, int src_size,
     cinfo.src = &jsrc;
 
     jpeg_read_header (&cinfo, TRUE);
-    cinfo.out_color_space = ocs;
+    cinfo.out_color_space = JCS_RGB;
+    jpeg_start_decompress (&cinfo);
+
+    if (cinfo.output_height != height || cinfo.output_width != width) {
+        fprintf (stderr, "Error: Buffer was %dx%d but JPEG image is %dx%d\n",
+                width, height, cinfo.output_width, cinfo.output_height);
+        jpeg_destroy_decompress (&cinfo);
+        return -1;
+    }
+
+    while (cinfo.output_scanline < height) {
+        uint8_t * row = dest + cinfo.output_scanline * stride;
+        jpeg_read_scanlines (&cinfo, &row, 1);
+    }
+    jpeg_finish_decompress (&cinfo);
+    jpeg_destroy_decompress (&cinfo);
+    return 0;
+}
+
+int
+jpeg_decompress_to_8u_gray (const uint8_t * src, int src_size,
+        uint8_t * dest, int width, int height, int stride)
+{
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
+    struct jpeg_source_mgr jsrc;
+
+    cinfo.err = jpeg_std_error (&jerr);
+    jpeg_create_decompress (&cinfo);
+
+    jsrc.next_input_byte = src;
+    jsrc.bytes_in_buffer = src_size;
+    jsrc.init_source = init_source;
+    jsrc.fill_input_buffer = fill_input_buffer;
+    jsrc.skip_input_data = skip_input_data;
+    jsrc.resync_to_restart = jpeg_resync_to_restart;
+    jsrc.term_source = term_source;
+    cinfo.src = &jsrc;
+
+    jpeg_read_header (&cinfo, TRUE);
+
+    cinfo.out_color_space = JCS_GRAYSCALE;
     jpeg_start_decompress (&cinfo);
 
     if (cinfo.output_height != height || cinfo.output_width != width) {
@@ -230,7 +244,7 @@ jpeg_compress_8u_bgra (const uint8_t * src, int width, int height, int stride,
 
 #if 0
 int
-jpeg_decompress_8u_rgb_IPP (const uint8_t * src, int src_size,
+jpeg_decompress_to_8u_rgb_IPP (const uint8_t * src, int src_size,
         uint8_t * dest, int width, int height, int stride)
 {
     struct jpeg_decompress_struct cinfo;
@@ -432,7 +446,7 @@ jpeg_compress_8u_rgb_IPP (const uint8_t * src, int width, int height,
 
 
 int
-jpeg_get_dimensions (const uint8_t * src, int src_size, int *width, int *height)
+jpeg_dimensions (const uint8_t * src, int src_size, int *width, int *height)
 {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -458,7 +472,6 @@ jpeg_get_dimensions (const uint8_t * src, int src_size, int *width, int *height)
 
     *width = cinfo.output_width;
     *height = cinfo.output_height;
-    //    *cs = cinfo.out_color_space; //TODO: should get the color space info...
     jpeg_destroy_decompress (&cinfo);
     return 0;
 }
