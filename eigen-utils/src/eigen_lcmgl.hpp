@@ -30,6 +30,8 @@ void bot_lcmgl_draw_axes(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orienta
 
 void bot_lcmgl_mult_quat_pos(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos);
 
+void bot_lcmgl_transform_frame(bot_lcmgl_t * lcmgl, const Eigen::Vector3d & xyt);
+
 }
 
 #endif

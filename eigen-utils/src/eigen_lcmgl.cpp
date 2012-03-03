@@ -143,4 +143,11 @@ void bot_lcmgl_draw_axes(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orienta
   bot_lcmgl_pop_matrix(lcmgl);
 }
 
+void bot_lcmgl_transform_frame(bot_lcmgl_t * lcmgl, const Eigen::Vector3d & xyt)
+{
+  bot_lcmgl_translated(lcmgl, xyt(0), xyt(1), 0);
+  bot_lcmgl_rotated(lcmgl, bot_to_degrees(xyt(2)), 0, 0, 1);
+}
+
+
 }

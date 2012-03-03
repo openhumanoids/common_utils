@@ -5,6 +5,7 @@
 #include <lcmtypes/eigen_utils/eigen_dense_t.hpp>
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace eigen_utils {
 
