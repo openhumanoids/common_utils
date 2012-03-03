@@ -1,5 +1,5 @@
 #include "../eigen_file_io.hpp"
-#include "../eigen_utils.hpp"
+#include "../eigen_utils_common.hpp"
 
 using namespace Eigen;
 using namespace eigen_utils;
@@ -13,8 +13,12 @@ int main(int argc, char * argv[])
   eigen_dump(m);
 
   MatrixXd m2 = readFromFile<MatrixXd>("testEigen.eg");
-
   eigen_dump(m2);
+
+  writeToFile("testEigenBlock.eg", m.block(0, 0, 3, 3));
+
+  MatrixXd m2b = readFromFile<MatrixXd>("testEigenBlock.eg");
+  eigen_dump(m2b);
 
   ofstream ofs("testMultiMat.eg", ios::binary);
 
