@@ -15,9 +15,6 @@ eigen_dense_t toLcmMsg(Eigen::DenseBase<Derived> & mat);
 template<typename Derived>
 typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg);
 
-template<typename LcmType>
-typename std::vector<LcmType> loadMsgsFromLog(const std::string& logfileName, const std::string & channel);
-
 template<typename T> const std::string typenameToStr();
 
 
