@@ -18,3 +18,6 @@ pods_use_pkg_config_packages(eigen-test-lcm-marshalling eigen-utils)
 
 add_executable(eigen-test-file-io test_file_io.cpp)
 pods_use_pkg_config_packages(eigen-test-file-io eigen-utils)
+
+add_executable(eigen-test-fft test_fft.cpp)
+pods_use_pkg_config_packages(eigen-test-fft eigen-utils fftw3)

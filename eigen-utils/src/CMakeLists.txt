@@ -5,12 +5,18 @@ if(NOT EIGEN3_FOUND)
     return()             
 endif()
 
+#todo: would be better to just not build the relevant components
 pkg_check_modules(BOT_LCMGL bot2-lcmgl-client)
 if(NOT BOT_LCMGL_FOUND)
     message("bot2-lcmgl-client not found. not building eigen-utils") 
     return()             
 endif()
 
+pkg_check_modules(FFTW3 fftw3)
+if(NOT FFTW3_FOUND)
+    message("fftw not found. not building eigen-utils") 
+    return()             
+endif()
 
 file(GLOB cpp_files *.cpp)
 file(GLOB hpp_files *.hpp)
@@ -21,7 +27,7 @@ add_library(eigen-utils SHARED
 
 target_link_libraries(eigen-utils ${OPENGL_LIBRARIES})
 
-set(REQUIRED_LIBS eigen3 bot2-lcmgl-client bot2-core bot2-vis lcmtypes_eigen-utils)
+set(REQUIRED_LIBS eigen3 bot2-lcmgl-client bot2-core bot2-vis lcmtypes_eigen-utils fftw3 fftw3f)
 
 pods_use_pkg_config_packages(eigen-utils ${REQUIRED_LIBS})
 
