@@ -11,6 +11,7 @@ namespace lcmgl_utils {
 class LcmglStore {
 public:
   LcmglStore(lcm_t * lcm, const std::string & prefix = "");
+  LcmglStore();
   virtual ~LcmglStore();
 
   /**

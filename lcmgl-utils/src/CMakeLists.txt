@@ -1,10 +1,11 @@
 # Create a shared library liblcmgl-utils.so with a single source file
 add_library(lcmgl-utils SHARED
+    lcmgl_utils.cpp
     LcmglStore.cpp)
 
 # make the header public
 # install it to include/lcmgl-utils
-pods_install_headers(LcmglStore.hpp DESTINATION lcmgl_utils)
+pods_install_headers(lcmgl_utils.hpp LcmglStore.hpp DESTINATION lcmgl_utils)
 
 # make the library public
 pods_install_libraries(lcmgl-utils)

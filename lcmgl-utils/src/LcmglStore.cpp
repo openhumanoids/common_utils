@@ -1,11 +1,18 @@
 #include "LcmglStore.hpp"
+#include <iostream>
+#include <stdlib.h>
 
 namespace lcmgl_utils {
 
 using namespace std;
 
-LcmglStore::LcmglStore(lcm_t * lcm_,const  std::string & prefix_) :
+LcmglStore::LcmglStore(lcm_t * lcm_, const std::string & prefix_) :
     lcm(lcm_), prefix(prefix_)
+{
+
+}
+LcmglStore::LcmglStore() :
+    lcm(NULL), prefix("uninitialized")
 {
 
 }
@@ -30,6 +37,11 @@ void LcmglStore::switchAllBuffers()
 
 bot_lcmgl_t * LcmglStore::getLcmgl(const std::string & name)
 {
+  if (lcm == NULL) {
+    std::cerr << "ERROR: lcmglStore " << prefix << " lcm object is NULL\n";
+    exit(1);
+  }
+
   std::string full_name;
   if (prefix.size() > 0)
     full_name = prefix + "-" + name;
