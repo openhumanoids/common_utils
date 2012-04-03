@@ -16,5 +16,6 @@ Description:
 
 Requirements: 
   fftw3
+  fftw3f
 
 License:      FILL-ME-IN
