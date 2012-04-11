@@ -10,6 +10,6 @@
 #include "eigen_select_block.hpp"
 #include "eigen_lcm.hpp"
 #include "eigen_file_io.hpp"
-#include "eigen_fftw.hpp"
+
 
 #endif

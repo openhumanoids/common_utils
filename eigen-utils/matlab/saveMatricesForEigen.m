@@ -1,15 +1,17 @@
-function saveMatricesForEigen(fname, mats, saveAsFloat)
+function saveMatricesForEigen(fname, mats, type)
 if (nargin<3)
-    saveAsFloat = false;
+    type = 'double';
 end
 fid = fopen(fname,'w');
 
-if (saveAsFloat)
+if (strcmp(type,'float'))
     savetype = 'single';
-    type = 'float';
-else
+elseif (strcmp(type,'double'))
     savetype = 'double';
-    type = 'double';
+elseif (strcmp(type,'int32_t'))
+    savetype = 'int32';
+else
+    error(['invalid dataType: ' type]);
 end
 typelen =length(type);
 

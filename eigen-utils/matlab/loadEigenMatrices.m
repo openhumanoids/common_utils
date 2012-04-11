@@ -10,6 +10,9 @@ while true
     cols = fread(fid, 1,'int32');
     typelen = fread(fid, 1,'int32');
     type = fread(fid, typelen,'int8=>char');
+    if strcmp(type(end-1:end),'_t') || strcmp(type(end-1:end)','_t') % dunno why it needs to be transposed :-/
+        type = type(1:end-2);
+    end
     m = fread(fid,[rows,cols],type);
     loaded = [loaded,m];
 end

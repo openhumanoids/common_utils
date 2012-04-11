@@ -4,7 +4,8 @@
 #include <Eigen/Dense>
 #include <iostream>
 #include <algorithm>
-
+#include <vector>
+#include <utility>
 // Define isnan() function for OSX
 #if defined(__APPLE__)
 #if (__GNUC__ >= 4)
@@ -52,7 +53,6 @@ bool assertNoNan(const Eigen::DenseBase<Derived> & m)
     assert(false);
   }
 }
-
 
 template<typename Derived>
 int numNonZeros(const Eigen::DenseBase<Derived> & m)
@@ -155,6 +155,28 @@ typename Derived::Scalar median(const Eigen::DenseBase<Derived> & const_arr)
 
   typename Derived::PlainObject arr = const_arr; //make a local copy... would be nice if this wasn't necessary :-/
   return median_non_const(arr);
+}
+
+template<typename Scalar>
+Eigen::Array<Scalar, Eigen::Dynamic, 1> sort(const Eigen::Array<Scalar, Eigen::Dynamic, 1> & arr,
+    Eigen::ArrayXi &sorted_inds)
+{
+  typedef std::pair<Scalar, int> scalar_index_pair;
+  std::vector<scalar_index_pair> sort_vec;
+  sort_vec.reserve(arr.size());
+  for (int i = 0; i < arr.size(); i++) {
+    sort_vec.push_back(scalar_index_pair(arr(i), i));
+  }
+  std::sort(sort_vec.begin(), sort_vec.end());
+
+  Eigen::Array<Scalar, Eigen::Dynamic, 1> sorted(arr.rows(), arr.cols());
+  sorted_inds.resizeLike(arr);
+  for (int i = 0; i < arr.size(); i++) {
+    sorted(i) = sort_vec[i].first;
+    sorted_inds(i) = sort_vec[i].second;
+  }
+
+  return sorted;
 }
 
 }  //namespace eigen_utils
