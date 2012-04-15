@@ -40,8 +40,9 @@ void writeToFile(const std::string & name, const Eigen::DenseBase<Derived> & m)
   ofs.close();
 }
 
-template<typename Derived>
-void writeMultipleToFile(const std::string & name, const typename std::vector<typename Derived::PlainObject> & mats)
+//template<typename Derived>
+template<typename vectorType>
+void writeMultipleToFile(const std::string & name, const vectorType & mats)
 {
   using namespace std;
   ofstream ofs(name.c_str(), ios::binary);

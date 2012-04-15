@@ -33,13 +33,13 @@ int main(int argc, char * argv[])
   wmats.push_back(w1);
   wmats.push_back(w2);
   wmats.push_back(w3);
-  writeMultipleToFile<MatrixXd>("testMultiMat.eg", wmats);
+  writeMultipleToFile("testMultiMat.eg", wmats);
 
   std::vector<ArrayXXd> wmats2;
   wmats2.push_back(w1);
   wmats2.push_back(w2);
   wmats2.push_back(w3);
-  writeMultipleToFile<ArrayXXd>("testMultiMat.eg", wmats2);
+  writeMultipleToFile("testMultiMat.eg", wmats2);
 
   std::vector<MatrixXd> rmats = readMultipleFromFile<MatrixXd>("testMultiMat.eg");
   for (int i = 0; i < rmats.size(); i++)
