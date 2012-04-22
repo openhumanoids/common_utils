@@ -31,7 +31,7 @@ public:
     bot_roll_pitch_yaw_to_quat(rpy, trans.rot_quat);
     return simulate(&trans, utime);
   }
-  const bot_core_planar_lidar_t * simulate(double xyt[3], int64_t utime = 0)
+  const bot_core_planar_lidar_t * simulate(const double xyt[3], int64_t utime = 0)
   {
     return simulate(xyt[0], xyt[1], xyt[2], utime);
   }
