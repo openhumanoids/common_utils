@@ -466,6 +466,14 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
   self->param = param;
 
   char **cam_names = bot_param_get_all_camera_names(self->param);
+
+  //failure if there are no cam names
+  if (cam_names == NULL) {
+    free(self);
+    fprintf(stderr, "error, no camera names detected, won't add %s renderer\n", RENDERER_NAME);
+    return NULL;
+  }
+
   for (int i = 0; cam_names[i]; i++) {
     char * channel = bot_param_get_camera_lcm_channel(self->param, cam_names[i]);
     if (channel != NULL) {
@@ -484,7 +492,9 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
 void add_cam_thumb_renderer_to_viewer(BotViewer *viewer, int render_priority, lcm_t * lcm, BotParam * param,
     BotFrames * frames)
 {
-  bot_viewer_add_renderer(viewer, _new(viewer, lcm, param, frames), render_priority);
+  BotRenderer * renderer =_new(viewer, lcm, param, frames);
+  if (renderer != NULL)
+    bot_viewer_add_renderer(viewer, renderer, render_priority);
 }
 
 static int cam_renderer_prepare_texture(cam_renderer_t *cr)
