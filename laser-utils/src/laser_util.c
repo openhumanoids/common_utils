@@ -172,7 +172,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
-      sensor_xyz[2] = range;
+      sensor_xyz[2] = -range; //TODO: HACK to use the "up region" as extra down beams
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else {
