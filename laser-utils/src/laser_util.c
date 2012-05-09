@@ -203,19 +203,25 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
   return proj_scan->projection_status;
 }
 
-void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation)
+void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation_min,
+    double spatial_decimation_max)
 {
   int lastAdd = -1e6;
   for (int i = 0; i < lscan->npoints; i++) {
     if (lscan->point_status[i] > laser_valid_projection)
       continue;
-    if ((i - lastAdd) > beam_skip
-        || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), point3d_as_array(&lscan->points[lastAdd]))
-            > spatial_decimation
-        || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), lscan->origin.trans_vec)
-            > (lscan->aveSurroundRange + 1.8 * lscan->stddevSurroundRange) ||
-        i < lscan->projector->surroundRegion[0]
-        || i > lscan->projector->surroundRegion[1]) {
+    double dist_to_prev;
+    if (lastAdd < 0)
+      dist_to_prev = 1e6;
+    else {
+      dist_to_prev = bot_vector_dist_3d(point3d_as_array(&lscan->points[i]),
+          point3d_as_array(&lscan->points[lastAdd]));
+    }
+    if (i < lscan->projector->surroundRegion[0] || i > lscan->projector->surroundRegion[1] || //always use height beams
+        (dist_to_prev > spatial_decimation_min && ((i - lastAdd) > beam_skip
+            || dist_to_prev > spatial_decimation_max
+            || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), lscan->origin.trans_vec)
+                > (lscan->aveSurroundRange + 1.8 * lscan->stddevSurroundRange)))) {
       lastAdd = i;
     }
     else {

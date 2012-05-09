@@ -104,7 +104,7 @@ extern "C" {
   int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_projected_scan * proj_scan,
       const char * dest_frame, const double laser_angular_rate[3], const double laser_velocity[3]);
 
-  void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation);
+  void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation_min, double spatial_decimation_max);
 
   void laser_destroy_projected_scan(laser_projected_scan * proj_scan);
 
