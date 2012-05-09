@@ -9,7 +9,7 @@
 
 class LaserOctomapper {
 public:
-  LaserOctomapper(char * logFname);
+  LaserOctomapper(const std::string &logFname, float resolution);
   ~LaserOctomapper();
   void addProjectedScan(laser_projected_scan * lscan);
   void processScansInQueue();

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <ConciseArgs/ConciseArgs.hpp>
+
 using namespace std;
 using namespace octomap;
 //TODO: make me a parameter
@@ -39,7 +41,7 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
 
   self->processScansInQueue();
 
-  if (msg->utime - self->last_publish_time > publish_interval * 1e6) {
+  if (msg->utime - self->last_publish_time > publish_interval * 1e6 && !self->fromLog) {
     self->last_publish_time = msg->utime;
     self->publish_map();
   }
@@ -51,14 +53,14 @@ void LaserOctomapper::addProjectedScan(laser_projected_scan * lscan)
   lscans_to_be_processed.push_back(lscan);
 }
 
-LaserOctomapper::LaserOctomapper(char * logFname) :
-  last_publish_time(-1)
+LaserOctomapper::LaserOctomapper(const std::string &logFname, float resolution) :
+    last_publish_time(-1)
 {
   lcm_pub = bot_lcm_get_global(NULL);
-  if (logFname != NULL) {
+  if (!logFname.empty()) {
     fromLog = true;
     char provider_buf[1024];
-    sprintf(provider_buf, "file://%s?speed=0", logFname);
+    sprintf(provider_buf, "file://%s?speed=0", logFname.c_str());
     lcm_recv = lcm_create(provider_buf);
   }
   else {
@@ -67,11 +69,9 @@ LaserOctomapper::LaserOctomapper(char * logFname) :
 
   }
   param = bot_param_get_global(lcm_pub, 0);
-  frames = bot_frames_get_global(lcm_pub, param);
+  frames = bot_frames_get_global(lcm_recv, param);
 
-  //TODO: these should be parameters
-  float res = .1;
-  ocTree = new OcTree(res);
+  ocTree = new OcTree(resolution);
 
   laser_projectors = g_hash_table_new(g_str_hash, g_str_equal);
 
@@ -196,17 +196,23 @@ static void shutdown_module(int unused __attribute__((unused)))
 int main(int argc, char *argv[])
 {
 
-  signal(SIGINT, shutdown_module);
-  char * logFName = NULL;
-  if (argc > 1)
-    logFName = argv[1];
+  string logFName;
+  float resolution =.1;
+  ConciseArgs opt(argc,argv);
+  opt.add(resolution,"r","resolution");
+  opt.add(logFName,"l","log_name");
+  opt.parse();
 
-  LaserOctomapper *map3d = new LaserOctomapper(logFName);
+  signal(SIGINT, shutdown_module);
+
+
+
+  LaserOctomapper *map3d = new LaserOctomapper(logFName,resolution);
   _map3d = map3d;
   while (true) {
     int ret = lcm_handle(map3d->lcm_recv);
     if (ret != 0)
-      break;//log is done...
+      break; //log is done...
   }
   shutdown_module(1);
 
