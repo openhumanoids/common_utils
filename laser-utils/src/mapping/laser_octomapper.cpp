@@ -53,14 +53,28 @@ void LaserOctomapper::addProjectedScan(laser_projected_scan * lscan)
   lscans_to_be_processed.push_back(lscan);
 }
 
-LaserOctomapper::LaserOctomapper(const std::string &logFname, float resolution) :
+LaserOctomapper::LaserOctomapper(int argc, char ** argv) :
     last_publish_time(-1)
 {
+
+  string logFName;
+  string paramName;
+  outFname = "octomap.bt";
+  resolution =.1;
+  ConciseArgs opt(argc,argv);
+  opt.add(resolution,"r","resolution");
+  opt.add(logFName,"l","log_name");
+  opt.add(outFname,"o","out_name");
+  opt.add(paramName,"p","param_file");
+  opt.parse();
+
+
+
   lcm_pub = bot_lcm_get_global(NULL);
-  if (!logFname.empty()) {
+  if (!logFName.empty()) {
     fromLog = true;
     char provider_buf[1024];
-    sprintf(provider_buf, "file://%s?speed=0", logFname.c_str());
+    sprintf(provider_buf, "file://%s?speed=0", logFName.c_str());
     lcm_recv = lcm_create(provider_buf);
   }
   else {
@@ -68,7 +82,10 @@ LaserOctomapper::LaserOctomapper(const std::string &logFname, float resolution) 
     lcm_recv = lcm_pub;
 
   }
-  param = bot_param_get_global(lcm_pub, 0);
+  if (paramName.empty())
+    param = bot_param_get_global(lcm_pub, 0);
+  else
+    param = bot_param_new_from_file(paramName.c_str());
   frames = bot_frames_get_global(lcm_recv, param);
 
   ocTree = new OcTree(resolution);
@@ -131,8 +148,8 @@ void LaserOctomapper::publish_map()
 
 void LaserOctomapper::save_map()
 {
-  fprintf(stderr, "Saving map... ");
-  ocTree->writeBinaryConst("octomap.bt");
+  fprintf(stderr, "Saving map to %s...", outFname.c_str());
+  ocTree->writeBinaryConst(outFname.c_str());
   fprintf(stderr, "done! \n");
 }
 
@@ -195,19 +212,9 @@ static void shutdown_module(int unused __attribute__((unused)))
  */
 int main(int argc, char *argv[])
 {
-
-  string logFName;
-  float resolution =.1;
-  ConciseArgs opt(argc,argv);
-  opt.add(resolution,"r","resolution");
-  opt.add(logFName,"l","log_name");
-  opt.parse();
-
   signal(SIGINT, shutdown_module);
 
-
-
-  LaserOctomapper *map3d = new LaserOctomapper(logFName,resolution);
+  LaserOctomapper *map3d = new LaserOctomapper(argc, argv);
   _map3d = map3d;
   while (true) {
     int ret = lcm_handle(map3d->lcm_recv);

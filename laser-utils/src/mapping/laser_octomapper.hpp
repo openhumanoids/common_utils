@@ -9,7 +9,7 @@
 
 class LaserOctomapper {
 public:
-  LaserOctomapper(const std::string &logFname, float resolution);
+  LaserOctomapper(int argc, char ** argv);
   ~LaserOctomapper();
   void addProjectedScan(laser_projected_scan * lscan);
   void processScansInQueue();
@@ -23,10 +23,13 @@ public:
   lcm_t *lcm_pub; //two different ones for running from log
   lcm_t *lcm_recv; //will point to same place if running live
 
+  float resolution;
   octomap::OcTree * ocTree;
 
   GHashTable * laser_projectors;
   std::list<laser_projected_scan *> lscans_to_be_processed;
+
+  std::string outFname;
 
   int64_t last_publish_time;
 
