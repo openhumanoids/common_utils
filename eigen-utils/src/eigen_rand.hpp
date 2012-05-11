@@ -64,7 +64,7 @@ scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matri
 
 template<typename scalarType, int Ndim, int Nsamples>
 void fitParticles(const Eigen::Matrix<scalarType, Ndim, Nsamples> & state_samples
-    , Eigen::Matrix<scalarType, Ndim, 1>& weights , Eigen::Matrix<scalarType, Ndim, 1> & mean
+    , const Eigen::Array<scalarType, Ndim, 1>& weights , Eigen::Matrix<scalarType, Ndim, 1> & mean
     ,Eigen::Matrix<scalarType, Ndim, Ndim> & covariance)
 {
 
@@ -72,7 +72,7 @@ void fitParticles(const Eigen::Matrix<scalarType, Ndim, Nsamples> & state_sample
   int N = state_samples.rows();
 
   scalarType sum_weights = weights.sum();
-  mean = state_samples * weights / sum_weights;
+  mean = state_samples * weights.matrix() / sum_weights;
 
   Eigen::Matrix<scalarType, Ndim, 1> diff(N);
   covariance.setZero(N, N);
