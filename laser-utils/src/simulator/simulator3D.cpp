@@ -88,13 +88,14 @@ int main(int argc, char *argv[])
   app.param = bot_param_get_global(app.lcm, 0);
   app.frames = bot_frames_get_global(app.lcm, app.param);
 
-  float publish_freq = 40.0;
+  float publish_freq = bot_param_get_double_or_fail(app.param,
+      ("planar_lidars." + string(app.laser_name) + ".frequency").c_str());
 
   app.laser_channel = bot_param_get_planar_lidar_lcm_channel(app.param, app.laser_name);
 
   //TODO: remove hardcoded parameters for a hokuyo UTM
   octomap::OcTree * ocTree = new OcTree(map_fname);
-  app.sim = new laser_util::LaserSim3D(ocTree, 1081, -0.75 * M_PI, bot_to_radians(0.25), 40.0, 50, -50);
+  app.sim = new laser_util::LaserSim3D(ocTree, app.param, app.frames, app.laser_name);
 
   g_timeout_add((guint) 1.0 / publish_freq * 1000.0, pub_handler, &app);
 

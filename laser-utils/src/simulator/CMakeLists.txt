@@ -35,7 +35,7 @@ if(OCTOMAP_FOUND)
 	    LaserSim3D.cpp)
 	pods_install_headers(LaserSim3D.hpp DESTINATION laser_utils)
 	
-	set(REQUIRED_LIBS bot2-core geom-utils octomap)
+	set(REQUIRED_LIBS bot2-core geom-utils octomap laser-util)
 	pods_use_pkg_config_packages(laser-sim3d ${REQUIRED_LIBS})
 	 
 	# make the library public

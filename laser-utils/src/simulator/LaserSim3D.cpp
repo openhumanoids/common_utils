@@ -16,8 +16,14 @@ const bot_core_planar_lidar_t * LaserSim3D::simulate(BotTrans * curr_pose, int64
 
   //do the ray tracing
   double local_xyz[3];
+  float prev_range = laser_max_range;
   for (int i = 0; i < laser_msg->nranges; i++) {
-    double * laser_xyz = laserFramePoints + 3 * i;
+
+    if (body_frame_scan->point_status[i] >= laser_valid_projection) {
+      laser_msg->ranges[i] = prev_range;
+      continue;
+    }
+    double * laser_xyz = point3d_as_array(&body_frame_scan->points[i]);
     bot_trans_apply_vec(curr_pose, laser_xyz, local_xyz);
 
     point3d origin(curr_pose->trans_vec[0], curr_pose->trans_vec[1], curr_pose->trans_vec[2]);
@@ -31,57 +37,46 @@ const bot_core_planar_lidar_t * LaserSim3D::simulate(BotTrans * curr_pose, int64
     else {
       laser_msg->ranges[i] = laser_max_range;
     }
+    prev_range = laser_msg->ranges[i];
   }
   laser_msg->utime = utime;
   return laser_msg;
 
 }
 
-LaserSim3D::LaserSim3D(const octomap::OcTree * ocTree, int nranges, float rad0, float radstep, float max_range,
-    int numHeightBeamsStart, int numHeightBeamsEnd)
+LaserSim3D::LaserSim3D(const octomap::OcTree * ocTree, BotParam * param, BotFrames * frames,
+    const std::string & laser_name)
 {
 
+  string prefix = "planar_lidars." + laser_name;
+
+  Laser_projector * proj = laser_projector_new(param, frames, laser_name.c_str(), 1);
+
   laser_msg = (bot_core_planar_lidar_t *) calloc(1, sizeof(bot_core_planar_lidar_t));
-  laser_msg->nranges = nranges;
-  laser_msg->ranges = (float *) calloc(nranges, sizeof(float));
+  laser_msg->nranges = bot_param_get_int_or_fail(param, (prefix + ".nranges").c_str());
+  laser_msg->ranges = (float *) calloc(laser_msg->nranges, sizeof(float));
   laser_msg->nintensities = 0;
-  laser_msg->rad0 = rad0;
-  laser_msg->radstep = radstep;
-  laser_max_range = max_range;
+  laser_msg->rad0 = bot_to_radians(bot_param_get_double_or_fail(param,(prefix+".rad0").c_str()));
+  laser_msg->radstep = bot_to_radians(bot_param_get_double_or_fail(param,(prefix+".radstep").c_str()));
+  laser_max_range = proj->max_range;
+
+  decimation_factor = bot_param_get_int_or_fail(param, (prefix + ".decimation_factor").c_str());
+
+  for (int i = 0; i < laser_msg->nranges; i++)
+    laser_msg->ranges[i] = laser_max_range*.95;
+  body_frame_scan = laser_create_projected_scan_from_planar_lidar(proj, laser_msg,
+      proj->coord_frame);
+
+  laser_decimate_projected_scan(body_frame_scan, decimation_factor, 0, 1000);
+
+  laser_projector_destroy(proj);
 
   map = ocTree;
-
-  laserFramePoints = (double *) calloc(3 * laser_msg->nranges, sizeof(double));
-  for (int i = 0; i < laser_msg->nranges; i++) {
-    double * laser_xyz = laserFramePoints + 3 * i;
-    double theta = laser_msg->rad0 + laser_msg->radstep * i;
-    laser_xyz[0] = laser_max_range * cos(theta);
-    laser_xyz[1] = laser_max_range * sin(theta);
-    laser_xyz[2] = 0;
-  }
-
-  float mirrorDist = .15;
-  for (int i = 0; i < abs(numHeightBeamsStart); i++) {
-    double * laser_xyz = laserFramePoints + 3 * i;
-    double theta = laser_msg->rad0 + laser_msg->radstep * i;
-    laser_xyz[0] = mirrorDist * cos(theta);
-    laser_xyz[1] = mirrorDist * sin(theta);
-    laser_xyz[2] = -bot_sgn(numHeightBeamsStart) * (laser_max_range - mirrorDist);
-  }
-
-  for (int i = laser_msg->nranges - abs(numHeightBeamsEnd); i < laser_msg->nranges; i++) {
-    double * laser_xyz = laserFramePoints + 3 * i;
-    double theta = laser_msg->rad0 + laser_msg->radstep * i;
-    laser_xyz[0] = mirrorDist * cos(theta);
-    laser_xyz[1] = mirrorDist * sin(theta);
-    laser_xyz[2] = -bot_sgn(numHeightBeamsEnd) * (laser_max_range - mirrorDist);
-  }
-
 }
 
 LaserSim3D::~LaserSim3D()
 {
 
-  free(laserFramePoints);
+  laser_destroy_projected_scan(body_frame_scan);
   bot_core_planar_lidar_t_destroy(laser_msg);
 }
