@@ -13,27 +13,35 @@ namespace eigen_utils {
  * Fill an Eigen vector with gaussian random numbers with mu=0, Sigma = I
  */
 template<typename scalarType, int N>
-void randn_identity(Eigen::Matrix<scalarType, N, 1> & vec)
+inline void randn_identity(Eigen::Matrix<scalarType, N, 1> & vec)
 {
   for (int ii = 0; ii < vec.size(); ii++) {
     vec(ii) = bot_gauss_rand(0, 1);
   }
 }
 
+
+
 template<typename scalarType, int N>
-Eigen::Matrix<scalarType, N, 1> randn(const Eigen::Matrix<scalarType, N, N> & cov)
+inline Eigen::Matrix<scalarType, N, 1> randn_chol(const Eigen::Matrix<scalarType, N, N> & chol_decomp_cov)
 {
   Eigen::Matrix<scalarType, N, 1> vec;
   randn_identity(vec);
+  return chol_decomp_cov * vec;
+}
+
+template<typename scalarType, int N>
+inline Eigen::Matrix<scalarType, N, 1> randn(const Eigen::Matrix<scalarType, N, N> & cov)
+{
   Eigen::Matrix<scalarType, N, N> chol_decomp = cov.llt().matrixL();
-  return chol_decomp * vec;
+  return randn_chol(chol_decomp);
 }
 
 /**
  * unnormalized log likelihood
  */
 template<typename scalarType, int N>
-scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
+inline scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
     , const Eigen::Matrix<scalarType, N, N> & sigma)
 {
   Eigen::Matrix<scalarType, N, 1> diff = mu - x;
@@ -44,7 +52,7 @@ scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x, const
  * unnormalized log likelhihood using information matrix
  */
 template<typename scalarType, int N>
-scalarType loglike_information_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x
+inline scalarType loglike_information_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x
     ,const Eigen::Matrix<scalarType, N, 1> & mu , const Eigen::Matrix<scalarType, N, N> & sigma_inv)
 {
   Eigen::Matrix<scalarType, N, 1> diff = mu - x;
@@ -52,7 +60,7 @@ scalarType loglike_information_unnormalized(const Eigen::Matrix<scalarType, N, 1
 }
 
 template<typename scalarType, int N>
-scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
+inline scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
     , const Eigen::Matrix<scalarType, N, N> & sigma)
 {
   Eigen::Matrix<scalarType, N, 1> diff = mu - x;
