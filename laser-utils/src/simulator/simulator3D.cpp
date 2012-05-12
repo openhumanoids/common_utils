@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
   if (argc > 2)
     app.laser_name = strdup(argv[2]);
   else
-    app.laser_name = strdup("laser");
+    app.laser_name = strdup("sim_laser");
 
   GMainLoop * mainloop = g_main_loop_new(NULL, FALSE);
 
