@@ -60,15 +60,13 @@ LaserOctomapper::LaserOctomapper(int argc, char ** argv) :
   string logFName;
   string paramName;
   outFname = "octomap.bt";
-  resolution =.1;
-  ConciseArgs opt(argc,argv);
-  opt.add(resolution,"r","resolution");
-  opt.add(logFName,"l","log_name");
-  opt.add(outFname,"o","out_name");
-  opt.add(paramName,"p","param_file");
+  resolution = .1;
+  ConciseArgs opt(argc, argv);
+  opt.add(resolution, "r", "resolution");
+  opt.add(logFName, "l", "log_name");
+  opt.add(outFname, "o", "out_name");
+  opt.add(paramName, "p", "param_file");
   opt.parse();
-
-
 
   lcm_pub = bot_lcm_get_global(NULL);
   if (!logFName.empty()) {
@@ -194,6 +192,23 @@ void LaserOctomapper::processScansInQueue()
   bot_tictoc("addLaser");
 }
 
+
+void addZPlane(octomap::OcTree * ocTree, double z_plane_height)
+{
+  double resolution = ocTree->getResolution();
+  double xy0[3];
+  double xy1[3];
+  ocTree->getMetricMin(xy0[0], xy0[1], xy0[2]);
+  ocTree->getMetricMax(xy1[0], xy1[1], xy1[2]);
+  double xy[0];
+  for (xy[0] = xy0[0]; xy[0] < xy1[1]; xy[0] += resolution) {
+    for (xy[1] = xy0[1]; xy[1] < xy1[1]; xy[1] += resolution) {
+      octomap::point3d point(xy[0], xy[1], z_plane_height);
+      ocTree->updateNode(point, true);
+    }
+  }
+}
+
 /**
  * Shutdown
  */
@@ -201,6 +216,10 @@ static LaserOctomapper * _map3d;
 static void shutdown_module(int unused __attribute__((unused)))
 {
   fprintf(stderr, "shutting down!\n");
+
+  //fill in the floor
+  addZPlane(_map3d->ocTree, 0);
+
   _map3d->save_map(); //TODO make an option?
   _map3d->publish_map();
   bot_tictoc_print_stats(BOT_TICTOC_AVG);
