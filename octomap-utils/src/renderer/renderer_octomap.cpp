@@ -673,6 +673,9 @@ void MyOcTreeDrawer::drawCubes(GLfloat** cubeArray, unsigned int cubeArraySize, 
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer(4, GL_FLOAT, 0, cubeColorArray);
   }
+  else{
+    glColor4f(.1,.1,.1,.5);
+  }
 
   // top surfaces:
   glNormal3f(0.0f, 1.0f, 0.0f);
