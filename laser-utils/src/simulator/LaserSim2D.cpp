@@ -53,7 +53,6 @@ bool LaserSim2D::getMapBorderInstersection(const double P0[2], const double P1[2
 
 const bot_core_planar_lidar_t * LaserSim2D::simulate(BotTrans * curr_pose, int64_t utime)
 {
-  bot_tictoc("publishLaser");
   bool nearMapBorder = isNearMapBorder(curr_pose->trans_vec, laser_max_range);
 
   //do the ray tracing
