@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <ConciseArgs/ConciseArgs.hpp>
+#include <ConciseArgs>
 
 using namespace std;
 using namespace octomap;

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <lcmtypes/octomap_utils.h>
-#include <ConciseArgs/ConciseArgs.hpp>
+#include <ConciseArgs>
 
 using namespace std;
 using namespace octomap;
