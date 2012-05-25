@@ -238,10 +238,10 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, d
   }
 
   m_octree_grid_vis_initialized = false;
-  if (m_drawOcTreeGrid && octree.size() < 10 * 1e6) {
-    octree.getVoxels(m_grid_voxels, m_max_tree_depth - 1); // octree structure not drawn at lowest level
-    initOctreeGridVis();
-  }
+//  if (m_drawOcTreeGrid && octree.size() < 10 * 1e6) {
+//    octree.getVoxels(m_grid_voxels, m_max_tree_depth - 1); // octree structure not drawn at lowest level
+//    initOctreeGridVis();
+//  }
 
   // initialize visualization:
   generateCubes(occupiedThresVoxels, &m_occupiedThresArray, m_occupiedThresSize, &m_occupiedThresColorArray);
@@ -922,7 +922,7 @@ BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t 
 
   bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_OCC, 0, NULL);
   bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_FREE, 0, NULL);
-  bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_GRID, 0, NULL);
+//  bot_gtk_param_widget_add_booleans(self->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_SHOW_GRID, 0, NULL);
 
   bot_gtk_param_widget_add_int(self->pw, PARAM_TREE_DEPTH, BOT_GTK_PARAM_WIDGET_SPINBOX, 1, 16, 1, 16);
 
