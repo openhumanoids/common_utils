@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <lcm/lcm.h>
-#include <ConciseArgs/ConciseArgs.hpp>
+#include <ConciseArgs>
 #include <string>
 #include <map>
 using namespace std;
