@@ -10,7 +10,7 @@
 namespace eigen_utils {
 
 template<typename Derived>
-eigen_dense_t toLcmMsg(Eigen::DenseBase<Derived> & mat);
+eigen_dense_t toLcmMsg(const Eigen::DenseBase<Derived> & mat);
 
 template<typename Derived>
 typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg);

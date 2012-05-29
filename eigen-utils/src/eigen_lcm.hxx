@@ -27,7 +27,7 @@ EIGEN_LCM_MAKE_TYPENAME_TO_STRING(uint8_t);
 EIGEN_LCM_MAKE_TYPENAME_TO_STRING(bool);
 
 template<typename Derived>
-eigen_dense_t toLcmMsg(Eigen::DenseBase<Derived> & mat)
+eigen_dense_t toLcmMsg(const Eigen::DenseBase<Derived> & mat)
 {
   eigen_dense_t ret_msg; //make use of return value optimization?
   ret_msg.rows = mat.rows();
