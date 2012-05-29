@@ -1,0 +1,9 @@
+package lcm_utils;
+
+struct rpc_command_t
+{
+	int32_t seqno;
+	int32_t nonce;
+    int32_t data_sz;
+    byte data[data_sz];
+}

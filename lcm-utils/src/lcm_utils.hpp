@@ -76,12 +76,12 @@ LcmType readMsgFromFile(const std::string& logfileName)
     return msg;
   }
   const lcm::LogEvent *event = log.readNextEvent();
-  if (event ==NULL) {
+  if (event == NULL) {
     std::cerr << "ERROR: log is invalid.\n";
     return msg;
   }
   else if (event->channel != "SINGLEMSGLOG") {
-    std::cerr << "ERROR: channel of "<< event->channel << " doesn't match SINGLEMSGLOG\n";
+    std::cerr << "ERROR: channel of " << event->channel << " doesn't match SINGLEMSGLOG\n";
     return msg;
   }
   // Try to decode the message.
