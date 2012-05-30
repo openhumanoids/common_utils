@@ -3,7 +3,7 @@ pods_use_pkg_config_packages(lcm-utils-channel-changer lcm)
 pods_install_executables(lcm-utils-channel-changer)
 
 
-pods_install_headers(lcm_utils.hpp LcmMatlabRpc.hpp DESTINATION lcm_utils)
+pods_install_headers(lcm_utils.hpp DESTINATION lcm_utils)
 
 set(REQUIRED_LIBS lcm lcmtypes_lcm-utils)
 

@@ -1,19 +1,19 @@
 #ifndef LcmMatlabRpc_HPP_
 #define LcmMatlabRpc_HPP_
 #include <lcm/lcm-cpp.hpp>
-#include <lcmtypes/lcm_utils.hpp>
+#include <lcmtypes/eigen_utils.hpp>
 #include <Eigen/Dense>
 #include <bot_core/bot_core.h>
 #include <eigen_utils/eigen_lcm.hpp>
 
-namespace lcm_utils {
+namespace eigen_utils {
 
 class LcmMatlabRpc {
 public:
   lcm::LCM lcm;
   bool received_ack;
 
-  lcm_utils::matlab_rpc_return_t * ret_msg;
+  eigen_utils::matlab_rpc_return_t * ret_msg;
 
   int nonce;
 
@@ -34,20 +34,20 @@ public:
     lcm.unsubscribe(ack_sub);
   }
 
-  void handleReturn(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const lcm_utils::matlab_rpc_return_t* msg)
+  void handleReturn(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const eigen_utils::matlab_rpc_return_t* msg)
   {
     if (msg->nonce == nonce) {
       printf("received return!\n");
-      ret_msg = new lcm_utils::matlab_rpc_return_t(*msg);
+      ret_msg = new eigen_utils::matlab_rpc_return_t(*msg);
 
     }
 
     //send back and ack
-    lcm_utils::matlab_rpc_ack_t ack_msg;
+    eigen_utils::matlab_rpc_ack_t ack_msg;
     ack_msg.nonce = msg->nonce;
     lcm.publish(name + "_RET_ACK", &ack_msg);
   }
-  void handleAck(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const lcm_utils::matlab_rpc_ack_t* msg)
+  void handleAck(const lcm::ReceiveBuffer* rbuf, const std::string& chan, const eigen_utils::matlab_rpc_ack_t* msg)
   {
     if (msg->nonce == nonce) {
       printf("received ack!\n");
@@ -59,7 +59,7 @@ public:
       std::vector<Eigen::MatrixXd> &ret, int64_t timeout = -1)
   {
     std::string chan = name + "_CMD";
-    lcm_utils::matlab_rpc_command_t cmd;
+    eigen_utils::matlab_rpc_command_t cmd;
     nonce = rand();
     cmd.nonce = nonce;
     cmd.command = command;
@@ -101,5 +101,5 @@ public:
   }
 };
 
-} /* namespace lcm_utils */
+} /* namespace eigen_utils */
 #endif /* LCMRPC_HPP_ */

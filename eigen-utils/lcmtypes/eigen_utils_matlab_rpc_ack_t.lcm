@@ -1,4 +1,4 @@
-package lcm_utils;
+package eigen_utils;
 
 struct matlab_rpc_ack_t
 {

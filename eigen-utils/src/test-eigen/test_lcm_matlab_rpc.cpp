@@ -1,7 +1,7 @@
-#include "../LcmMatlabRpc.hpp"
+#include "../eigen_lcm_matlab_rpc.hpp"
 
 using namespace std;
-using namespace lcm_utils;
+using namespace eigen_utils;
 
 int main(int argc, char ** argv)
 {
