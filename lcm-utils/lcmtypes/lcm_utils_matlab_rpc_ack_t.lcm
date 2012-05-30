@@ -1,0 +1,6 @@
+package lcm_utils;
+
+struct matlab_rpc_ack_t
+{
+	int32_t nonce;
+}
