@@ -1,4 +1,5 @@
 #include "../eigen_lcm_matlab_rpc.hpp"
+#include <iostream>
 
 using namespace std;
 using namespace eigen_utils;
