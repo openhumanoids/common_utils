@@ -20,5 +20,5 @@ add_executable(eigen-test-file-io test_file_io.cpp)
 pods_use_pkg_config_packages(eigen-test-file-io eigen-utils)
 
 add_executable(eigen-test-lcm-matlab-rpc test_lcm_matlab_rpc.cpp)
-pods_use_pkg_config_packages(eigen-test-lcm-matlab-rpc bot2-core eigen3)
+pods_use_pkg_config_packages(eigen-test-lcm-matlab-rpc eigen-utils)
 
