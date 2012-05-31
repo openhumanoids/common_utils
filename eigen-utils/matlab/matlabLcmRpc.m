@@ -36,15 +36,16 @@ while true
     end
     
     try
-        cmd = lcm_utils.matlab_rpc_command_t(msg.data);
+        cmd = eigen_utils.matlab_rpc_command_t(msg.data);
     catch ME
-        fprintf('WARNING: could not decode msg on channel %s\n',msg.channel)
+        fprintf('WARNING: could not decode msg on channel %s\n',char(msg.channel))
+        continue;
     end
-    ack = lcm_utils.matlab_rpc_ack_t();
+    ack = eigen_utils.matlab_rpc_ack_t();
     ack.nonce = cmd.nonce;
     lc.publish([rpc_chan '_CMD_ACK'], ack);
     
-    ret = lcm_utils.matlab_rpc_return_t();
+    ret = eigen_utils.matlab_rpc_return_t();
     ret.nonce = cmd.nonce;
     ret.error_msg = '';
     
@@ -96,7 +97,7 @@ while true
                 break
             end
         end
-        ret_ack =lcm_utils.matlab_rpc_ack_t(msg.data);
+        ret_ack =eigen_utils.matlab_rpc_ack_t(msg.data);
         if (ret_ack.nonce == cmd.nonce)
             break;
         end

@@ -9,7 +9,7 @@ namespace eigen_utils {
 
 class LcmMatlabRpc {
 public:
-  LcmMatlabRpc(const std::string &_name = "MATLAB_LCM_RPC");
+  LcmMatlabRpc(const std::string &_name = "MATLAB_LCM_RPC", bool verbose=false);
   ~LcmMatlabRpc();
 
   //main function taking a variable number of input and output args
@@ -36,6 +36,7 @@ private:
   std::string name;
   lcm::Subscription * ret_sub;
   lcm::Subscription * ack_sub;
+  bool verbose;
 };
 
 } /* namespace eigen_utils */

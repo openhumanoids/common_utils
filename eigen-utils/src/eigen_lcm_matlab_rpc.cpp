@@ -6,8 +6,8 @@
 
 namespace eigen_utils {
 
-LcmMatlabRpc::LcmMatlabRpc(const std::string &_name) :
-    lcm(), ret_msg(NULL), received_ack(false), name(_name)
+LcmMatlabRpc::LcmMatlabRpc(const std::string &_name, bool _verbose) :
+    lcm(), ret_msg(NULL), received_ack(false), name(_name), verbose(_verbose)
 {
   ret_sub = lcm.subscribe(name + "_RETURN", &LcmMatlabRpc::handleReturn, this);
   ack_sub = lcm.subscribe(name + "_CMD_ACK", &LcmMatlabRpc::handleAck, this);
@@ -23,7 +23,8 @@ void LcmMatlabRpc::handleReturn(const lcm::ReceiveBuffer* rbuf, const std::strin
     const eigen_utils::matlab_rpc_return_t* msg)
 {
   if (msg->nonce == nonce) {
-    printf("received return!\n");
+    if (verbose)
+      fprintf(stderr, "received return!\n");
     ret_msg = new eigen_utils::matlab_rpc_return_t(*msg);
 
   }
@@ -37,7 +38,8 @@ void LcmMatlabRpc::handleAck(const lcm::ReceiveBuffer* rbuf, const std::string& 
     const eigen_utils::matlab_rpc_ack_t* msg)
 {
   if (msg->nonce == nonce) {
-    printf("received ack!\n");
+    if (verbose)
+      fprintf(stderr, "received ack!\n");
     received_ack = true;
   }
 }
@@ -57,12 +59,16 @@ int LcmMatlabRpc::run(const std::string & command, const std::vector<Eigen::Matr
   }
   cmd.numReturnVals = numReturnVals;
 
+  ret_msg = NULL;
+  received_ack = false;
+
   int64_t startTime = bot_timestamp_now();
   while (ret_msg == NULL) {
     if (!received_ack) {
-      printf("sending command\n");
+      if (verbose)
+        fprintf(stderr, "sending command\n");
       lcm.publish(chan, &cmd);
-      bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e3);
+      bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e6);
       continue;
     }
     else {
