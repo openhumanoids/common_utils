@@ -30,7 +30,7 @@
 #define PARAM_Z_RELATIVE "Relative Z"
 #define PARAM_ALPHA "Alpha"
 
-#define MAX_SCAN_MEMORY 5000
+#define MAX_SCAN_MEMORY 50000
 #define OLD_HISTORY_THRESHOLD 3000000 /* microseconds */
 #define MAX_SENSOR_RANGE_DEFAULT 30.0 /* meters */
 #define MIN_SENSOR_RANGE_DEFAULT 0.15 /* meters */

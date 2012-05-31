@@ -5,15 +5,14 @@ namespace eigen_utils {
 
 using namespace Eigen;
 
-
 std::ostream& operator<<(std::ostream& output, const RigidBodyState & state)
 {
-  output<< "angularVelocity: " << state.angularVelocity().transpose();
-  output<< ", velocity: " << state.velocity().transpose();
-  output<< ", chi: " << state.chi().transpose();
-  output<< ", position: " << state.position().transpose();
-  output<< ", acceleration: " << state.acceleration().transpose();
-  output<< ", RPY: " << state.getEulerAngles().transpose();
+  output << "angularVelocity: " << state.angularVelocity().transpose();
+  output << ", velocity: " << state.velocity().transpose();
+  output << ", chi: " << state.chi().transpose();
+  output << ", position: " << state.position().transpose();
+  output << ", acceleration: " << state.acceleration().transpose();
+  output << ", RPY: " << state.getEulerAngles().transpose();
   return output;
 }
 
@@ -64,6 +63,13 @@ Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers)
       * Eigen::AngleAxisd(eulers(0), Eigen::Vector3d::UnitX());
 
   return quat;
+}
+
+Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat)
+{
+  Eigen::Vector3d eulers = quat.toRotationMatrix().eulerAngles(2, 1, 0); //ypr
+  Eigen::Vector3d ret_eulers(eulers(2), eulers(1), eulers(0)); //rpy
+  return ret_eulers;
 }
 
 }

@@ -34,6 +34,8 @@ void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[
 
 Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers);
 
+Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat);
+
 const double g_val = 9.80665; //gravity
 const double rho_val = 1.2; //air density kg/m^3
 const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity vector
@@ -111,9 +113,7 @@ public:
    */
   Eigen::Vector3d getEulerAngles() const
   {
-    Eigen::Vector3d eulers = this->quat.toRotationMatrix().eulerAngles(2, 1, 0); //ypr
-    Eigen::Vector3d ret_eulers(eulers(2), eulers(1), eulers(0)); //rpy
-    return ret_eulers;
+    return eigen_utils::getEulerAngles(this->quat);
   }
 
   /**
