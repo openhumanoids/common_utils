@@ -76,21 +76,22 @@ void fitParticles(const Eigen::Matrix<scalarType, Ndim, Nsamples> & state_sample
     ,Eigen::Matrix<scalarType, Ndim, Ndim> & covariance)
 {
 
-  int num_samples = state_samples.cols();
-  int N = state_samples.rows();
-
   scalarType sum_weights = weights.sum();
   mean = state_samples * weights.matrix() / sum_weights;
 
-  Eigen::Matrix<scalarType, Ndim, 1> diff(N);
-  covariance.setZero(N, N);
-  for (int ii = 0; ii < num_samples; ii++)
+  Eigen::Matrix<scalarType, Ndim, 1> diff(Ndim);
+  covariance.setZero(Ndim, Ndim);
+  for (int ii = 0; ii < Nsamples; ii++)
   {
     diff = mean - state_samples.col(ii);
     covariance += diff * diff.transpose() * weights(ii);
   }
   covariance = covariance / sum_weights;
 }
+
+void fitParticles(const Eigen::MatrixXd & state_samples
+    , const Eigen::VectorXd & weights , Eigen::VectorXd & mean
+    ,Eigen::MatrixXd & covariance);
 
 }
 #endif

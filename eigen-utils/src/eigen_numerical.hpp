@@ -88,6 +88,34 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
   }
 }
 
+/**
+ * fits a hyperplane to weighted particles by computing mean and covariance and aligning normal vec with the minimum variance axis in covariance
+ *
+ * data: columnwise data points
+ * result_vec: orthoganol vector, scaled such that line satisfies result_vec.dot(y)=||result_vec||^2 for all points y on the line
+ * weights: vector of weights for the fitting
+ *
+ * returns the standard deviation along that axis
+ */
+double fitHyperplaneLeastSquares(const Eigen::MatrixXd & data, const Eigen::VectorXd & weights,
+    Eigen::VectorXd & result_vec);
+
+/**
+ * implements RANSAC for LS hyperplane fitting
+ *
+ * data: columnwise data points
+ * num_iterations: number of ransac iterations
+ * include_threshold: data point must lie within this distance of plane to be added to consensus set
+ * min_num_include: miminum number of data points to be included to be considered a candidate for best fit
+ *
+ * result_vec: orthoganol vector, scaled such that line satisfies result_vec.dot(y)=||result_vec||^2 for all points y on the line
+ * consensus_set: consensus_set(ind)==1 if data.col(ind) is included in best fit, 0 otherwise
+ * returns: standard dev of best fit
+ *
+ */
+double fitHyperPlaneRANSAC(const Eigen::MatrixXd & data, int num_iterations, double include_threshold,
+    int min_num_include, Eigen::VectorXd & result_vec, Eigen::VectorXi & consensus_set);
+
 }
 
 #endif
