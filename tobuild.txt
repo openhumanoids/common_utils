@@ -12,3 +12,4 @@ eigen-utils
 marshall-utils
 lcmgl-utils
 lcm-utils
+matlab-utils
