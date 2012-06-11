@@ -90,7 +90,7 @@ public:
   }
 
   RigidBodyState(const rigid_body_pose_t * pose) :
-      vec(basic_num_states)
+      vec(basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
     Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
@@ -105,7 +105,6 @@ public:
 
     eigen_utils::botDoubleToQuaternion(this->quat, pose->orientation);
 
-    this->utime = pose->utime;
   }
 
   /**
