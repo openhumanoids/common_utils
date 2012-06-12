@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <bot_core/bot_core.h>
+#include <lcmtypes/rigid_body/pose_t.hpp>
 #include <lcmtypes/rigid_body_pose_t.h>
 
 // Define isnan() function for OSX
@@ -124,13 +125,25 @@ public:
   }
 
   void getPose(rigid_body_pose_t * pose) const
-  {
-    Eigen::Map<Eigen::Vector3d>(pose->rotation_rate)  = this->angularVelocity();
-    Eigen::Map<Eigen::Vector3d>(pose->vel)= this->velocity();
-    Eigen::Map<Eigen::Vector3d>(pose->pos)= this->position();
-    Eigen::Map<Eigen::Vector3d>(pose->accel)= this->acceleration();
+      {
+    Eigen::Map<Eigen::Vector3d>(pose->rotation_rate) = this->angularVelocity();
+    Eigen::Map<Eigen::Vector3d>(pose->vel) = this->velocity();
+    Eigen::Map<Eigen::Vector3d>(pose->pos) = this->position();
+    Eigen::Map<Eigen::Vector3d>(pose->accel) = this->acceleration();
     eigen_utils::quaternionToBotDouble(pose->orientation, this->quat);
     pose->utime = this->utime;
+  }
+
+  rigid_body::pose_t getPose() const
+  {
+    rigid_body::pose_t pose;
+    Eigen::Map<Eigen::Vector3d>(pose.rotation_rate) = this->angularVelocity();
+    Eigen::Map<Eigen::Vector3d>(pose.vel) = this->velocity();
+    Eigen::Map<Eigen::Vector3d>(pose.pos) = this->position();
+    Eigen::Map<Eigen::Vector3d>(pose.accel) = this->acceleration();
+    eigen_utils::quaternionToBotDouble(pose.orientation, this->quat);
+    pose.utime = this->utime;
+    return pose;
   }
 
   typedef Eigen::Block<Eigen::VectorXd, 3, 1> Block3Element;
