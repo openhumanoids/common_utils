@@ -70,25 +70,6 @@ inline scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen
   return exp(exponent) / (pow(2 * M_PI, ((scalarType) N) / 2.0) * pow(sigma.determinant(), 0.5));
 }
 
-template<typename scalarType, int Ndim, int Nsamples>
-void fitParticles(const Eigen::Matrix<scalarType, Ndim, Nsamples> & state_samples
-    , const Eigen::Array<scalarType, Ndim, 1>& weights , Eigen::Matrix<scalarType, Ndim, 1> & mean
-    ,Eigen::Matrix<scalarType, Ndim, Ndim> & covariance)
-{
-
-  scalarType sum_weights = weights.sum();
-  mean = state_samples * weights.matrix() / sum_weights;
-
-  Eigen::Matrix<scalarType, Ndim, 1> diff(Ndim);
-  covariance.setZero(Ndim, Ndim);
-  for (int ii = 0; ii < Nsamples; ii++)
-  {
-    diff = mean - state_samples.col(ii);
-    covariance += diff * diff.transpose() * weights(ii);
-  }
-  covariance = covariance / sum_weights;
-}
-
 void fitParticles(const Eigen::MatrixXd & state_samples
     , const Eigen::VectorXd & weights , Eigen::VectorXd & mean
     ,Eigen::MatrixXd & covariance);
