@@ -45,7 +45,7 @@ void LcmMatlabRpc::handleAck(const lcm::ReceiveBuffer* rbuf, const std::string& 
     received_ack = true;
   }
   else if (verbose) {
-    fprintf(stderr, "received duplicate? ack %d\n",msg->nonce);
+    fprintf(stderr, "received duplicate? ack %d\n", msg->nonce);
   }
 }
 
@@ -68,17 +68,16 @@ int LcmMatlabRpc::run(const std::string & command, const std::vector<Eigen::Matr
   received_ack = false;
 
   int64_t startTime = bot_timestamp_now();
+  int64_t lastSendTime = 0;
   while (ret_msg == NULL) {
-    if (!received_ack) {
+    if (!received_ack && bot_timestamp_now() - lastSendTime > 1e6) {
       if (verbose)
-        fprintf(stderr, "sending command %s, %d\n", cmd.command.c_str(),cmd.nonce);
+        fprintf(stderr, "sending command %s, %d\n", cmd.command.c_str(), cmd.nonce);
       lcm.publish(chan, &cmd);
-      bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e6);
-      continue;
+      lastSendTime = bot_timestamp_now();
     }
-    else {
-      bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e6);
-    }
+
+    bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e5);
     if (timeout > 0 && bot_timestamp_now() - startTime > timeout)
       break;
   }

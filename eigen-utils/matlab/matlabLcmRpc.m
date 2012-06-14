@@ -25,7 +25,7 @@ ret_ack_aggregator = lcm.lcm.MessageAggregator();
 lc.subscribe([rpc_chan '_CMD'], cmd_aggregator);
 lc.subscribe([rpc_chan '_RET_ACK'], ret_ack_aggregator);
 
-prev_msg = [];
+prev_cmd = [];
 while true
     fprintf('waiting for cmd\n')
     while true
@@ -46,7 +46,7 @@ while true
     ack.nonce = cmd.nonce;
     lc.publish([rpc_chan '_CMD_ACK'], ack);
     
-    if ~isempty(prev_msg) && prev_cmd.nonce==cmd.nonce
+    if ~isempty(prev_cmd) && prev_cmd.nonce==cmd.nonce
         fprintf('received duplicate command: %s %d!\n',char(cmd.command), cmd.nonce);
         continue;
     end
@@ -87,7 +87,7 @@ while true
             ret.returnVals(i) = edmsg;
         end
         ret.return_status = 1;
-        printmsg = sprintf('rpc command: "%s" succeeded!',char(cmd.command));
+        printmsg = sprintf('rpc command: "%s" %d succeeded!',char(cmd.command), cmd.nonce);
     catch ME
         ret.return_status = 0;
         ret.error_msg = ME.message;
