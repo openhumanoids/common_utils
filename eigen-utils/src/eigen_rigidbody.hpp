@@ -37,6 +37,11 @@ Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers);
 
 Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat);
 
+Eigen::Affine3d getTransTwistUnscaled(const Eigen::Vector3d & unscaledAngularVelocity,
+    const Eigen::Vector3d & unscailedLinearVelocity);
+Eigen::Affine3d getTransTwist(const Eigen::Vector3d & angularVelocity, const Eigen::Vector3d & linearVelocity,
+    double time);
+
 const double g_val = 9.80665; //gravity
 const double rho_val = 1.2; //air density kg/m^3
 const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity vector

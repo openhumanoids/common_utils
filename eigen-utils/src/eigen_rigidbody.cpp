@@ -72,5 +72,30 @@ Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat)
   return ret_eulers;
 }
 
+Eigen::Affine3d getTransTwistUnscaled(const Eigen::Vector3d & unscaledAngularVelocity,
+    const Eigen::Vector3d & unscailedLinearVelocity)
+{
+  double t = unscaledAngularVelocity.norm();
+  Affine3d trans;
+  if (t < 0.000000001) {
+    trans = Translation3d(unscailedLinearVelocity);
+  }
+  else {
+    Vector3d omega = unscaledAngularVelocity / t;
+    Vector3d v = unscailedLinearVelocity / t;
+
+    trans.linear() = AngleAxisd(t, unscaledAngularVelocity.normalized());
+    trans.translation() = (Matrix3d::Identity() - trans.rotation()) * omega.cross(v) + omega.dot(v) * omega * t;
+  }
+  return trans;
+}
+
+Eigen::Affine3d getTransTwist(const Eigen::Vector3d & angularVelocity, const Eigen::Vector3d & linearVelocity,
+    double time)
+{
+  return getTransTwistUnscaled(time * angularVelocity, time * linearVelocity);
+}
+
+
 }
 

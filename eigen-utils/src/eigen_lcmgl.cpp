@@ -10,6 +10,28 @@ void bot_lcmgl_vertex3d(bot_lcmgl_t * lcmgl, Eigen::Vector3d & vec)
   bot_lcmgl_vertex3d(lcmgl, vec(0), vec(1), vec(2));
 }
 
+void bot_lcmgl_draw_vector(bot_lcmgl_t * lcmgl, const Eigen::Vector3d & vec, const Eigen::Vector3d & pos,
+    double head_width,
+    double head_length, double body_width)
+{
+  Eigen::Quaterniond toVectorX;
+  toVectorX.setFromTwoVectors(Eigen::Vector3d::UnitX(), vec);
+  Eigen::AngleAxisd ang_ax(toVectorX);
+
+  double length = vec.norm();
+  lcmglPushMatrix();
+  lcmglTranslated(pos(0), pos(1), pos(2));
+  lcmglRotated(bot_to_degrees(ang_ax.angle()), ang_ax.axis()(0), ang_ax.axis()(1), ang_ax.axis()(2));
+  lcmglTranslated(length / 2, 0, 0);
+  //  bot_gl_draw_arrow_2d(vec_mag * scale, head_width, head_length, body_width, fill);
+
+  if (head_length > length)
+    head_length = length;
+
+  bot_lcmgl_draw_arrow_3d(lcmgl, length, head_width, head_length, body_width);
+  lcmglPopMatrix();
+}
+
 void bot_lcmgl_cov_ellipse(bot_lcmgl_t * lcmgl, const Eigen::Matrix2d & cov, const Eigen::Vector3d & mu3d,
     double scale, bool fill)
 {
@@ -143,11 +165,19 @@ void bot_lcmgl_draw_axes(bot_lcmgl_t * lcmgl, const Eigen::Quaterniond & orienta
   bot_lcmgl_pop_matrix(lcmgl);
 }
 
+void bot_lcmgl_draw_axes(bot_lcmgl_t * lcmgl, const Eigen::Affine3d & trans, double scale)
+{
+  lcmglPushMatrix();
+  lcmglMultMatrixd(trans.data());
+  lcmglScalef(scale, scale, scale);
+  bot_lcmgl_draw_axes(lcmgl);
+  lcmglPopMatrix();
+}
+
 void bot_lcmgl_transform_frame(bot_lcmgl_t * lcmgl, const Eigen::Vector3d & xyt)
 {
   bot_lcmgl_translated(lcmgl, xyt(0), xyt(1), 0);
   bot_lcmgl_rotated(lcmgl, bot_to_degrees(xyt(2)), 0, 0, 1);
 }
-
 
 }

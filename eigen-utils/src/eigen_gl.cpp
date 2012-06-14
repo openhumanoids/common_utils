@@ -48,6 +48,7 @@ void bot_gl_draw_vector(const Eigen::Vector3d & vec, const Vector3d & pos, doubl
 
   double length = vec.norm();
   glPushMatrix();
+  glTranslated(pos(0), pos(1), pos(2));
   glRotated(RAD2DEG(ang_ax.angle()), ang_ax.axis()(0), ang_ax.axis()(1), ang_ax.axis()(2));
   glTranslated(length / 2, 0, 0);
   //  bot_gl_draw_arrow_2d(vec_mag * scale, head_width, head_length, body_width, fill);
@@ -119,7 +120,6 @@ void bot_gl_cov_ellipse_3d(const Eigen::Matrix3d & pos_cov, const Eigen::Vector3
     eig_vecs.col(2) = eig_vecs.col(0).cross(eig_vecs.col(1));
     Transform<double, 3, Affine> trans(Transform<double, 3, Affine>::Identity());
     trans.linear() = eig_vecs;
-
 
     glPushMatrix();
     glTranslated(mu(0), mu(1), mu(2));
