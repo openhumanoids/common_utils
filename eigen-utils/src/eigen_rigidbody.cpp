@@ -84,7 +84,7 @@ Eigen::Affine3d getTransTwistUnscaled(const Eigen::Vector3d & unscaledAngularVel
     Vector3d omega = unscaledAngularVelocity / t;
     Vector3d v = unscailedLinearVelocity / t;
 
-    trans.linear() = AngleAxisd(t, unscaledAngularVelocity.normalized());
+    trans = AngleAxisd(t, unscaledAngularVelocity.normalized());
     trans.translation() = (Matrix3d::Identity() - trans.rotation()) * omega.cross(v) + omega.dot(v) * omega * t;
   }
   return trans;
