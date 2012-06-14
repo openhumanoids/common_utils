@@ -26,10 +26,12 @@ void LcmMatlabRpc::handleReturn(const lcm::ReceiveBuffer* rbuf, const std::strin
     if (verbose)
       fprintf(stderr, "received return!\n");
     ret_msg = new eigen_utils::matlab_rpc_return_t(*msg);
-
+  }
+  else if (verbose) {
+    fprintf(stderr, "received duplicate? return %d\n", msg->nonce);
   }
 
-  //send back and ack
+  //send back an ack
   eigen_utils::matlab_rpc_ack_t ack_msg;
   ack_msg.nonce = msg->nonce;
   lcm.publish(name + "_RET_ACK", &ack_msg);
@@ -41,6 +43,9 @@ void LcmMatlabRpc::handleAck(const lcm::ReceiveBuffer* rbuf, const std::string& 
     if (verbose)
       fprintf(stderr, "received ack!\n");
     received_ack = true;
+  }
+  else if (verbose) {
+    fprintf(stderr, "received duplicate? ack %d\n",msg->nonce);
   }
 }
 
@@ -66,7 +71,7 @@ int LcmMatlabRpc::run(const std::string & command, const std::vector<Eigen::Matr
   while (ret_msg == NULL) {
     if (!received_ack) {
       if (verbose)
-        fprintf(stderr, "sending command\n");
+        fprintf(stderr, "sending command %s, %d\n", cmd.command.c_str(),cmd.nonce);
       lcm.publish(chan, &cmd);
       bot_lcm_handle_or_timeout(lcm.getUnderlyingLCM(), 1e6);
       continue;

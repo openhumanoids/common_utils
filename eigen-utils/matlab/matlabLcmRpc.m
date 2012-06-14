@@ -25,6 +25,7 @@ ret_ack_aggregator = lcm.lcm.MessageAggregator();
 lc.subscribe([rpc_chan '_CMD'], cmd_aggregator);
 lc.subscribe([rpc_chan '_RET_ACK'], ret_ack_aggregator);
 
+prev_msg = [];
 while true
     fprintf('waiting for cmd\n')
     while true
@@ -45,6 +46,12 @@ while true
     ack.nonce = cmd.nonce;
     lc.publish([rpc_chan '_CMD_ACK'], ack);
     
+    if ~isempty(prev_msg) && prev_cmd.nonce==cmd.nonce
+        fprintf('received duplicate command: %s %d!\n',char(cmd.command), cmd.nonce);
+        continue;
+    end
+    prev_cmd = cmd;
+     
     ret = eigen_utils.matlab_rpc_return_t();
     ret.nonce = cmd.nonce;
     ret.error_msg = '';
@@ -57,7 +64,7 @@ while true
             cmdArgs{i} = arg;
         end
         if ~isempty(extra_data)
-           cmdArgs{end+1} = extra_data; 
+            cmdArgs{end+1} = extra_data;
         end
         if cmd.numReturnVals<0
             nrets = nargout(char(cmd.command));
@@ -90,13 +97,13 @@ while true
     disp(printmsg);
     while true
         lc.publish([rpc_chan '_RETURN'],ret)
-        while true
-            millis_to_wait = 2;
-            msg = ret_ack_aggregator.getNextMessage(millis_to_wait);
-            if ~isempty(msg)
-                break
-            end
+        
+        millis_to_wait = 100;
+        msg = ret_ack_aggregator.getNextMessage(millis_to_wait);
+        if isempty(msg)
+            continue;
         end
+        
         ret_ack =eigen_utils.matlab_rpc_ack_t(msg.data);
         if (ret_ack.nonce == cmd.nonce)
             break;
