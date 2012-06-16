@@ -3,6 +3,7 @@
 
 #include <lcm/lcm-cpp.hpp>
 #include <iostream>
+#include <string.h>
 
 namespace lcm_utils {
 
@@ -89,6 +90,65 @@ LcmType readMsgFromFile(const std::string& logfileName)
     std::cerr << "ERRPR: Could not decode msg... incorrect template arg?\n";
   }
   return msg;
+}
+
+class logEventData {
+public:
+  lcm::LogEvent event;
+
+  logEventData(const lcm::LogEvent & _event) :
+      event(_event)
+  {
+    event.data = malloc(_event.datalen);
+    memcpy(event.data, event.data, event.datalen);
+  }
+
+  logEventData& operator=(const logEventData& rhs)
+  {
+    if (event.data != NULL) {
+      free(event.data);
+    }
+    event = rhs.event;
+    event.data = malloc(event.datalen);
+    memcpy(event.data, rhs.event.data, event.datalen);
+    return *this;
+  }
+
+  logEventData()
+  {
+    event.data = NULL;
+  }
+
+  logEventData(const logEventData & other)
+  {
+    event = other.event;
+    event.data = malloc(event.datalen);
+    memcpy(event.data, other.event.data, event.datalen);
+  }
+
+  ~logEventData()
+  {
+    if (event.data != NULL)
+      free(event.data);
+  }
+
+  lcm::LogEvent & getOr()
+  {
+    return event;
+  }
+};
+
+template<typename LcmType>
+logEventData encodeToLogEventData(const std::string & channel, int64_t utime, const LcmType * msg)
+{
+  logEventData event_data;
+  event_data.event.datalen = msg->getEncodedSize();
+  event_data.event.channel = channel;
+  event_data.event.timestamp = utime;
+  event_data.event.eventnum = 0;
+  event_data.event.data = malloc(event_data.event.datalen);
+  msg->encode(event_data.event.data, 0, event_data.event.datalen);
+  return event_data;
 }
 
 }
