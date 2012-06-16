@@ -100,7 +100,7 @@ public:
       event(_event)
   {
     event.data = malloc(_event.datalen);
-    memcpy(event.data, event.data, event.datalen);
+    memcpy(event.data, _event.data, event.datalen);
   }
 
   logEventData& operator=(const logEventData& rhs)
