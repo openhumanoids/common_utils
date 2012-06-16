@@ -49,7 +49,7 @@ int main(int argc, char** argv)
       list<logEventData>::iterator event_it;
       for (event_it = eventList.begin(); event_it != eventList.end(); event_it++) {
         event_it->event.timestamp = pose_utime;
-        out_log.writeEvent(&event_it->getOr());
+        out_log.writeEvent(&event_it->event);
       }
       eventList.clear();
     }

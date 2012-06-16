@@ -131,11 +131,6 @@ public:
     if (event.data != NULL)
       free(event.data);
   }
-
-  lcm::LogEvent & getOr()
-  {
-    return event;
-  }
 };
 
 template<typename LcmType>
