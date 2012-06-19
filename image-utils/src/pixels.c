@@ -169,6 +169,21 @@ pixel_convert_8u_gray_to_64f_gray (double * dest, int dstride,
 }
 
 int
+pixel_convert_8u_gray_to_32f_gray (float * dest, int dstride,
+        int dwidth, int dheight, const uint8_t * src, int sstride)
+{
+    int i, j;
+    for( i=0; i<dheight; i++ ) {
+        float *drow = (float*)( (uint8_t*)dest + i * dstride );
+        const uint8_t *srow = src + i * sstride;
+        for( j=0; j<dwidth; j++ ) {
+            drow[j] = srow[j];
+        }
+    }
+    return 0;
+}
+
+int
 pixel_convert_8u_gray_to_8u_RGBA (uint8_t * dest, int dstride,
         int dwidth, int dheight, const uint8_t * src, int sstride)
 {

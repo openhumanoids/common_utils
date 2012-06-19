@@ -96,6 +96,28 @@ int pixel_convert_8u_gray_to_64f_gray (double * dest, int dstride,
         int dwidth, int dheight, const uint8_t * src, int sstride);
 
 /**
+ * pixel_convert_8u_gray_to_32f_gray:
+ *
+ * Converts an image composed of 8-bit unsigned pixels to an image composed
+ * of float-precision pixels.  Pixel values are _not_ rescaled to [0,1].
+ * This function works on multiple-channel images, as long as the width
+ * and height are modified accordingly.
+ *
+ * @dest: The destination buffer pre-allocated by the caller.
+ * @dstride: Number of bytes between the start of each image row in the
+ *      destination buffer.
+ * @dwidth: Width of the destination image in pixels.
+ * @dheight: Height of the destination image in pixels.
+ * @src: The source image.
+ * @sstride: Number of bytes between the start of each image row in the
+ *      source buffer.
+ */
+
+int
+pixel_convert_8u_gray_to_32f_gray (float * dest, int dstride,
+                                   int dwidth, int dheight, const uint8_t * src, int sstride);
+
+/**
  * pixel_convert_8u_gray_to_8u_RGB:
  *
  * Converts a grayscale image composed of 8-bit unsigned pixels to an
