@@ -58,3 +58,19 @@ typename Derived::PlainObject fromLcmMsg(const eigen_utils::eigen_dense_t * msg)
   return ret;
 }
 
+template<typename Derived>
+eigen_matrixxd_t toMatrixXdLcmMsg(const Eigen::DenseBase<Derived> & mat)
+{
+  eigen_matrixxd_t ret_msg;
+  ret_msg.rows = mat.rows();
+  ret_msg.cols = mat.cols();
+  ret_msg.num_data = ret_msg.rows * ret_msg.cols;
+
+  ret_msg.data.resize(ret_msg.num_data);
+  //ugly hack to treat the vector as a C-style array
+  typename Derived::Scalar* dataP = (typename Derived::Scalar*) &ret_msg.data[0];
+  //let eigen do the copying :-)
+  Eigen::Map<typename Derived::PlainObject>(dataP, ret_msg.rows, ret_msg.cols) = mat;
+  return ret_msg;
+}
+
