@@ -9,6 +9,7 @@
 #define LASER_MAX_SENSOR_RANGE_DEFAULT 30.0 /* meters */
 #define LASER_MIN_SENSOR_RANGE_DEFAULT 0.15 /* meters */
 #define LASER_FREQUENCY_DEFAULT        40   /* meters */
+#define LASER_MIRROR_DISTANCE          .085 /* meters */
 
 Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const char * laser_name, int project_height)
 {
@@ -164,15 +165,15 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);
     }
     else if (projector->project_height && projector->heightDownRegion[0] <= i && i <= projector->heightDownRegion[1]) {
-      sensor_xyz[0] = 0;
-      sensor_xyz[1] = 0;
-      sensor_xyz[2] = -range;
+      sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
+      sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
+      sensor_xyz[2] = -range + LASER_MIRROR_DISTANCE;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_down);
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
-      sensor_xyz[0] = 0;
-      sensor_xyz[1] = 0;
-      sensor_xyz[2] = -range; //TODO: HACK to use the "up region" as extra down beams
+      sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
+      sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
+      sensor_xyz[2] = -range + LASER_MIRROR_DISTANCE; //TODO: HACK to use the "up region" as extra down beams
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else {
