@@ -20,8 +20,6 @@ inline void randn_identity(Eigen::Matrix<scalarType, N, 1> & vec)
   }
 }
 
-
-
 template<typename scalarType, int N>
 inline Eigen::Matrix<scalarType, N, 1> randn_chol(const Eigen::Matrix<scalarType, N, N> & chol_decomp_cov)
 {
@@ -41,7 +39,8 @@ inline Eigen::Matrix<scalarType, N, 1> randn(const Eigen::Matrix<scalarType, N, 
  * unnormalized log likelihood
  */
 template<typename scalarType, int N>
-inline scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
+inline scalarType loglike_unnormalized(const Eigen::Matrix<scalarType, N, 1> & x
+    , const Eigen::Matrix<scalarType, N, 1> & mu
     , const Eigen::Matrix<scalarType, N, N> & sigma)
 {
   Eigen::Matrix<scalarType, N, 1> diff = mu - x;
@@ -59,6 +58,14 @@ inline scalarType loglike_information_unnormalized(const Eigen::Matrix<scalarTyp
   return -0.5 * diff.transpose() * sigma_inv * diff;
 }
 
+template<typename DerivedX, typename DerivedMU, typename DerivedSigma>
+double loglike_normalized(const Eigen::MatrixBase<DerivedX> & x, const Eigen::MatrixBase<DerivedMU> & mu,
+    const Eigen::MatrixBase<DerivedSigma> & sigma)
+{
+  Eigen::VectorXd diff = mu - x;
+  return -log(sigma.determinant()) - diff.transpose() * sigma.ldlt().solve(diff);
+}
+
 template<typename scalarType, int N>
 inline scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen::Matrix<scalarType, N, 1> & mu
     , const Eigen::Matrix<scalarType, N, N> & sigma)
@@ -71,8 +78,8 @@ inline scalarType normpdf(const Eigen::Matrix<scalarType, N, 1> & x, const Eigen
 }
 
 void fitParticles(const Eigen::MatrixXd & state_samples
-    , const Eigen::VectorXd & weights , Eigen::VectorXd & mean
-    ,Eigen::MatrixXd & covariance);
+    , const Eigen::VectorXd & weights, Eigen::VectorXd & mean
+    , Eigen::MatrixXd & covariance);
 
 }
 #endif
