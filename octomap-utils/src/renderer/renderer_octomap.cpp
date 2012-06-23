@@ -932,10 +932,10 @@ BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t 
       self->octd->m_zMin - 2), round(self->octd->m_zMax + 5), .5, round(self->octd->m_zMax));
 
   bot_gtk_param_widget_add_double(self->pw, PARAM_Z_MIN, BOT_GTK_PARAM_WIDGET_SPINBOX,
-      round(self->octd->m_zMin - 5), round(self->octd->m_zMax + 2), .5, round(self->octd->m_zMin));
+      round(self->octd->m_zMin - 5), round(self->octd->m_zMax + 2), .05, round(self->octd->m_zMin));
 
   bot_gtk_param_widget_add_double(self->pw, PARAM_Z_MAX, BOT_GTK_PARAM_WIDGET_SPINBOX,
-      round(self->octd->m_zMin - 2), round(self->octd->m_zMax + 5), .5, round(self->octd->m_zMax));
+      round(self->octd->m_zMin - 2), round(self->octd->m_zMax + 5), .05, round(self->octd->m_zMax));
 
   GtkWidget *find_button = gtk_button_new_with_label("Find");
   gtk_box_pack_start(GTK_BOX(renderer->widget), find_button, FALSE, FALSE, 0);
