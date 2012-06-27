@@ -46,6 +46,12 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
     self->publish_map();
   }
 
+  static int num_laser_processed = 0;
+
+  if (num_laser_processed % 1000 == 0)
+    fprintf(stderr, "processed %d laser scans\n", num_laser_processed);
+  num_laser_processed++;
+
 }
 
 void LaserOctomapper::addProjectedScan(laser_projected_scan * lscan)
@@ -62,12 +68,14 @@ LaserOctomapper::LaserOctomapper(int argc, char ** argv) :
   outFname = "octomap.bt";
   resolution = .1;
   addFloor = false;
+  rayTracing = false;
   ConciseArgs opt(argc, argv);
   opt.add(resolution, "r", "resolution");
   opt.add(addFloor, "f", "floor");
   opt.add(logFName, "l", "log_name");
   opt.add(outFname, "o", "out_name");
   opt.add(paramName, "p", "param_file");
+  opt.add(rayTracing, "t", "ray_trace");
   opt.parse();
 
   lcm_pub = bot_lcm_get_global(NULL);
@@ -172,14 +180,21 @@ void LaserOctomapper::processScansInQueue()
         if (lscan->point_status[i] >= laser_min_range)
           continue;
         else if (lscan->point_status[i] == laser_max_range) { //maxrange
-          //          octomap::point3d endpoint(lscan->points[i].x, lscan->points[i].y, lscan->points[i].z);
-          //    ocTree->insertRay(origin, endpoint, lscan->projector->max_range-10);
-          //TODO:
+          if (rayTracing) {
+//            octomap::point3d endpoint(lscan->points[i].x, lscan->points[i].y, lscan->points[i].z);
+//            ocTree->insertRay(origin, endpoint, lscan->projector->max_range / 2.0);
+          }
         }
         else {
           octomap::point3d endpoint(lscan->points[i].x, lscan->points[i].y, lscan->points[i].z);
-          ocTree->updateNode(endpoint, true); // integrate 'occupied' measurement
-          //          ocTree->insertRay(origin, endpoint, lscan->projector->max_range);
+          if (rayTracing) {
+            ocTree->insertRay(origin, endpoint, lscan->projector->max_range);
+            ocTree->updateNode(endpoint, true); // integrate 'occupied' measurement //fixme double counting hit according to docs
+          }
+          else {
+            ocTree->updateNode(endpoint, true); // integrate 'occupied' measurement
+          }
+
         }
 
       }
@@ -193,7 +208,6 @@ void LaserOctomapper::processScansInQueue()
   }
   bot_tictoc("addLaser");
 }
-
 
 void addZPlane(octomap::OcTree * ocTree, double z_plane_height)
 {
