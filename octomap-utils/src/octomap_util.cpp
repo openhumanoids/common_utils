@@ -101,14 +101,16 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
   //compute the size of the gaussian kernel assuming max likelihood of 255, and min of 32
   double det_var = pow(blurVar, 3); //covariance is diagonal
   double normalizer = pow(2 * M_PI, -3 / 2) * pow(det_var, -1 / 2);
-  int sz = 0;
-  float val = 1;
-  while (val > .1) {
-    sz++;
-    double d = sz * res;
-    val = normalizer * exp(-.5 * (d * d + d * d + d * d) / blurVar);
-  }
-  int kernel_size = 2 * sz;
+//  int sz = 0;
+//  float val = 1;
+//  while (val > .1) {
+//    sz++;
+//    double d = sz * res;
+//    val = normalizer * exp(-.5 * (d * d + d * d + d * d) / blurVar);
+//  }
+//  int kernel_size = 2 * sz;
+
+  int kernel_size = 2 * blurSigma / res;
 
   printf("kernel size is %d\n", kernel_size);
 
