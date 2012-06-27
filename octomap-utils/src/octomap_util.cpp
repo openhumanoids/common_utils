@@ -89,29 +89,6 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   return voxMap;
 }
 
-double evaluateLaserLogLikelihood(octomap::OcTree *oc, const laser_projected_scan * lscan, const BotTrans * trans,
-    double minNegLogLike)
-{
-
-  double logLike = 0;
-  for (int i = 0; i < lscan->npoints; i++) {
-    if (lscan->point_status[i] > laser_valid_projection)
-      continue;
-    double proj_xyz[3];
-    bot_trans_apply_vec(trans, point3d_as_array(&lscan->points[i]), proj_xyz);
-    logLike += getOctomapLogLikelihood(oc, proj_xyz);
-  }
-  double MAX_LOG_LIKE = -minNegLogLike * (double) lscan->numValidPoints;
-  double MIN_LOG_LIKE = LOGLIKE_HITS_EMPTY * (double) lscan->numValidPoints;
-  double percent_hit = (logLike - MIN_LOG_LIKE) / (MAX_LOG_LIKE - MIN_LOG_LIKE);
-
-  double abes_magic_exponent = 2.0;
-  double abe_hack = pow(percent_hit, abes_magic_exponent);
-
-  return log(abe_hack);
-
-  return logLike;
-}
 
 //TODO: add verbose flag/disable printing?
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double *minNegLogLike)
@@ -191,6 +168,12 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
     count++;
 
     point3d center = it.getCoordinate();
+    ocTree->search(it.getKey());
+    if (!ocTree->isNodeOccupied(ocTree->search(it.getKey()))) {
+//      fprintf(stderr, "skipping unoccupied node at %f, %f, %f\n", it.getCoordinate().x(),
+//          it.getCoordinate().y(), it.getCoordinate().z());
+      continue;
+    }
     for (int i = 0; i < blurKernel->num_cells; i++) {
       OcTreeKey key;
       if (!ocTree_blurred->genKey(center + indexTable->data[i], key)) {
