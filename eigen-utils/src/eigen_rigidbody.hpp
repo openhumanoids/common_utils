@@ -29,6 +29,8 @@ Eigen::Matrix3d skewHat(const Eigen::Vector3d & vec);
  */
 Eigen::Vector3d subtractQuats(const Eigen::Quaterniond & quat1, const Eigen::Quaterniond & quat2);
 
+Eigen::Vector3d subtractRotations(const Eigen::Matrix3d & rot1, const Eigen::Matrix3d & rot2);
+
 void quaternionToBotDouble(double bot_quat[4], const Eigen::Quaterniond & eig_quat);
 
 void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[4]);

@@ -40,6 +40,14 @@ Eigen::Vector3d subtractQuats(const Eigen::Quaterniond & quat1, const Eigen::Qua
   return angle_axis_resid.axis() * angle;
 }
 
+Eigen::Vector3d subtractRotations(const Eigen::Matrix3d & rot1, const Eigen::Matrix3d & rot2)
+{
+  Eigen::AngleAxisd angle_axis_resid = Eigen::AngleAxisd(rot2.inverse() * rot1);
+  double angle = angle_axis_resid.angle();
+  angle = bot_mod2pi(angle);
+  return angle_axis_resid.axis() * angle;
+}
+
 void quaternionToBotDouble(double bot_quat[4], const Eigen::Quaterniond & eig_quat)
 {
   bot_quat[0] = eig_quat.coeffs()(3);
