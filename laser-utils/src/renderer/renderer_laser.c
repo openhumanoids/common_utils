@@ -21,6 +21,7 @@
 
 #define RENDERER_NAME "Laser"
 #define PARAM_SCAN_MEMORY "Scan Memory"
+#define PARAM_MAX_BUFFER_SIZE "Max Buffer Size"
 #define PARAM_COLOR_MODE "Color Mode"
 #define PARAM_Z_BUFFER "Z Buffer"
 #define PARAM_BIG_POINTS "Big Points"
@@ -94,6 +95,7 @@ typedef struct _RendererLaser {
   /* user parameters */
   BotGtkParamWidget *pw;
   int param_scan_memory;
+  int param_max_buffer_size;
   color_mode_t param_color_mode;
   gboolean param_z_buffer;
   gboolean param_big_points;
@@ -360,7 +362,7 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
       lchan->color[2] = color[2];
     }
 
-    lchan->scans = bot_ptr_circular_new(MAX_SCAN_MEMORY, laser_scan_destroy, NULL);
+    lchan->scans = bot_ptr_circular_new(self->param_max_buffer_size, laser_scan_destroy, NULL);
     g_assert(lchan->scans);
 
     /* add laser channel to hash table and array */
@@ -379,6 +381,11 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
       bot_frames_get_root_name(self->bot_frames));
   if (lscan == NULL)
     return; //probably didn't have a pose message yet...
+  
+  if(lchan->scans->capacity != self->param_max_buffer_size){
+      bot_ptr_circular_resize(lchan->scans, self->param_max_buffer_size);
+  }
+  
   if (bot_ptr_circular_size(lchan->scans) > 0) {
     laser_projected_scan *last_scan = bot_ptr_circular_index(lchan->scans, 0);
 
@@ -510,6 +517,7 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
   self->param_max_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MAX_DRAW_Z);
   self->param_min_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MIN_DRAW_Z);
   self->param_alpha = bot_gtk_param_widget_get_double(self->pw, PARAM_ALPHA);
+  self->param_max_buffer_size = bot_gtk_param_widget_get_int(self->pw, PARAM_MAX_BUFFER_SIZE);
 
   for (int i = 0; i < self->channels->len; i++) {
     laser_channel *lchan = g_ptr_array_index(self->channels, i);
@@ -564,6 +572,7 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
 
   self->param_scan_memory = 50;
   self->param_color_mode = COLOR_MODE_LASER;
+  self->param_max_buffer_size = MAX_SCAN_MEMORY;
   self->param_z_buffer = FALSE;
   self->param_big_points = FALSE;
   self->param_spacial_decimate = FALSE;
@@ -572,6 +581,7 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
   self->param_max_draw_z = COLOR_MODE_Z_MAX_Z;
   self->param_min_draw_z = COLOR_MODE_Z_MIN_Z;
   self->param_alpha = 1;
+  self->param_max_buffer_size = MAX_SCAN_MEMORY; 
 
   if (viewer) {
     /* setup parameter widget */
@@ -599,6 +609,9 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
         COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_min_draw_z);
     bot_gtk_param_widget_add_double(self->pw, PARAM_MAX_DRAW_Z, BOT_GTK_PARAM_WIDGET_SPINBOX, COLOR_MODE_Z_MIN_Z,
         COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_max_draw_z);
+
+    bot_gtk_param_widget_add_int(self->pw, PARAM_MAX_BUFFER_SIZE, BOT_GTK_PARAM_WIDGET_SPINBOX, 1, MAX_SCAN_MEMORY, 1,
+        self->param_max_buffer_size);
 
     GtkWidget *clear_button = gtk_button_new_with_label("Clear memory");
     gtk_box_pack_start(GTK_BOX(renderer->widget), clear_button, FALSE, FALSE, 0);
