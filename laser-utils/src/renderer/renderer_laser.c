@@ -30,7 +30,7 @@
 #define PARAM_Z_RELATIVE "Relative Z"
 #define PARAM_ALPHA "Alpha"
 
-#define MAX_SCAN_MEMORY 50000
+#define MAX_SCAN_MEMORY 5000
 #define OLD_HISTORY_THRESHOLD 3000000 /* microseconds */
 #define MAX_SENSOR_RANGE_DEFAULT 30.0 /* meters */
 #define MIN_SENSOR_RANGE_DEFAULT 0.15 /* meters */
@@ -377,8 +377,7 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
 
   laser_projected_scan *lscan = laser_create_projected_scan_from_planar_lidar(lchan->projector, msg,
       bot_frames_get_root_name(self->bot_frames));
-  if (lscan == NULL
-  )
+  if (lscan == NULL)
     return; //probably didn't have a pose message yet...
   if (bot_ptr_circular_size(lchan->scans) > 0) {
     laser_projected_scan *last_scan = bot_ptr_circular_index(lchan->scans, 0);
@@ -387,8 +386,7 @@ static void on_laser(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
      jumping around an LCM log file) */
     gboolean time_jump = FALSE;
     int64_t dt = msg->utime - last_scan->utime;
-    if (dt < -OLD_HISTORY_THRESHOLD || dt > OLD_HISTORY_THRESHOLD
-    )
+    if (dt < -OLD_HISTORY_THRESHOLD || dt > OLD_HISTORY_THRESHOLD)
       time_jump = TRUE;
 
     /* spacial decimation */
