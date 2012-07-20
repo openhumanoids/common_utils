@@ -217,8 +217,8 @@ void addZPlane(octomap::OcTree * ocTree, double z_plane_height)
   ocTree->getMetricMin(xy0[0], xy0[1], xy0[2]);
   ocTree->getMetricMax(xy1[0], xy1[1], xy1[2]);
   double xy[0];
-  for (xy[0] = xy0[0]; xy[0] < xy1[1]; xy[0] += resolution) {
-    for (xy[1] = xy0[1]; xy[1] < xy1[1]; xy[1] += resolution) {
+  for (xy[0] = xy0[0]; xy[0] < xy1[0]; xy[0] += resolution/2) {
+    for (xy[1] = xy0[1]; xy[1] < xy1[1]; xy[1] += resolution/2) {
       octomap::point3d point(xy[0], xy[1], z_plane_height);
       ocTree->updateNode(point, true);
     }
