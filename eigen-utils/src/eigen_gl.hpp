@@ -21,6 +21,11 @@ void bot_gl_draw_vector(const Eigen::Vector3d & vec, const Eigen::Vector3d & pos
 
 void bot_gl_draw_axes_cov(Eigen::Matrix3d & chi_cov, double nsigma = 1);
 
+void bot_gl_draw_axes(const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos,
+    double scale);
+
+void bot_gl_draw_axes(const Eigen::Affine3d & trans, double scale);
+
 void bot_gl_cov_ellipse_3d(const Eigen::Matrix3d & pos_cov, const Eigen::Vector3d & mu = Eigen::Vector3d::Zero(),
     double scale = 1);
 

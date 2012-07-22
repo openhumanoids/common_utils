@@ -1,10 +1,34 @@
 #include "eigen_gl.hpp"
 #include "eigen_utils_common.hpp"
 
+
+
 namespace eigen_utils {
 
-#define RAD2DEG(X) (180.0 / M_PI * (X))
-#define DEG2RAD(X) (M_PI / 180.0 * (X))
+void bot_gl_draw_axes()
+{
+  //x-axis
+  glBegin(GL_LINES);
+  glColor3f(1, 0, 0);
+  glVertex3f(1, 0, 0);
+  glVertex3f(0, 0, 0);
+  glEnd();
+
+  //y-axis
+  glBegin(GL_LINES);
+  glColor3f(0, 1, 0);
+  glVertex3f(0, 1, 0);
+  glVertex3f(0, 0, 0);
+  glEnd();
+
+  //z-axis
+  glBegin(GL_LINES);
+  glColor3f(0, 0, 1);
+  glVertex3f(0, 0, 1);
+  glVertex3f(0, 0, 0);
+  glEnd();
+
+} //FIXME Not sure why this needed to be copied for gl_util.h in libbot, namespacing c++ issue?
 
 using namespace Eigen;
 
@@ -49,7 +73,7 @@ void bot_gl_draw_vector(const Eigen::Vector3d & vec, const Vector3d & pos, doubl
   double length = vec.norm();
   glPushMatrix();
   glTranslated(pos(0), pos(1), pos(2));
-  glRotated(RAD2DEG(ang_ax.angle()), ang_ax.axis()(0), ang_ax.axis()(1), ang_ax.axis()(2));
+  glRotated(bot_to_degrees(ang_ax.angle()), ang_ax.axis()(0), ang_ax.axis()(1), ang_ax.axis()(2));
   glTranslated(length / 2, 0, 0);
   //  bot_gl_draw_arrow_2d(vec_mag * scale, head_width, head_length, body_width, fill);
 
@@ -98,6 +122,26 @@ void bot_gl_draw_axes_cov(Eigen::Matrix3d & chi_cov, double nsigma)
 //  glRotated(180, 1, 1, 0); //switch the xy axes in our drawing frame
   glColor4d(1, 0, 0, 1);
   bot_gl_cov_ellipse(axis_cov, nsigma);
+  glPopMatrix();
+}
+
+void bot_gl_draw_axes(const Eigen::Quaterniond & orientation, const Eigen::Vector3d & pos,
+    double scale)
+{
+  glPushMatrix();
+  bot_gl_mult_quat_pos(orientation, pos);
+  glScalef(scale, scale, scale);
+  bot_gl_draw_axes();
+  bot_gl_print_current_matrix();
+  glPopMatrix();
+}
+
+void bot_gl_draw_axes(const Eigen::Affine3d & trans, double scale)
+{
+  glPushMatrix();
+  glMultMatrixd(trans.data());
+  glScalef(scale, scale, scale);
+  bot_gl_draw_axes();
   glPopMatrix();
 }
 
