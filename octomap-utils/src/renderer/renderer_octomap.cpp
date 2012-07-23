@@ -24,7 +24,7 @@
 #define PARAM_COLOR_MODE_Z_MIN_Z "Blue Height"
 #define PARAM_SHOW_FREE "Show Free"
 #define PARAM_SHOW_OCC  "Show Occ"
-#define PARAM_SHOW_GRID "Show Grid"
+//#define PARAM_SHOW_GRID "Show Grid"
 #define PARAM_TREE_DEPTH "Tree Depth"
 #define PARAM_POINT_SIZE "Point Size"
 #define PARAM_Z_MAX "Z max"
@@ -806,11 +806,11 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
 
   self->octd->enableFreespace(bot_gtk_param_widget_get_bool(self->pw, PARAM_SHOW_FREE));
   self->octd->enableOcTreeCells(bot_gtk_param_widget_get_bool(self->pw, PARAM_SHOW_OCC));
-  self->octd->enableOcTree(bot_gtk_param_widget_get_bool(self->pw, PARAM_SHOW_GRID));
+//  self->octd->enableOcTree(bot_gtk_param_widget_get_bool(self->pw, PARAM_SHOW_GRID));
 
   if (self->ocTree != NULL && (strcmp(name, PARAM_COLOR_MODE_Z_MIN_Z) == 0 || strcmp(name, PARAM_COLOR_MODE_Z_MAX_Z)
-      == 0 || strcmp(name, PARAM_TREE_DEPTH) == 0 || strcmp(name, PARAM_SHOW_FREE) || strcmp(name, PARAM_SHOW_OCC)
-      || strcmp(name, PARAM_SHOW_GRID)))
+      == 0 || strcmp(name, PARAM_TREE_DEPTH) == 0 || strcmp(name, PARAM_SHOW_FREE) || strcmp(name, PARAM_SHOW_OCC)))
+//      || strcmp(name, PARAM_SHOW_GRID)))
     self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MIN),
         bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MAX)); //regenerate cubes etc..
 
