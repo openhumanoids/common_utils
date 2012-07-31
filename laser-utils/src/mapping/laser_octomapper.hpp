@@ -20,6 +20,7 @@ public:
   BotFrames *frames;
   bool fromLog;
   bool addFloor;
+  double floor_height;
   bool rayTracing;
   char * logFName;
   lcm_t *lcm_pub; //two different ones for running from log

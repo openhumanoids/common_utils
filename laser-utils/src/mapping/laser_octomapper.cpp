@@ -68,10 +68,13 @@ LaserOctomapper::LaserOctomapper(int argc, char ** argv) :
   outFname = "octomap.bt";
   resolution = .1;
   addFloor = false;
+  floor_height = 0;
   rayTracing = false;
+
   ConciseArgs opt(argc, argv);
   opt.add(resolution, "r", "resolution");
   opt.add(addFloor, "f", "floor");
+  opt.add(floor_height, "z", "floor_height", "floor is inserted at this height");
   opt.add(logFName, "l", "log_name");
   opt.add(outFname, "o", "out_name");
   opt.add(paramName, "p", "param_file");
@@ -235,7 +238,7 @@ static void shutdown_module(int unused __attribute__((unused)))
 
   //fill in the floor
   if (_map3d->addFloor)
-    addZPlane(_map3d->ocTree, 0);
+    addZPlane(_map3d->ocTree, _map3d->floor_height);
 
   _map3d->save_map(); //TODO make an option?
   _map3d->publish_map();
