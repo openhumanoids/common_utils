@@ -38,6 +38,7 @@ void botDoubleToQuaternion(Eigen::Quaterniond & eig_quat, const double bot_quat[
 Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers);
 
 Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat);
+Eigen::Vector3d getEulerAngles(const Eigen::Matrix3d & rot);
 
 Eigen::Affine3d getTransTwistUnscaled(const Eigen::Vector3d & unscaledAngularVelocity,
     const Eigen::Vector3d & unscailedLinearVelocity);

@@ -12,7 +12,7 @@ std::ostream& operator<<(std::ostream& output, const RigidBodyState & state)
   output << ", chi: " << state.chi().transpose();
   output << ", position: " << state.position().transpose();
   output << ", acceleration: " << state.acceleration().transpose();
-  output << ", RPY: " << state.getEulerAngles().transpose();
+  output << ", RPY: " << bot_to_degrees(state.getEulerAngles().transpose());
   return output;
 }
 
@@ -75,9 +75,12 @@ Eigen::Quaterniond setQuatEulerAngles(const Eigen::Vector3d & eulers)
 
 Eigen::Vector3d getEulerAngles(const Eigen::Quaterniond & quat)
 {
-  Eigen::Vector3d eulers = quat.toRotationMatrix().eulerAngles(2, 1, 0); //ypr
-  Eigen::Vector3d ret_eulers(eulers(2), eulers(1), eulers(0)); //rpy
-  return ret_eulers;
+  return quat.toRotationMatrix().eulerAngles(2, 1, 0).reverse(); //ypr
+}
+
+Eigen::Vector3d getEulerAngles(const Eigen::Matrix3d & rot)
+{
+  return rot.eulerAngles(2, 1, 0).reverse(); //ypr
 }
 
 Eigen::Affine3d getTransTwistUnscaled(const Eigen::Vector3d & unscaledAngularVelocity,
