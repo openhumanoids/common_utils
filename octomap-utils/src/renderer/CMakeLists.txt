@@ -1,3 +1,9 @@
+pkg_check_modules(OCTOMAP_UTILS octomap_utils)
+if(NOT OCTOMAP_UTILS_FOUND)
+    message("octomap_utils not found. Not building octomap libbot2 renderer")
+    return()
+endif()
+
 pkg_check_modules(BOT2_VIS bot2-vis)
 if(NOT BOT2_VIS_FOUND)
     message("bot2-vis not found.  Not building octomap libbot2 renderer")
