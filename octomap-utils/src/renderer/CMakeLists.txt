@@ -1,6 +1,6 @@
-pkg_check_modules(OCTOMAP_UTILS octomap_utils)
-if(NOT OCTOMAP_UTILS_FOUND)
-    message("octomap_utils not found. Not building octomap libbot2 renderer")
+pkg_check_modules(OCTOMAP_UTIL octomap-util)
+if(NOT OCTOMAP_UTIL_FOUND)
+    message("octomap_util not found. Not building octomap libbot2 renderer")
     return()
 endif()
 
