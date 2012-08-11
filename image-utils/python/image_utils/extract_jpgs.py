@@ -15,12 +15,15 @@ from lcm import EventLog
 from bot_core.pose_t import pose_t
 from bot_core.image_t import image_t
 
-def shouldAddImage(pose,poseList,thresh):
-    if thresh>0:
-        for p in poseList[::-1]:
-            d = linalg.norm(array(p.pos)-array(pose.pos))
-            if d<thresh:
-        	   return False
+def shouldAddImage(pose,poseList,thresh,globalCheck):
+    if thresh>0 and len(poseList)>0:
+        if globalCheck:
+            for p in poseList[::-1]:
+                d = linalg.norm(array(p.pos)-array(pose.pos))
+                if d<thresh:
+            	   return False
+        elif linalg.norm(array(poseList[-1].pos)-array(pose.pos))<thresh:
+            return False
     return True
 
 def deleteStatusMsg(statMsg):
@@ -37,7 +40,8 @@ def usage():
     print """
     -h --help                 print this message
     -c --channels=chan        Parse channels that match Python regex [chan] defaults to ["IMAGE_.*"]
-    -d --dist=d               Enforce that images are at least [d] meters apart
+    -d --dist=d               Enforce that images taken [d] from previous
+    -D --global_dist=d        Enforce minimum distance between ANY images is [d]
     -v                        Verbose
     """
 
@@ -46,7 +50,7 @@ def usage():
 
 
 try:
-    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvc:d:", longOpts)
+    opts, args = getopt.gnu_getopt(sys.argv[1:], "hvc:d:D:", longOpts)
 except getopt.GetoptError, err:
     # print help information and exit:
     print str(err) # will print something like "option -a not recognized"
@@ -62,6 +66,7 @@ outFname = outFname + ".mat"
 verbose = False
 channels = "IMAGE_.*"
 dist_thresh =-1
+globalCheck = False
 for o, a in opts:
     if o == "-v":
         verbose = True
@@ -71,6 +76,9 @@ for o, a in opts:
         channels = a
     elif o in ("-d", "--dist="):
         dist_thresh = float(a)
+    elif o in ("-D", "--global_dist="):
+        dist_thresh = float(a)
+        globalCheck = True
     else:
         print "unhandled option"
         usage()
@@ -134,7 +142,7 @@ for e in log:
             os.mkdir("%s" %(imageDir))
         if not os.path.isdir("%s/%s" %(imageDir,e.channel)):
             os.mkdir("%s/%s" %(imageDir,e.channel))
-    if not shouldAddImage(lastPose,imagePoses[e.channel],dist_thresh):
+    if not shouldAddImage(lastPose,imagePoses[e.channel],dist_thresh,globalCheck):
         continue
     #TODO: filter on poses...    
     im = image_t.decode(e.data)
