@@ -3,8 +3,8 @@
 #endif
 
 template<typename DerivedData, typename DerivedInd>
-typename DerivedData::PlainObject selectRowsByIndices(const Eigen::DenseBase<DerivedData> & m,
-    const Eigen::DenseBase<DerivedInd> & inds)
+typename DerivedData::PlainObject selectRowsByIndices(const Eigen::DenseBase<DerivedData> & m, const Eigen::DenseBase<
+    DerivedInd> & inds)
 {
   typename DerivedData::PlainObject ret(inds.size(), m.cols());
   for (int i = 0; i < inds.size(); i++) {
@@ -14,8 +14,8 @@ typename DerivedData::PlainObject selectRowsByIndices(const Eigen::DenseBase<Der
 }
 
 template<typename DerivedData, typename DerivedInd>
-typename DerivedData::PlainObject selectColsByIndices(const Eigen::DenseBase<DerivedData> & m,
-    const Eigen::DenseBase<DerivedInd> & inds)
+typename DerivedData::PlainObject selectColsByIndices(const Eigen::DenseBase<DerivedData> & m, const Eigen::DenseBase<
+    DerivedInd> & inds)
 {
   typename DerivedData::PlainObject ret(m.rows(), inds.size());
   for (int i = 0; i < inds.size(); i++) {
@@ -25,9 +25,8 @@ typename DerivedData::PlainObject selectColsByIndices(const Eigen::DenseBase<Der
 }
 
 template<typename DerivedData, typename DerivedInd>
-typename DerivedData::PlainObject selectBlockByIndices(const Eigen::DenseBase<DerivedData> & m,
-    const Eigen::DenseBase<DerivedInd> & rinds,
-    const Eigen::DenseBase<DerivedInd> & cinds)
+typename DerivedData::PlainObject selectBlockByIndices(const Eigen::DenseBase<DerivedData> & m, const Eigen::DenseBase<
+    DerivedInd> & rinds, const Eigen::DenseBase<DerivedInd> & cinds)
 {
   typename DerivedData::PlainObject ret(rinds.rows(), cinds.rows());
   for (int r = 0; r < rinds.size(); r++) {
@@ -73,8 +72,7 @@ typename DerivedData::PlainObject selectColsByIndicator(const Eigen::DenseBase<D
 
 template<typename DerivedData, typename DerivedInd>
 typename DerivedData::PlainObject selectBlockByIndicators(const Eigen::DenseBase<DerivedData> & m,
-    const Eigen::DenseBase<DerivedInd> & rinds,
-    const Eigen::DenseBase<DerivedInd> & cinds)
+    const Eigen::DenseBase<DerivedInd> & rinds, const Eigen::DenseBase<DerivedInd> & cinds)
 {
   eigen_assert(m.rows() == rinds.size());
   eigen_assert(m.cols() == cinds.size());
@@ -91,5 +89,14 @@ typename DerivedData::PlainObject selectBlockByIndicators(const Eigen::DenseBase
     rcnt++;
   }
   return ret;
+}
+
+template<typename DerivedInd, typename DerivedAssign, typename DerivedData>
+void assignRowsByIndices(const Eigen::DenseBase<DerivedInd> & inds, const Eigen::DenseBase<DerivedAssign> & assign_vals,
+    Eigen::DenseBase<DerivedData> & m)
+{
+  for (int i = 0; i < inds.size(); i++) {
+    m.row(inds(i)) = assign_vals.row(i);
+  }
 }
 

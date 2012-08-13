@@ -53,6 +53,9 @@ const Eigen::Vector3d g_vec = -g_val * Eigen::Vector3d::UnitZ(); //ENU gravity v
  * Basic Rigid Body State representation
  *
  * The chi part of the state vector represents attitude perterbations (exponential coordinates)
+ *
+ * velocity, angular velocity, and acceleration are tracked in body coordiates
+ * acceleration is the "sensed" acceleration including the gravity vector (what an IMU onboard would measure)
  */
 class RigidBodyState {
 public:
@@ -72,20 +75,20 @@ public:
 
 protected:
   RigidBodyState(int state_dim) :
-      vec(Eigen::VectorXd::Zero(state_dim)), utime(0), quat(Eigen::Quaterniond::Identity())
+    vec(Eigen::VectorXd::Zero(state_dim)), utime(0), quat(Eigen::Quaterniond::Identity())
   {
 
   }
 
 public:
   RigidBodyState() :
-      vec(Eigen::VectorXd::Zero(basic_num_states)), utime(0), quat(Eigen::Quaterniond::Identity())
+    vec(Eigen::VectorXd::Zero(basic_num_states)), utime(0), quat(Eigen::Quaterniond::Identity())
   {
 
   }
 
   RigidBodyState(const Eigen::VectorXd & arg_vec) :
-      vec(arg_vec)
+    vec(arg_vec)
   {
     quat = Eigen::Quaterniond::Identity();
     this->chiToQuat();
@@ -93,13 +96,31 @@ public:
   }
 
   RigidBodyState(const Eigen::VectorXd & arg_vec, const Eigen::Quaterniond & arg_quat) :
-      vec(arg_vec), quat(arg_quat)
+    vec(arg_vec), quat(arg_quat)
   {
     utime = 0;
   }
 
   RigidBodyState(const rigid_body_pose_t * pose) :
-      vec(basic_num_states), utime(pose->utime)
+    vec(basic_num_states), utime(pose->utime)
+  {
+    Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
+    Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
+    Eigen::Map<const Eigen::Vector3d> position_map(pose->pos);
+    Eigen::Map<const Eigen::Vector3d> acceleration_map(pose->accel);
+
+    this->velocity() = velocity_map;
+    this->angularVelocity() = angular_velocity_map;
+    this->position() = position_map;
+    this->acceleration() = acceleration_map;
+    this->chi() = Eigen::Vector3d::Zero();
+
+    eigen_utils::botDoubleToQuaternion(this->quat, pose->orientation);
+
+  }
+
+  RigidBodyState(const rigid_body::pose_t * pose) :
+    vec(basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
     Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
@@ -133,7 +154,7 @@ public:
   }
 
   void getPose(rigid_body_pose_t * pose) const
-      {
+  {
     Eigen::Map<Eigen::Vector3d>(pose->rotation_rate) = this->angularVelocity();
     Eigen::Map<Eigen::Vector3d>(pose->vel) = this->velocity();
     Eigen::Map<Eigen::Vector3d>(pose->pos) = this->position();
@@ -159,27 +180,27 @@ public:
 
   inline Block3Element velocity()
   {
-    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::velocity_ind, 0);
   }
 
   inline Block3Element chi()
   {
-    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::chi_ind, 0);
   }
 
   inline Block3Element position()
   {
-    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::position_ind, 0);
   }
 
   inline Block3Element angularVelocity()
   {
-    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline Block3Element acceleration()
   {
-    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::acceleration_ind, 0);
   }
 
   inline Eigen::Quaterniond & orientation()
@@ -195,27 +216,57 @@ public:
   //const returns
   inline ConstBlock3Element velocity() const
   {
-    return vec.block<3, 1>(RigidBodyState::velocity_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::velocity_ind, 0);
   }
 
   inline ConstBlock3Element chi() const
   {
-    return vec.block<3, 1>(RigidBodyState::chi_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::chi_ind, 0);
   }
 
   inline ConstBlock3Element position() const
   {
-    return vec.block<3, 1>(RigidBodyState::position_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::position_ind, 0);
   }
 
   inline ConstBlock3Element angularVelocity() const
   {
-    return vec.block<3, 1>(RigidBodyState::angular_velocity_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::angular_velocity_ind, 0);
   }
 
   inline ConstBlock3Element acceleration() const
   {
-    return vec.block<3, 1>(RigidBodyState::acceleration_ind, 0);
+    return vec.block<3, 1> (RigidBodyState::acceleration_ind, 0);
+  }
+
+  inline Eigen::Vector3d accelerationGlobal() const
+  {
+    return orientation() * acceleration();
+  }
+
+  inline Eigen::Vector3d accelerationGlobalNoGravity() const
+  {
+    return orientation() * acceleration() + g_vec;
+  }
+
+  inline Eigen::Vector3d velocityGlobal() const
+  {
+    return orientation() * velocity();
+  }
+
+  /**
+   * aligns the body x axis with the velocity vector
+   */
+  void alignVelocityXAxis()
+  {
+    Eigen::Quaterniond wind_axes_to_body_axes; //transforms vectors in wind frame to vectors in body frame
+    wind_axes_to_body_axes.setFromTwoVectors(Eigen::Vector3d::UnitX(), velocity());
+    Eigen::Matrix3d body_axes_to_wind_axes = wind_axes_to_body_axes.toRotationMatrix().transpose();
+
+    angularVelocity() = body_axes_to_wind_axes * angularVelocity();
+    velocity() = body_axes_to_wind_axes * velocity();
+    acceleration() = body_axes_to_wind_axes * acceleration();
+    orientation() = orientation() * wind_axes_to_body_axes;
   }
 
   void chiToQuat()
@@ -255,7 +306,7 @@ public:
   }
 
   void getBotTrans(BotTrans * bot_trans) const
-      {
+  {
     Eigen::Vector3d delta_vec = this->position();
     memcpy(bot_trans->trans_vec, delta_vec.data(), 3 * sizeof(double));
 
