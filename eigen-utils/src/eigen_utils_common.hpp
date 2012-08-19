@@ -32,6 +32,49 @@ void angleToVec(double angle, Eigen::Vector2d & unit_vec);
 Eigen::VectorXd flattenSymmetric(Eigen::MatrixXd symm);
 Eigen::MatrixXd unflattenSymmetric(Eigen::VectorXd flat);
 
+/**
+ * alpha is (time step)/(filter time constant)
+ */
+template<typename Type>
+class ExponentialFilter {
+public:
+
+  ExponentialFilter(const Type & init_val, double alpha) :
+      val(init_val), alpha()
+  {
+  }
+
+  const Type & step(const Type & new_val)
+  {
+    val = alpha * new_val + (1 - alpha) * val;
+  }
+
+  const Type & operator()() const
+  {
+    return getVal();
+  }
+
+  const Type & getVal() const
+  {
+    return val;
+  }
+
+  const double & getAlpha() const
+  {
+    return alpha;
+  }
+
+  void setAlpha(double _alpha)
+  {
+    alpha = _alpha;
+  }
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+private:
+  double alpha;
+  Type val;
+}
+;
+
 template<typename Derived>
 bool hasNan(const Eigen::DenseBase<Derived> & m)
 {
@@ -159,7 +202,7 @@ typename Derived::Scalar median(const Eigen::DenseBase<Derived> & const_arr)
 
 template<typename Scalar>
 Eigen::Array<Scalar, Eigen::Dynamic, 1> sort(const Eigen::Array<Scalar, Eigen::Dynamic, 1> & arr,
-    Eigen::ArrayXi &sorted_inds)
+Eigen::ArrayXi &sorted_inds)
 {
   typedef std::pair<Scalar, int> scalar_index_pair;
   std::vector<scalar_index_pair> sort_vec;
@@ -179,5 +222,5 @@ Eigen::Array<Scalar, Eigen::Dynamic, 1> sort(const Eigen::Array<Scalar, Eigen::D
   return sorted;
 }
 
-}  //namespace eigen_utils
+} //namespace eigen_utils
 #endif

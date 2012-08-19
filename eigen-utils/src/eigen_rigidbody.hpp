@@ -257,10 +257,13 @@ public:
   /**
    * aligns the body x axis with the velocity vector
    */
-  void alignVelocityXAxis()
+  void alignVelocityXAxis(double vel_tol = .01)
   {
-    Eigen::Quaterniond wind_axes_to_body_axes; //transforms vectors in wind frame to vectors in body frame
-    wind_axes_to_body_axes.setFromTwoVectors(Eigen::Vector3d::UnitX(), velocity());
+    Eigen::Quaterniond wind_axes_to_body_axes = Eigen::Quaterniond::Identity(); //transforms vectors in wind frame to vectors in body frame
+    if (velocity().norm() > vel_tol) {
+      wind_axes_to_body_axes.setFromTwoVectors(Eigen::Vector3d::UnitX(), velocity());
+    }
+
     Eigen::Matrix3d body_axes_to_wind_axes = wind_axes_to_body_axes.toRotationMatrix().transpose();
 
     angularVelocity() = body_axes_to_wind_axes * angularVelocity();
