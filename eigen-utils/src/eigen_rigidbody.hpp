@@ -137,6 +137,13 @@ public:
 
   }
 
+  void integrateForwardConstantVelocity(double time)
+  {
+    Eigen::Affine3d trans = getTransTwist(angularVelocity(), velocity(), time);
+    this->orientation() = this->orientation() * trans.rotation();
+    this->position() = this->position() + this->orientation() * trans.translation();
+  }
+
   /**
    * phi, theta, psi (roll, pitch, yaw)
    */
