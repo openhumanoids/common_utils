@@ -37,6 +37,10 @@ add_executable(octomap-blurrer octomap-blurrer.cpp)
 pods_use_pkg_config_packages(octomap-blurrer octomap-util)
 pods_install_executables(octomap-blurrer)
 
+add_executable(octomap-dilator octomap-dilator.cpp)
+pods_use_pkg_config_packages(octomap-dilator octomap-util)
+pods_install_executables(octomap-dilator)
+
 add_executable(octomap-server octomap-server.cpp)
 pods_use_pkg_config_packages(octomap-server octomap-util)
 pods_install_executables(octomap-server)
