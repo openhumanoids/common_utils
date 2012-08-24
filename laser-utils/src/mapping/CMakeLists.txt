@@ -6,6 +6,14 @@ if(OCC_MAP_FOUND)
                     bot2-core bot2-param-client bot2-frames
                     occ-map laser-util)   
     pods_install_executables(laser-voxmapper) 
+    
+    
+    add_executable(laser-pixmapper laser_pixmapper.cpp)
+    pods_use_pkg_config_packages(laser-pixmapper 
+                    bot2-core bot2-param-client bot2-frames
+                    occ-map laser-util)   
+    pods_install_executables(laser-pixmapper) 
+    
 else()
     message("occ-map not found. not building laser-voxmapper")              
 endif()
