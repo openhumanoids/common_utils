@@ -33,11 +33,11 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
 //    }
     //    x_star = A_decomp.solve(b);
 
-//    if (!A.colPivHouseholderQr().isInvertible()) {
-//      fprintf(stderr,
-//          "Warning: A matrix for fully constrained quadProgEliminationSolve in %s is not invertible, line %d\n",
-//          __FILE__, __LINE__);
-//    }
+    if (!A.colPivHouseholderQr().isInvertible()) {
+      fprintf(stderr,
+          "Warning: A matrix for fully constrained quadProgEliminationSolve in %s is not invertible, line %d\n",
+          __FILE__, __LINE__);
+    }
     x_star = A.colPivHouseholderQr().solve(b);
   }
   else {
@@ -50,20 +50,21 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
     Eigen::MatrixXd Q_RR = Q.bottomRightCorner(n - m, n - m);
 
     /*
-     *  Choose between LDLT (fastest?), ColPivHouseholderQR (faster, less accurate) and FullPivHouseholderQR (slower, more accurate)
+     *  ColPivHouseholderQR (faster, less accurate)
+     *  FullPivHouseholderQR (slower, more accurate)
      *  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> B_decomp;
      *  Eigen::FullPivHouseholderQR<Eigen::MatrixXd> B_decomp;
-     *  Eigen::LDLT<Eigen::MatrixXd> B_decomp;
      */
 
-    Eigen::LDLT<Eigen::MatrixXd> B_decomp;
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> B_decomp;
     B_decomp.compute(B);
+
     Eigen::ColPivHouseholderQR<Eigen::MatrixXd> B_transpose_decomp;
     B_transpose_decomp.compute(B.transpose());
-//    if (!B_decomp.isInvertible()) {
-//      fprintf(stderr, "Warning: B matrix in A=[B R] for quadProgEliminationSolve in %s is not invertible, line %d\n",
-//          __FILE__, __LINE__);
-//    }
+    if (!B_decomp.isInvertible()) {
+      fprintf(stderr, "Warning: B matrix in A=[B R] for quadProgEliminationSolve in %s is not invertible, line %d\n",
+          __FILE__, __LINE__);
+    }
     Eigen::MatrixXd B_inv_R = B_decomp.solve(R);
 
     //f_prime_RR=2*b'*(B'\(Q_BR-(Q_BB/B)*R));
@@ -83,17 +84,17 @@ void quadProgEliminationSolve(const Eigen::MatrixBase<DerivedQ> & Q, const Eigen
         - Q_RB * B_inv_R;
 
     /*
-     *  Choose between LDLT (fastest?), ColPivHouseholderQR (faster, less accurate) and FullPivHouseholderQR (slower, more accurate)
+     *  ColPivHouseholderQR (faster, less accurate)
+     *  FullPivHouseholderQR (slower, more accurate)
      *  Eigen::ColPivHouseholderQR<Eigen::MatrixXd> Q_prime_RR_decomp;
      *  Eigen::FullPivHouseholderQR<Eigen::MatrixXd> Q_prime_RR_decomp;
-     *  Eigen::LDLT<Eigen::MatrixXd> Q_prime_RR_decomp;
      */
-    Eigen::LDLT<Eigen::MatrixXd> Q_prime_RR_decomp;
+    Eigen::ColPivHouseholderQR<Eigen::MatrixXd> Q_prime_RR_decomp;
     Q_prime_RR_decomp.compute(Q_prime_RR);
-//    if (!Q_prime_RR_decomp.isInvertible()) {
-//      fprintf(stderr, "Warning: Q_primer_RR matrix in quadProgEliminationSolve in %s is not invertible, line %d\n",
-//          __FILE__, __LINE__);
-//    }
+    if (!Q_prime_RR_decomp.isInvertible()) {
+      fprintf(stderr, "Warning: Q_primer_RR matrix in quadProgEliminationSolve in %s is not invertible, line %d\n",
+          __FILE__, __LINE__);
+    }
 
     //    x_R_star = -(2*Q_prime_RR)\f_prime_RR';
     //    x_B_star = B\(b-R*x_R_star);
