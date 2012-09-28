@@ -54,9 +54,8 @@ convexhull_simple_polygon_2d (const pointlist2d_t *input)
         const point2d_t *dt0 = (const point2d_t*) tail_link->data;
         const point2d_t *dt1 = (const point2d_t*) tail_link->prev->data;
         const point2d_t *v = &input->points[curpoint];
-        while ( !(geom_handedness_2d (v, db0, db1) < 0 ||
-                  geom_handedness_2d (dt1, dt0, v) < 0) &&
-                curpoint < input->npoints) {
+        while ( curpoint < input->npoints && !(geom_handedness_2d (v, db0, db1) < 0 ||
+                  geom_handedness_2d (dt1, dt0, v) < 0)) {
             dbg ("nope\n");
             curpoint++;
             v = &input->points[curpoint];
