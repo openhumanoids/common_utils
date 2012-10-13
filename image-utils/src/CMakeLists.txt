@@ -4,7 +4,7 @@ file(GLOB c_files *.c)
 file(GLOB h_files *.h)
 add_library(image-utils SHARED ${c_files})
 
-target_link_libraries(image-utils -ljpeg)
+target_link_libraries(image-utils ${JPEG_LIBRARIES})
 
 # set the library API version.  Increment this every time the public API
 # changes.

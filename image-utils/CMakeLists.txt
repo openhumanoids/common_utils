@@ -15,6 +15,8 @@ if (NOT SSE3_FOUND)
   return()
 endif()
 
+find_package (JPEG REQUIRED)
+
 add_subdirectory(src)
 add_subdirectory(src/renderer)
 
