@@ -12,6 +12,9 @@
 #include <iostream>
 #include <sstream>
 
+//#include <lcmtypes/octomap_raw_t.h>
+#include <lcmtypes/laser_raw_t.h>
+
 #include <ConciseArgs>
 
 using namespace std;
@@ -145,15 +148,21 @@ void LaserOctomapper::publish_map()
   ocTree->getMetricMax(maxX, maxY, maxZ);
   printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
 
-  bot_core_raw_t msg;
+  laser_raw_t msg;
   msg.utime = bot_timestamp_now();
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      msg.transform[i][j] = 0;
+    }
+    msg.transform[i][i] = 1;
+  }
 
   std::stringstream datastream;
   ocTree->writeBinaryConst(datastream);
   std::string datastring = datastream.str();
   msg.data = (uint8_t *) datastring.c_str();
   msg.length = datastring.size();
-  bot_core_raw_t_publish(lcm_pub, "OCTOMAP", &msg);
+  laser_raw_t_publish(lcm_pub, "OCTOMAP", &msg);
   fprintf(stderr, "done! \n");
 }
 

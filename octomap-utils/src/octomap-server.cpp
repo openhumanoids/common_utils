@@ -46,6 +46,13 @@ int main(int argc, char ** argv)
   octomap_raw_t msg;
   msg.utime = bot_timestamp_now();
 
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      msg.transform[i][j] = 0;
+    }
+    msg.transform[i][i] = 1;
+  }
+
   std::stringstream datastream;
   ocTree->writeBinaryConst(datastream);
   std::string datastring = datastream.str();

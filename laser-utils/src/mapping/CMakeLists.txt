@@ -23,7 +23,7 @@ if(OCTOMAP_FOUND)
     add_executable(laser-octomapper laser_octomapper.cpp)
     pods_use_pkg_config_packages(laser-octomapper 
                     bot2-core bot2-param-client bot2-frames
-                    octomap laser-util)
+                    octomap laser-util lcmtypes_laser-utils)
                    
     pods_install_executables(laser-octomapper)
 else()

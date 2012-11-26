@@ -15,6 +15,8 @@
 #include <bot_vis/bot_vis.h>
 #include "renderer_octomap.h"
 
+#include <lcmtypes/octomap_raw_t.h>
+
 #include <octomap/octomap.h>
 #include <sstream>
 
@@ -129,6 +131,8 @@ public:
   double m_alphaOccupied;
 
   double minX, minY, minZ, maxX, maxY, maxZ;
+
+  float m_ocTreeTransform[16];
 
 };
 }
@@ -591,6 +595,8 @@ void MyOcTreeDrawer::clear()
 void MyOcTreeDrawer::draw() const
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushMatrix();
+  glMultMatrixf(m_ocTreeTransform);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   glEnable(GL_BLEND);
@@ -611,6 +617,7 @@ void MyOcTreeDrawer::draw() const
 
   glDisableClientState(GL_VERTEX_ARRAY);
 
+  glPopMatrix();
   glPopAttrib();
 
 }
@@ -848,7 +855,7 @@ static void on_save_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
   bot_gtk_param_widget_save_to_key_file(self->pw, keyfile, RENDERER_NAME);
 }
 
-static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const bot_core_raw_t *msg, void *user_data)
+static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const octomap_raw_t *msg, void *user_data)
 {
   fprintf(stderr, "got new octomap\n");
   BotRendererOctomap *self = (BotRendererOctomap*) user_data;
@@ -856,6 +863,13 @@ static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const bo
   )
     delete self->ocTree;
   self->octd->clear();
+
+  // set transform
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      self->octd->m_ocTreeTransform[j*4+i] = msg->transform[i][j];
+    }
+  }
 
   std::stringstream datastream;
   datastream.write((const char*) msg->data, msg->length);
@@ -903,7 +917,7 @@ BotRenderer *renderer_octomap_new(BotViewer *viewer, int render_priority, lcm_t 
   self->ocTree = NULL;
   self->octd = new MyOcTreeDrawer();
 
-  bot_core_raw_t_subscribe(self->lc, "OCTOMAP", on_octomap, self);
+  octomap_raw_t_subscribe(self->lc, "OCTOMAP", on_octomap, self);
 
   renderer->draw = Octomap_draw;
   renderer->destroy = Octomap_free;
