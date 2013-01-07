@@ -35,8 +35,8 @@
 #define OLD_HISTORY_THRESHOLD 3000000 /* microseconds */
 #define MAX_SENSOR_RANGE_DEFAULT 30.0 /* meters */
 #define MIN_SENSOR_RANGE_DEFAULT 0.15 /* meters */
-#define COLOR_MODE_Z_MAX_Z 15
-#define COLOR_MODE_Z_MIN_Z -2
+#define COLOR_MODE_Z_MAX_Z 30
+#define COLOR_MODE_Z_MIN_Z -30
 #define COLOR_MODE_Z_DZ 0.1
 #define PARAM_MAX_DRAW_Z "Max Draw Z"
 #define PARAM_MIN_DRAW_Z "Min Draw Z"
