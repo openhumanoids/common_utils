@@ -100,6 +100,8 @@ enum {
   RENDER_IN_BOTTOM_RIGHT,
   RENDER_IN_BOTTOM_CENTER,
   RENDER_IN_BOTTOM_LEFT,
+  RENDER_IN_TOP_LEFT_LARGE,
+  RENDER_IN_TOP_RIGHT_LARGE,
   RENDER_AT_CAMERA,
   RENDER_ON_GROUND,
 };
@@ -371,6 +373,32 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       p1.y = 0;
       break;
     case RENDER_IN_TOP_RIGHT:
+      p1.x = vp_width - thumb_width;
+      p1.y = 0;
+      break;
+    case RENDER_IN_TOP_LEFT_LARGE:
+      if ((vp_width / 2) / aspect > vp_height / 2) {
+        thumb_height = vp_height / 2;
+        thumb_width = thumb_height * aspect;
+      }
+      else {
+        thumb_width = vp_width / 2;
+        thumb_height = thumb_width / aspect;
+      }
+      
+      p1.x = 0;
+      p1.y = 0;
+      break;
+    case RENDER_IN_TOP_RIGHT_LARGE:
+      if ((vp_width / 2) / aspect > vp_height / 2) {
+        thumb_height = vp_height / 2;
+        thumb_width = thumb_height * aspect;
+      }
+      else {
+        thumb_width = vp_width / 2;
+        thumb_height = thumb_width / aspect;
+      }
+      
       p1.x = vp_width - thumb_width;
       p1.y = 0;
       break;
@@ -727,9 +755,11 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
     cr->gl_area = BOT_GTK_GL_DRAWING_AREA (bot_gtk_gl_drawing_area_new (FALSE));
 
     cr->pw = BOT_GTK_PARAM_WIDGET (bot_gtk_param_widget_new ());
-    bot_gtk_param_widget_add_enum(cr->pw, PARAM_RENDER_IN, 0, cr->render_place, "Here", RENDER_IN_WIDGET, "Top Left",
-        RENDER_IN_TOP_LEFT, "Top Cent.", RENDER_IN_TOP_CENTER, "Top Right", RENDER_IN_TOP_RIGHT, "Bot. Left",
-        RENDER_IN_BOTTOM_LEFT, "Bot. Cent.", RENDER_IN_BOTTOM_CENTER, "Bot. Right", RENDER_IN_BOTTOM_RIGHT,
+    bot_gtk_param_widget_add_enum(cr->pw, PARAM_RENDER_IN, 0, cr->render_place, "Here", RENDER_IN_WIDGET, 
+        "Top Left", RENDER_IN_TOP_LEFT, "Top Cent.", RENDER_IN_TOP_CENTER, 
+        "Top Right", RENDER_IN_TOP_RIGHT, "Bot. Left", RENDER_IN_BOTTOM_LEFT, 
+        "Bot. Cent.", RENDER_IN_BOTTOM_CENTER, "Bot. Right", RENDER_IN_BOTTOM_RIGHT,
+        "Top L Lrg", RENDER_IN_TOP_LEFT_LARGE,"Top R Lrg", RENDER_IN_TOP_RIGHT_LARGE,
         "At Camera", RENDER_AT_CAMERA, "Ground", RENDER_ON_GROUND, NULL);
 
     cr->expander = gtk_expander_new(channel);
