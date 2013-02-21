@@ -28,6 +28,7 @@
 
 #define RENDERER_NAME "Camera"
 
+#define PARAM_COLOR_ALPHA "Alpha"
 #define PARAM_RENDER_IN "Show"
 
 #define MAX_GROUND_PROJECTION_DISTANCE 120
@@ -47,6 +48,10 @@ struct _RendererCamThumb {
 
   lcm_t *lc;
   BotViewer *viewer;
+  
+  // opacity
+  float alpha;
+  
 };
 
 typedef struct _ImageVertex ImageVertex;
@@ -90,6 +95,7 @@ typedef struct _cam_renderer {
   int expanded;
 
 //    CamrendVisualFeatures *feature_renderer;
+  
 } cam_renderer_t;
 
 enum {
@@ -102,6 +108,7 @@ enum {
   RENDER_IN_BOTTOM_LEFT,
   RENDER_IN_TOP_LEFT_LARGE,
   RENDER_IN_TOP_RIGHT_LARGE,
+  RENDER_IN_TOP,
   RENDER_AT_CAMERA,
   RENDER_ON_GROUND,
 };
@@ -186,10 +193,18 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
       texcoord_scale_y = 1 / (float) cr->height;
     }
 
+    // was pre jan2013:
     // disable the depth mask while drawing these images
-    glDepthMask(GL_FALSE);
+    //glDepthMask(GL_FALSE);
+    //    glColor3f(1, 1, 1);
 
-    glColor3f(1, 1, 1);
+    // added pre jan2013: for variable opacity
+    glEnable(GL_DEPTH_TEST);
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+
+    glColor4f(1, 1, 1, self->alpha);
 
     // draw
     if (rmode == RENDER_AT_CAMERA) {
@@ -216,6 +231,7 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
         for (int i = 0; i < cr->n_vert_indices; i++) {
           ImageVertex *v = &cr->vertices[cr->vert_indices[i]];
           glTexCoord2f(v->tx, v->ty);
+//          glTexCoord3f(v->tx, v->ty, 0.5f);
           glVertex3f(v->vx, v->vy, v->vz);
         }
         glEnd();
@@ -402,6 +418,11 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       p1.x = vp_width - thumb_width;
       p1.y = 0;
       break;
+    case RENDER_IN_TOP:
+      thumb_width = vp_width;
+      thumb_height = thumb_width / aspect;
+      p1.x = 0;
+      p1.y = 0;
     default:
       break;
     }
@@ -466,6 +487,16 @@ static void on_save_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
   g_list_free(keys);
 }
 
+static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, void *user)
+{
+  RendererCamThumb *self = (RendererCamThumb*) user;
+  if(! strcmp(name, PARAM_COLOR_ALPHA)) {
+    self->alpha = (float) bot_gtk_param_widget_get_double(pw, PARAM_COLOR_ALPHA);
+    bot_viewer_request_redraw(self->viewer);
+  }
+}
+
+
 static void cam_thumb_free(BotRenderer *renderer)
 {
   RendererCamThumb *self = (RendererCamThumb*) renderer;
@@ -487,12 +518,18 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
   self->bot_frames = frames;
   self->lc = lcm;
 
-  self->renderer.widget = gtk_vbox_new(FALSE, 0);
+  self->renderer.widget = bot_gtk_param_widget_new();//gtk_vbox_new(FALSE, 0);
   gtk_widget_show(self->renderer.widget);
 
   self->cam_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, NULL, (GDestroyNotify) cam_renderer_destroy);
   self->param = param;
+  
+  self->alpha = 1.0;
+  self->pw = BOT_GTK_PARAM_WIDGET(self->renderer.widget);
+  bot_gtk_param_widget_add_double (self->pw, PARAM_COLOR_ALPHA, BOT_GTK_PARAM_WIDGET_SLIDER, 0, 1, 0.001, 1);
 
+  g_signal_connect(G_OBJECT(self->pw), "changed", G_CALLBACK(on_param_widget_changed), self);
+  
   char **cam_names = bot_param_get_all_camera_names(self->param);
 
   //failure if there are no cam names
@@ -759,7 +796,8 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
         "Top Left", RENDER_IN_TOP_LEFT, "Top Cent.", RENDER_IN_TOP_CENTER, 
         "Top Right", RENDER_IN_TOP_RIGHT, "Bot. Left", RENDER_IN_BOTTOM_LEFT, 
         "Bot. Cent.", RENDER_IN_BOTTOM_CENTER, "Bot. Right", RENDER_IN_BOTTOM_RIGHT,
-        "Top L Lrg", RENDER_IN_TOP_LEFT_LARGE,"Top R Lrg", RENDER_IN_TOP_RIGHT_LARGE,
+        "Top L Lrg", RENDER_IN_TOP_LEFT_LARGE,
+        "Top Full", RENDER_IN_TOP,
         "At Camera", RENDER_AT_CAMERA, "Ground", RENDER_ON_GROUND, NULL);
 
     cr->expander = gtk_expander_new(channel);

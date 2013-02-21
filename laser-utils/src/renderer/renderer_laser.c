@@ -40,6 +40,10 @@
 #define COLOR_MODE_Z_DZ 0.1
 #define PARAM_MAX_DRAW_Z "Max Draw Z"
 #define PARAM_MIN_DRAW_Z "Min Draw Z"
+
+#define PARAM_MAX_DRAW_RANGE "MaxDrawRng"
+#define MAX_DRAW_RANGE 80.0 /* length of a sick range - 80.0m */
+
 #define SPACIAL_DECIMATION_LIMIT 0.05 /* meters */
 #define ANGULAR_DECIMATION_LIMIT .075 /* radians */
 
@@ -69,7 +73,7 @@
 #endif
 
 typedef enum _color_mode_t {
-  COLOR_MODE_DRAB, COLOR_MODE_LASER, COLOR_MODE_INTENSITY, COLOR_MODE_Z,
+  COLOR_MODE_DRAB, COLOR_MODE_LASER, COLOR_MODE_INTENSITY, COLOR_MODE_Z, COLOR_MODE_WORKSPACE
 } color_mode_t;
 
 typedef struct _laser_channel {
@@ -104,6 +108,7 @@ typedef struct _RendererLaser {
   double param_color_mode_z_min_z;
   double param_max_draw_z;
   double param_min_draw_z;
+  double param_max_draw_range;
   double param_alpha;
   int z_relative;
 
@@ -203,7 +208,8 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       }
       //count number of points we want to draw
       for (int i = 0; i < lscan->npoints; i++) {
-        if (lscan->point_status[i]<laser_valid_projection && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
+        if ((lscan->point_status[i]<laser_valid_projection && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
+              &&  (lscan->rawScan->ranges[i] < self->param_max_draw_range ))
           numPointsToDraw++;
       }
     }
@@ -228,7 +234,8 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       laser_projected_scan *lscan = bot_ptr_circular_index(lchan->scans, scan_idx);
 
       for (int i = 0; i < lscan->npoints; i++) {
-        if (lscan->point_status[i]>laser_valid_projection || lscan->points[i].z < self->param_min_draw_z|| lscan->points[i].z > self->param_max_draw_z) {
+        if (lscan->point_status[i]>laser_valid_projection || lscan->points[i].z < self->param_min_draw_z|| 
+               lscan->points[i].z > self->param_max_draw_z || lscan->rawScan->ranges[i] > self->param_max_draw_range ){
           continue;
         }
         else {
@@ -245,6 +252,19 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
 
               double z_norm = (z - self->param_color_mode_z_min_z) * z_norm_scale;
               float * jetC = bot_color_util_jet(z_norm);
+              memcpy(colorV, jetC, 3 * sizeof(float));
+            }
+            break;
+          case COLOR_MODE_WORKSPACE:
+            {
+              double range_mapping = (lscan->rawScan->ranges[i] -0.5 /1.5); // map 0.5->2 range to be 0->1
+              double z_norm=0;
+              if (range_mapping >1.0){
+                range_mapping = 1.0;
+              }else if(range_mapping < 0.0){
+                range_mapping = 0.0;
+              }
+              float * jetC = bot_color_util_jet(range_mapping);
               memcpy(colorV, jetC, 3 * sizeof(float));
             }
             break;
@@ -516,6 +536,7 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
   self->param_color_mode_z_min_z = bot_gtk_param_widget_get_double(self->pw, PARAM_COLOR_MODE_Z_MIN_Z);
   self->param_max_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MAX_DRAW_Z);
   self->param_min_draw_z = bot_gtk_param_widget_get_double(self->pw, PARAM_MIN_DRAW_Z);
+  self->param_max_draw_range = bot_gtk_param_widget_get_double(self->pw, PARAM_MAX_DRAW_RANGE);
   self->param_alpha = bot_gtk_param_widget_get_double(self->pw, PARAM_ALPHA);
   self->param_max_buffer_size = bot_gtk_param_widget_get_int(self->pw, PARAM_MAX_BUFFER_SIZE);
 
@@ -580,6 +601,7 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
   self->param_color_mode_z_min_z = COLOR_MODE_Z_MIN_Z;
   self->param_max_draw_z = COLOR_MODE_Z_MAX_Z;
   self->param_min_draw_z = COLOR_MODE_Z_MIN_Z;
+  self->param_max_draw_range = MAX_DRAW_RANGE;
   self->param_alpha = 1;
   self->param_max_buffer_size = MAX_SCAN_MEMORY; 
 
@@ -591,7 +613,7 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
     bot_gtk_param_widget_add_int(self->pw, PARAM_SCAN_MEMORY, BOT_GTK_PARAM_WIDGET_SPINBOX, 1, MAX_SCAN_MEMORY, 1,
         self->param_scan_memory);
     bot_gtk_param_widget_add_enum(self->pw, PARAM_COLOR_MODE, BOT_GTK_PARAM_WIDGET_MENU, self->param_color_mode,
-        "Laser", COLOR_MODE_LASER, "Drab", COLOR_MODE_DRAB, "Intensity", COLOR_MODE_INTENSITY, "Height", COLOR_MODE_Z,
+        "Laser", COLOR_MODE_LASER, "Drab", COLOR_MODE_DRAB, "Intensity", COLOR_MODE_INTENSITY, "Height", COLOR_MODE_Z, "Workspace", COLOR_MODE_WORKSPACE,
         NULL);
     bot_gtk_param_widget_add_booleans(self->pw, 0, PARAM_Z_BUFFER, self->param_z_buffer, NULL);
     bot_gtk_param_widget_add_booleans(self->pw, 0, PARAM_BIG_POINTS, self->param_big_points, NULL);
@@ -609,6 +631,8 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
         COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_min_draw_z);
     bot_gtk_param_widget_add_double(self->pw, PARAM_MAX_DRAW_Z, BOT_GTK_PARAM_WIDGET_SPINBOX, COLOR_MODE_Z_MIN_Z,
         COLOR_MODE_Z_MAX_Z, COLOR_MODE_Z_DZ, self->param_max_draw_z);
+    bot_gtk_param_widget_add_double(self->pw, PARAM_MAX_DRAW_RANGE, BOT_GTK_PARAM_WIDGET_SPINBOX, 0,
+        MAX_DRAW_RANGE, 0.1, MAX_DRAW_RANGE); // from short to sick range
 
     bot_gtk_param_widget_add_int(self->pw, PARAM_MAX_BUFFER_SIZE, BOT_GTK_PARAM_WIDGET_SPINBOX, 1, MAX_SCAN_MEMORY, 1,
         self->param_max_buffer_size);
