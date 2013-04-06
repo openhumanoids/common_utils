@@ -177,7 +177,7 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, d
 
   octree.getMetricMin(minX, minY, minZ);
   octree.getMetricMax(maxX, maxY, maxZ);
-  printf("map bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
+  //printf("map bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
 
   std::list<octomap::OcTreeVolume> occupiedThresVoxels;
   std::list<octomap::OcTreeVolume> freeThresVoxels;
@@ -209,8 +209,8 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, d
     }
     int size3 = occupiedVoxels.size();
     int size4 = occupiedThresVoxels.size();
-    printf("thresh=[%f,%f], numremoved=%d, sizes %d %d %d %d\n", minDrawZ, maxDrawZ, numremoved, size1, size2, size3,
-        size4);
+    //printf("thresh=[%f,%f], numremoved=%d, sizes %d %d %d %d\n", minDrawZ, maxDrawZ, numremoved, size1, size2, size3,
+    //    size4);
   }
 
   if (m_drawFree) {
@@ -237,8 +237,8 @@ void MyOcTreeDrawer::setOcTree(const octomap::OcTree& octree, double minDrawZ, d
     }
     int size3 = freeVoxels.size();
     int size4 = freeThresVoxels.size();
-    printf("free numremoved=%d, sizes %d %d %d %d\n", numremoved, size1, size2, size3,
-        size4);
+    //printf("free numremoved=%d, sizes %d %d %d %d\n", numremoved, size1, size2, size3,
+    //    size4);
   }
 
   m_octree_grid_vis_initialized = false;
@@ -857,10 +857,8 @@ static void on_save_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
 
 static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const octomap_raw_t *msg, void *user_data)
 {
-  fprintf(stderr, "got new octomap\n");
   BotRendererOctomap *self = (BotRendererOctomap*) user_data;
-  if (self->ocTree != NULL
-  )
+  if (self->ocTree != NULL)
     delete self->ocTree;
   self->octd->clear();
 
@@ -878,10 +876,9 @@ static void on_octomap(const lcm_recv_buf_t *rbuf, const char *channel, const oc
   double minX, minY, minZ, maxX, maxY, maxZ;
   self->ocTree->getMetricMin(minX, minY, minZ);
   self->ocTree->getMetricMax(maxX, maxY, maxZ);
-  printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
+  //printf("\nmap bounds: [%.2f, %.2f, %.2f] - [%.2f, %.2f, %.2f]\n", minX, minY, minZ, maxX, maxY, maxZ);
   self->octd->setOcTree(*self->ocTree, bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MIN),
       bot_gtk_param_widget_get_double(self->pw, PARAM_Z_MAX));
-  fprintf(stderr, "loadedOctomap\n");
 }
 
 static void on_find_button(GtkWidget *button, BotRendererOctomap *self)

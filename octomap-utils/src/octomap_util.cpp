@@ -74,9 +74,7 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   for (ixyz[2] = 0; ixyz[2] < voxMap->dimensions[2]; ixyz[2]++) {
     float v = voxMap->readValue(ixyz);
     voxMap->tableToWorld(ixyz, xyz);
-    printf(" %f", v);
   }
-  printf("\n");
   xyz[0] = -100;
   xyz[1] = 100;
   xyz[2] = 0;
@@ -84,7 +82,6 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   for (ixyz[2] = 0; ixyz[2] < voxMap->dimensions[2]; ixyz[2]++) {
     float v = voxMap->readValue(ixyz);
     voxMap->tableToWorld(ixyz, xyz);
-    printf(" %f", v);
   }
   return voxMap;
 }
