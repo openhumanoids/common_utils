@@ -51,7 +51,10 @@ struct _RendererCamThumb {
   
   // opacity
   float alpha;
-  
+
+  // height of ground plane - provided via POSE_GROUND message
+  // Otherwise = 0. this could be inferred by any method e.g. lowest foot or from perception
+  float ground_height;  
 };
 
 typedef struct _ImageVertex ImageVertex;
@@ -95,7 +98,6 @@ typedef struct _cam_renderer {
   int expanded;
 
 //    CamrendVisualFeatures *feature_renderer;
-  
 } cam_renderer_t;
 
 enum {
@@ -158,6 +160,7 @@ static void cam_renderer_destroy(cam_renderer_t *cr)
   free(cr);
 }
 
+static void on_pose_ground(const lcm_recv_buf_t *rbuf, const char *channel, const bot_core_pose_t *msg, void *user_data);
 static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_core_image_t *msg, void *user_data);
 static void cam_renderer_draw(cam_renderer_t *cr);
 static int cam_renderer_prepare_texture(cam_renderer_t *cr);
@@ -245,6 +248,8 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
       BotTrans cam_to_local;
       bot_frames_get_trans_with_utime(self->bot_frames, cr->coord_frame, bot_frames_get_root_name(self->bot_frames),
           cr->last_image->utime, &cam_to_local);
+      // Project the camera onto a plane estimated from the foot/bottom of the robot
+      cam_to_local.trans_vec[2] = cam_to_local.trans_vec[2] - self->ground_height;
 
       // project image onto the ground plane
       for (int i = 0; i < cr->img_nvertices; i++) {
@@ -298,13 +303,13 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
           continue;
 
         glTexCoord2f(v0->tx, v0->ty);
-        glVertex3f(p0->x, p0->y, 0);
+        glVertex3f(p0->x, p0->y, self->ground_height);
         glTexCoord2f(v1->tx, v1->ty);
-        glVertex3f(p1->x, p1->y, 0);
+        glVertex3f(p1->x, p1->y, self->ground_height);
         glTexCoord2f(v2->tx, v2->ty);
-        glVertex3f(p2->x, p2->y, 0);
+        glVertex3f(p2->x, p2->y, self->ground_height);
         glTexCoord2f(v3->tx, v3->ty);
-        glVertex3f(p3->x, p3->y, 0);
+        glVertex3f(p3->x, p3->y, self->ground_height);
       }
       glEnd();
     }
@@ -525,6 +530,8 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
   self->param = param;
   
   self->alpha = 1.0;
+  self->ground_height = 0.0;
+  
   self->pw = BOT_GTK_PARAM_WIDGET(self->renderer.widget);
   bot_gtk_param_widget_add_double (self->pw, PARAM_COLOR_ALPHA, BOT_GTK_PARAM_WIDGET_SLIDER, 0, 1, 0.001, 1);
 
@@ -547,7 +554,8 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
     }
   }
   g_strfreev(cam_names);
-
+  bot_core_pose_t_subscribe(self->lc, "POSE_GROUND", on_pose_ground, self);
+ 
   g_signal_connect(G_OBJECT(viewer), "load-preferences", G_CALLBACK(on_load_preferences), self);
   g_signal_connect(G_OBJECT(viewer), "save-preferences", G_CALLBACK(on_save_preferences), self);
 
@@ -772,6 +780,12 @@ static void on_cam_renderer_param_widget_changed(BotGtkParamWidget *pw, const ch
 
   cr->is_uploaded = 0;
   bot_viewer_request_redraw(cr->renderer->viewer);
+}
+
+static void on_pose_ground(const lcm_recv_buf_t *rbuf, const char *channel, const bot_core_pose_t *msg, void *user_data)
+{
+  RendererCamThumb *self = (RendererCamThumb*) user_data;
+  self->ground_height =(float) msg->pos[2];
 }
 
 static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_core_image_t *msg, void *user_data)
