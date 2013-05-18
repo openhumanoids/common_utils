@@ -28,6 +28,8 @@
 
 #define RENDERER_NAME "Camera"
 
+#define PARAM_AT_GROUND_SCALE "At Camera Scale"
+
 #define PARAM_COLOR_ALPHA "Alpha"
 #define PARAM_RENDER_IN "Show"
 
@@ -51,6 +53,10 @@ struct _RendererCamThumb {
   
   // opacity
   float alpha;
+  // scale of at camera distance:
+  float at_camera_scale;
+  // has the scale changed - need new dl (boolean)
+  int need_new_camera_dl;
 
   // height of ground plane - provided via POSE_GROUND message
   // Otherwise = 0. this could be inferred by any method e.g. lowest foot or from perception
@@ -167,6 +173,7 @@ static int cam_renderer_prepare_texture(cam_renderer_t *cr);
 
 static void _draw_thumbs_at_cameras(RendererCamThumb *self)
 {
+  
   // transform into body frame
   GList *crlist = bot_g_hash_table_get_vals(self->cam_handlers);
   for (GList *criter = crlist; criter; criter = criter->next) {
@@ -222,7 +229,7 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
       glPushMatrix();
       glMultMatrixd(c2l_mat_gl);
 
-      if (cr->at_camera_dl) {
+      if (cr->at_camera_dl && !self->need_new_camera_dl ) {
         glCallList(cr->at_camera_dl);
       }
       else {
@@ -234,12 +241,14 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
         for (int i = 0; i < cr->n_vert_indices; i++) {
           ImageVertex *v = &cr->vertices[cr->vert_indices[i]];
           glTexCoord2f(v->tx, v->ty);
-//          glTexCoord3f(v->tx, v->ty, 0.5f);
-          glVertex3f(v->vx, v->vy, v->vz);
+          // glTexCoord3f(v->tx, v->ty, 0.5f);
+          // glVertex3f(v->vx, v->vy, v->vz);
+	  glVertex3f(self->at_camera_scale *v->vx, self->at_camera_scale* v->vy, self->at_camera_scale*v->vz);
         }
         glEnd();
 
         glEndList();
+	
       }
 
       glPopMatrix();
@@ -318,6 +327,9 @@ static void _draw_thumbs_at_cameras(RendererCamThumb *self)
     glBindTexture(textarget, 0);
     glDisable(textarget);
   }
+  
+  // Set the new scale flag to false
+  self->need_new_camera_dl=0;
 }
 
 static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
@@ -499,6 +511,11 @@ static void on_param_widget_changed(BotGtkParamWidget *pw, const char *name, voi
     self->alpha = (float) bot_gtk_param_widget_get_double(pw, PARAM_COLOR_ALPHA);
     bot_viewer_request_redraw(self->viewer);
   }
+  if(! strcmp(name, PARAM_AT_GROUND_SCALE)) {
+    self->need_new_camera_dl = 1;
+    self->at_camera_scale = (float) bot_gtk_param_widget_get_double(pw, PARAM_AT_GROUND_SCALE);
+    bot_viewer_request_redraw(self->viewer);
+  }
 }
 
 
@@ -530,9 +547,12 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
   self->param = param;
   
   self->alpha = 1.0;
+  self->need_new_camera_dl =0; // bool false
+  self->at_camera_scale= 1.0;
   self->ground_height = 0.0;
   
   self->pw = BOT_GTK_PARAM_WIDGET(self->renderer.widget);
+  bot_gtk_param_widget_add_double (self->pw, PARAM_AT_GROUND_SCALE, BOT_GTK_PARAM_WIDGET_SLIDER, 0.1, 2, 0.1, 1);
   bot_gtk_param_widget_add_double (self->pw, PARAM_COLOR_ALPHA, BOT_GTK_PARAM_WIDGET_SLIDER, 0, 1, 0.001, 1);
 
   g_signal_connect(G_OBJECT(self->pw), "changed", G_CALLBACK(on_param_widget_changed), self);
