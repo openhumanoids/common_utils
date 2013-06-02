@@ -32,6 +32,7 @@
 
 #define PARAM_COLOR_ALPHA "Alpha"
 #define PARAM_RENDER_IN "Show"
+#define PARAM_UPRIGHT "Upright"
 
 #define MAX_GROUND_PROJECTION_DISTANCE 120
 #define MAX_GROUND_PROJECTION_DISTANCE_SQ (MAX_GROUND_PROJECTION_DISTANCE*MAX_GROUND_PROJECTION_DISTANCE)
@@ -102,6 +103,7 @@ typedef struct _cam_renderer {
   int msg_received;
   int render_place;
   int expanded;
+  int upright;
 
 //    CamrendVisualFeatures *feature_renderer;
 } cam_renderer_t;
@@ -446,7 +448,20 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
 
     glPushMatrix();
     glTranslatef(p1.x, p1.y, 1);
+
+    if (cr->upright) {
+      BotTrans local_to_cam;
+      bot_frames_get_trans_with_utime(cr->renderer->bot_frames, bot_frames_get_root_name(cr->renderer->bot_frames), cr->coord_frame, cr->last_image->utime, &local_to_cam);
+      double local_to_cam_mat[16];
+      bot_trans_get_mat_4x4(&local_to_cam, local_to_cam_mat);
+      float theta = atan2(local_to_cam_mat[6], local_to_cam_mat[2]);
+      glTranslatef(thumb_width/2.0f,thumb_height/2.0f,0);
+      glRotatef(-theta*180/M_PI-90,0,0,1);
+      glTranslatef(-thumb_width/2.0f,-thumb_height/2.0f,0);
+    }
+
     glScalef(thumb_width, thumb_height, 1);
+
     cam_renderer_draw(cr);
     glPopMatrix();
   }
@@ -480,8 +495,9 @@ static void on_load_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
     char *val = g_key_file_get_string(keyfile, RENDERER_NAME, key, NULL);
     cr->render_place = 0;
     cr->expanded = 0;
+    cr->upright = 0;
     if (val) {
-      sscanf(val, "%d %d", &cr->render_place, &cr->expanded);
+      sscanf(val, "%d %d %d", &cr->render_place, &cr->expanded, &cr->upright);
     }
     g_free(val);
   }
@@ -498,7 +514,7 @@ static void on_save_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
     cam_renderer_t *cr = g_hash_table_lookup(self->cam_handlers, key);
 
     char str[80];
-    sprintf(str, "%d %d", cr->render_place, cr->expanded);
+    sprintf(str, "%d %d %d", cr->render_place, cr->expanded, cr->upright);
     g_key_file_set_string(keyfile, RENDERER_NAME, key, str);
   }
   g_list_free(keys);
@@ -790,6 +806,8 @@ static void on_cam_renderer_param_widget_changed(BotGtkParamWidget *pw, const ch
     cr->texture = NULL;
   }
 
+  cr->upright = bot_gtk_param_widget_get_bool(pw, PARAM_UPRIGHT);
+
   cr->render_place = bot_gtk_param_widget_get_enum(pw, PARAM_RENDER_IN);
   if (cr->render_place == RENDER_IN_WIDGET) {
     gtk_widget_show(GTK_WIDGET(cr->gl_area));
@@ -833,6 +851,7 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
         "Top L Lrg", RENDER_IN_TOP_LEFT_LARGE,
         "Top Full", RENDER_IN_TOP,
         "At Camera", RENDER_AT_CAMERA, "Ground", RENDER_ON_GROUND, NULL);
+    bot_gtk_param_widget_add_booleans(cr->pw, BOT_GTK_PARAM_WIDGET_CHECKBOX, PARAM_UPRIGHT, 0, NULL);
 
     cr->expander = gtk_expander_new(channel);
     gtk_box_pack_start(GTK_BOX(self->renderer.widget), cr->expander, TRUE, TRUE, 0);
@@ -848,6 +867,7 @@ static void on_image(const lcm_recv_buf_t *rbuf, const char *channel, const bot_
 
     gtk_widget_show_all(GTK_WIDGET(cr->expander));
     gtk_expander_set_expanded(GTK_EXPANDER(cr->expander), cr->expanded);
+    bot_gtk_param_widget_set_bool(cr->pw, PARAM_UPRIGHT, cr->upright);
 
     if (cr->render_place == RENDER_IN_WIDGET) {
       gtk_widget_show(GTK_WIDGET(cr->gl_area));
