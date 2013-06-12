@@ -371,12 +371,12 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
     double aspect = cr->last_image->width / (double) cr->last_image->height;
 
     double thumb_width, thumb_height;
-    if ((vp_width / 3) / aspect > vp_height / 3) {
-      thumb_height = vp_height / 3;
+    if ((vp_width / 3.5) / aspect > vp_height / 3.5) {
+      thumb_height = vp_height / 3.5;
       thumb_width = thumb_height * aspect;
     }
     else {
-      thumb_width = vp_width / 3;
+      thumb_width = vp_width / 3.5;
       thumb_height = thumb_width / aspect;
     }
 
@@ -392,7 +392,7 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       p1.y = vp_height - thumb_height;
       break;
     case RENDER_IN_BOTTOM_CENTER:
-      p1.x = vp_width / 3;
+      p1.x = vp_width / 3.5;
       p1.y = vp_height - thumb_height;
       break;
     case RENDER_IN_BOTTOM_LEFT:
@@ -404,7 +404,7 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       p1.y = 0;
       break;
     case RENDER_IN_TOP_CENTER:
-      p1.x = vp_width / 3;
+      p1.x = vp_width / 3.5;
       p1.y = 0;
       break;
     case RENDER_IN_TOP_RIGHT:
@@ -413,11 +413,11 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       break;
     case RENDER_IN_TOP_LEFT_LARGE:
       if ((vp_width / 2) / aspect > vp_height / 2) {
-        thumb_height = vp_height / 2;
+        thumb_height = vp_height / 3;
         thumb_width = thumb_height * aspect;
       }
       else {
-        thumb_width = vp_width / 2;
+        thumb_width = vp_width / 3;
         thumb_height = thumb_width / aspect;
       }
       
@@ -425,12 +425,12 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       p1.y = 0;
       break;
     case RENDER_IN_TOP_RIGHT_LARGE:
-      if ((vp_width / 2) / aspect > vp_height / 2) {
-        thumb_height = vp_height / 2;
+      if ((vp_width / 3) / aspect > vp_height / 3) {
+        thumb_height = vp_height / 3;
         thumb_width = thumb_height * aspect;
       }
       else {
-        thumb_width = vp_width / 2;
+        thumb_width = vp_width / 3;
         thumb_height = thumb_width / aspect;
       }
       
