@@ -104,6 +104,8 @@ typedef struct _cam_renderer {
   int render_place;
   int expanded;
   int upright;
+  int64_t upright_update_time;
+  double upright_theta;  
 
 //    CamrendVisualFeatures *feature_renderer;
 } cam_renderer_t;
@@ -449,14 +451,19 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
     glPushMatrix();
     glTranslatef(p1.x, p1.y, 1);
 
-    if (cr->upright) {
+    if (cr->last_image->utime != cr->upright_update_time) {
       BotTrans local_to_cam;
-      bot_frames_get_trans_with_utime(cr->renderer->bot_frames, bot_frames_get_root_name(cr->renderer->bot_frames), cr->coord_frame, cr->last_image->utime, &local_to_cam);
-      double local_to_cam_mat[16];
-      bot_trans_get_mat_4x4(&local_to_cam, local_to_cam_mat);
-      float theta = atan2(local_to_cam_mat[6], local_to_cam_mat[2]);
+      if (bot_frames_get_trans_with_utime(cr->renderer->bot_frames, bot_frames_get_root_name(cr->renderer->bot_frames), cr->coord_frame, cr->last_image->utime, &local_to_cam) != 0) {
+        double local_to_cam_mat[16];
+        bot_trans_get_mat_4x4(&local_to_cam, local_to_cam_mat);
+        cr->upright_theta = atan2(local_to_cam_mat[6], local_to_cam_mat[2]);
+        cr->upright_theta = -cr->upright_theta*180/M_PI - 90;
+        cr->upright_update_time = cr->last_image->utime;
+      }
+    }
+    if ((cr->upright) && (cr->upright_update_time == cr->last_image->utime)) {
       glTranslatef(thumb_width/2.0f,thumb_height/2.0f,0);
-      glRotatef(-theta*180/M_PI-90,0,0,1);
+      glRotatef(cr->upright_theta,0,0,1);
       glTranslatef(-thumb_width/2.0f,-thumb_height/2.0f,0);
     }
 
@@ -496,6 +503,8 @@ static void on_load_preferences(BotViewer *viewer, GKeyFile *keyfile, void *user
     cr->render_place = 0;
     cr->expanded = 0;
     cr->upright = 0;
+    cr->upright_theta = 0;
+    cr->upright_update_time = -1;
     if (val) {
       sscanf(val, "%d %d %d", &cr->render_place, &cr->expanded, &cr->upright);
     }
