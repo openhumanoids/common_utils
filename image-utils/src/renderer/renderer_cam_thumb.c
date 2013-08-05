@@ -594,7 +594,24 @@ static BotRenderer *_new(BotViewer *viewer, lcm_t * lcm, BotParam * param, BotFr
   for (int i = 0; cam_names[i]; i++) {
     char * channel = bot_param_get_camera_lcm_channel(self->param, cam_names[i]);
     if (channel != NULL) {
-      bot_core_image_t_subscribe(self->lc, channel, on_image, self);
+
+      char key[2048];
+      sprintf(key, "cameras.%s.type",  cam_names[i]);
+      char *type = NULL;
+      int typical_image = 1;
+      if (0 == bot_param_get_str(self->param, key, &type)) {
+        //fprintf(stdout, "type field found %s\n",type);
+        if (strcmp (type, "stereo") == 0){
+          //fprintf(stdout, "stereo found type %s\n",type);
+          typical_image = 0;
+        }
+      }
+      
+      if (typical_image){
+        bot_core_image_t_subscribe(self->lc, channel, on_image, self);
+      }else{
+        //fprintf(stdout, "cam renderer ignoring stereo images on [%s]\n", channel);
+      }
       free(channel);
     }
   }
