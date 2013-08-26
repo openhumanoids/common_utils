@@ -415,11 +415,11 @@ static void cam_thumb_draw(BotViewer *viewer, BotRenderer *renderer)
       break;
     case RENDER_IN_TOP_LEFT_LARGE:
       if ((vp_width / 2) / aspect > vp_height / 2) {
-        thumb_height = vp_height / 3;
+        thumb_height = vp_height / 2;
         thumb_width = thumb_height * aspect;
       }
       else {
-        thumb_width = vp_width / 3;
+        thumb_width = vp_width / 2;
         thumb_height = thumb_width / aspect;
       }
       
