@@ -273,11 +273,16 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
               if (lscan->rawScan->nintensities == lscan->rawScan->nranges) {
                 double v = lscan->rawScan->intensities[i];
                 if (v > 1) {
-                  // old non-normalized encoding
-                  double minv = 7000, maxv = 12000;
+                  // SICK intensity ranges: (rarely used now)
+                  // double minv = 7000, maxv = 12000; 
+                  // Hokuyo Typical Ranges:
+                  double minv = 300, maxv = 4000;
+                  
+                  v = fmax(300.0 , fmin(v,4000.0) );
                   v = (v - minv) / (maxv - minv);
                 }
-                glColor3fv(bot_color_util_jet(v));
+                float * jetC = bot_color_util_jet(v);
+                memcpy(colorV, jetC, 3 * sizeof(float));
                 break;
               }
             }
@@ -314,7 +319,7 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
   }
 
   if (self->param_big_points)
-    glPointSize(8.0f);
+    glPointSize(4.0f);
   else
     glPointSize(2.0f);
 
@@ -594,7 +599,7 @@ static BotRenderer* renderer_laser_new(BotViewer *viewer, lcm_t * lcm, BotParam 
   self->param_scan_memory = 50;
   self->param_color_mode = COLOR_MODE_LASER;
   self->param_max_buffer_size = MAX_SCAN_MEMORY;
-  self->param_z_buffer = FALSE;
+  self->param_z_buffer = TRUE;
   self->param_big_points = FALSE;
   self->param_spacial_decimate = FALSE;
   self->param_color_mode_z_max_z = COLOR_MODE_Z_MAX_Z;
