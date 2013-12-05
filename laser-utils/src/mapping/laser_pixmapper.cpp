@@ -3,14 +3,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include <bot_core/bot_core.h>
 #include <pthread.h>
 #include <deque>
-#include <bot_param/param_util.h>
-#include <GL/gl.h>
 #include <vector>
 #include <iostream>
 #include <sstream>
+
+
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
+#include <GL/gl.h>
+#endif
+
+#include <bot_core/bot_core.h>
+#include <bot_param/param_util.h>
 
 #include <ConciseArgs>
 
