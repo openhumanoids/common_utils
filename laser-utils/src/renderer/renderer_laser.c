@@ -208,8 +208,9 @@ static void renderer_laser_draw(BotViewer *viewer, BotRenderer *renderer)
       }
       //count number of points we want to draw
       for (int i = 0; i < lscan->npoints; i++) {
-        if ((lscan->point_status[i]<laser_valid_projection && lscan->points[i].z > self->param_min_draw_z&& lscan->points[i].z < self->param_max_draw_z)
-              &&  (lscan->rawScan->ranges[i] < self->param_max_draw_range ))
+        if ((lscan->point_status[i]<=laser_valid_projection && lscan->points[i].z >= self->param_min_draw_z&& lscan->points[i].z <= self->param_max_draw_z)
+              &&  (lscan->rawScan->ranges[i] <= self->param_max_draw_range ))
+
           numPointsToDraw++;
       }
     }
