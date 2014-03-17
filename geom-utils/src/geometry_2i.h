@@ -273,7 +273,7 @@ geom_point_point_distance_squared_2i (const point2i_t *a, const point2i_t *b)
 static inline double
 geom_point_point_distance_2i (const point2i_t *a, const point2i_t *b)
 {
-    return sqrt ((a->x-b->x)*(a->x-b->x) + (a->y-b->y)*(a->y-b->y));
+    return sqrt ( (double) (a->x-b->x)*(a->x-b->x) + (a->y-b->y)*(a->y-b->y));
 }
 
 static inline int
