@@ -15,10 +15,12 @@ int main(int argc, char ** argv)
 
   double repeat_period = -1;
   bool blurred_map = false;
+  std::string channel = "OCTOMAP";
 
   opt_parse.add(repeat_period, "r", "repeat", "repeat period for lcm publishing, negative only publish once", false);
   opt_parse.add(blurred_map, "b", "blurred",
       "map file contains a blurred map, load with loadOctomap instead of default", false);
+  opt_parse.add(channel, "c", "channel", "channel on which to transmit", false);
 
   string octomap_fname;
   opt_parse.parse(octomap_fname);
@@ -59,12 +61,12 @@ int main(int argc, char ** argv)
   msg.data = (uint8_t *) datastring.c_str();
   msg.length = datastring.size();
 
-  octomap_raw_t_publish(lcm, "OCTOMAP", &msg);
+  octomap_raw_t_publish(lcm, channel.c_str(), &msg);
   if (repeat_period > 0) {
     while (1) {
       usleep(1e6 * repeat_period);
       fprintf(stderr, ".");
-      octomap_raw_t_publish(lcm, "OCTOMAP", &msg);
+      octomap_raw_t_publish(lcm, channel.c_str(), &msg);
     }
   }
   fprintf(stderr, "done! \n");
