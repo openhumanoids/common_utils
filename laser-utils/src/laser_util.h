@@ -88,22 +88,43 @@ extern "C" {
 
   /*
    * motion corrects the projection for laser_angular_rate and laser_angular_velocity expressed in laser frame
+   * mfallon, march 2014: I did not think this was very accurate, specifically because of bot_trans_set_from_velocities
    */
   laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(Laser_projector * projector,
       const bot_core_planar_lidar_t *msg, const char * dest_frame, const double laser_angular_rate[3],
       const double laser_velocity[3]);
 
   /*
-   * update the scan with the current transform...
-   */
-  int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame);
-
-  /*
    * motion corrects the projection for laser_angular_rate and laser_angular_velocity expressed in laser frame
+   * mfallon, march 2014: I did not think this was very accurate, specifically because of bot_trans_set_from_velocities
    */
   int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_projected_scan * proj_scan,
       const char * dest_frame, const double laser_angular_rate[3], const double laser_velocity[3]);
 
+
+  ///////////////////////////////// NEW NEW NEW NEW NEW NEW //////////////////////////////////
+  /*
+   * interpolation corrects the projection due to motion expressed in laser frame using bot frames
+   * add by mfallon, march 2014: Uses bot-frames to determine required bottrans of start and end of scan 
+   * And then interpolates that. It does NOT take into account the motion of the body for that duration
+   * that could be supported. I'd like to merge this *with_motion and provide optional arguments as the code is duplicative
+   */
+  laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation(Laser_projector * projector,
+      const bot_core_planar_lidar_t *msg, const char * dest_frame);
+
+  /*
+   * interpolation corrects the projection due to motion expressed in laser frame using bot frames
+   * added by mfallon, march 2014: ses bot-frames to determine required transform of start of scan
+   */
+  int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
+      const char * dest_frame);
+  
+  /*
+   * update the scan with the current transform...
+   */
+  int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame);
+  
+  
   void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation_min, double spatial_decimation_max);
 
   void laser_destroy_projected_scan(laser_projected_scan * proj_scan);
