@@ -158,7 +158,8 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1])) {
+    //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
       sensor_xyz[2] = 0;
@@ -247,14 +248,14 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
       &proj_scan->origin)) {
     return proj_scan->projection_status;
   }
-  
+
   // proj_scan->origin is the location of the mirror at the end of the scan. the following is the location at the start of the scan
   // I'm not checking status as by definition. it is was before, it must be valid if the above is also valid.
   int64_t scan_start_utime = proj_scan->utime - 1E6*3/(40*4);
   BotTrans origin_start;
   bot_frames_get_trans_with_utime( projector->bot_frames, projector->coord_frame,  dest_frame, scan_start_utime, &origin_start);
-  
-  
+
+
 
   int64_t latest_trans_timestamp;
   bot_frames_get_trans_latest_timestamp(projector->bot_frames, projector->coord_frame, dest_frame,
@@ -287,10 +288,10 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
 
   const double tStep = 1.0/(proj_scan->rawScan->nranges-1);
   double t = 0;
-  
+
   /* convert the range data to the local frame */
   for (int i = 0; i < proj_scan->npoints; i++, t+=tStep) {
-    
+
     double range = proj_scan->rawScan->ranges[i];
     double theta = proj_scan->rawScan->rad0 + proj_scan->rawScan->radstep * i;
 
@@ -307,7 +308,8 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1])) {
+    //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
       sensor_xyz[2] = 0;
@@ -341,11 +343,11 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     }
 
     /* convert to local frame */
-    bot_trans_interpolate(&laser_hit_time_to_dest, &origin_start, & proj_scan->origin, t);  
+    bot_trans_interpolate(&laser_hit_time_to_dest, &origin_start, & proj_scan->origin, t);
     bot_trans_apply_vec(&laser_hit_time_to_dest, sensor_xyz, point3d_as_array(&proj_scan->points[i]));
   }
-  
-  
+
+
   aveRange /= surroundCount;
   aveRangeSq /= surroundCount;
   proj_scan->aveSurroundRange = aveRange;
@@ -435,4 +437,3 @@ void laser_destroy_projected_scan(laser_projected_scan * proj_scan)
     bot_core_planar_lidar_t_destroy(proj_scan->rawScan);
   free(proj_scan);
 }
-
