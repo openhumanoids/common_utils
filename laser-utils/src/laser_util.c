@@ -251,7 +251,10 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
 
   // proj_scan->origin is the location of the mirror at the end of the scan. the following is the location at the start of the scan
   // I'm not checking status as by definition. it is was before, it must be valid if the above is also valid.
-  int64_t scan_start_utime = proj_scan->utime - 1E6*3/(40*4);
+  double frac_sweep = (proj_scan->rawScan->nranges-1)*proj_scan->rawScan->radstep/(2*M_PI);
+  int64_t sweep_time = (int64_t) 1E6*frac_sweep/projector->laser_frequency; // time taken for the lidar device to sweep the visiable arc fraction
+  // int64_t sweep_time = 1E6*3/(40*4); // correct value for a Hokuyo lidar
+  int64_t scan_start_utime = proj_scan->utime - sweep_time;
   BotTrans origin_start;
   bot_frames_get_trans_with_utime( projector->bot_frames, projector->coord_frame,  dest_frame, scan_start_utime, &origin_start);
 
