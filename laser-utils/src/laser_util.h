@@ -32,6 +32,7 @@ extern "C" {
     double max_range_free_dist; /*project max_range readings out this far (from param) */
     double min_range; /* min sensor range (from param) */
 
+    int distBackRegion[2]; /*(from param)*/
     int heightDownRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int heightUpRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int surroundRegion[2]; /*begining and end of beams not deflected by mirror (from param)*/
@@ -105,7 +106,7 @@ extern "C" {
   ///////////////////////////////// NEW NEW NEW NEW NEW NEW //////////////////////////////////
   /*
    * interpolation corrects the projection due to motion expressed in laser frame using bot frames
-   * add by mfallon, march 2014: Uses bot-frames to determine required bottrans of start and end of scan 
+   * add by mfallon, march 2014: Uses bot-frames to determine required bottrans of start and end of scan
    * And then interpolates that. It does NOT take into account the motion of the body for that duration
    * that could be supported. I'd like to merge this *with_motion and provide optional arguments as the code is duplicative
    */
@@ -118,13 +119,13 @@ extern "C" {
    */
   int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
       const char * dest_frame);
-  
+
   /*
    * update the scan with the current transform...
    */
   int laser_update_projected_scan(Laser_projector * projector, laser_projected_scan * proj_scan, const char * dest_frame);
-  
-  
+
+
   void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, double spatial_decimation_min, double spatial_decimation_max);
 
   void laser_destroy_projected_scan(laser_projected_scan * proj_scan);

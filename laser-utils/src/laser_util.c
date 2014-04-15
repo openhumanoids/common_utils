@@ -46,6 +46,14 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
     self->min_range = LASER_MIN_SENSOR_RANGE_DEFAULT;
   }
 
+  sprintf(key, "%s.back_region", param_prefix);
+  if (2 != bot_param_get_int_array(self->param, key, self->distBackRegion, 2)) {
+      fprintf(stderr, "Error: Missing or funny down region parameter "
+              "for planar LIDAR configuration key: '%s'\n", key);
+      self->distBackRegion[0] = -1;
+      self->distBackRegion[1] = -1;
+  }
+
   sprintf(key, "%s.down_region", param_prefix);
   if (2 != bot_param_get_int_array(self->param, key, self->heightDownRegion, 2)) {
     fprintf(stderr, "Error: Missing or funny down region parameter "
@@ -158,7 +166,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1])) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1]) && (projector->heightUpRegion[0] >= i || i >= projector->heightUpRegion[1]) && (projector->distBackRegion[0] >= i || i >= projector->distBackRegion[1])) {
     //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
@@ -177,8 +185,14 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
       sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
       sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
-      sensor_xyz[2] = -range + LASER_MIRROR_DISTANCE; //TODO: HACK to use the "up region" as extra down beams
+      sensor_xyz[2] = range - LASER_MIRROR_DISTANCE;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
+    }
+    else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
+      sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
+      sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
+      sensor_xyz[2] = 0;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
@@ -311,7 +325,7 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1])) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1]) && (projector->heightUpRegion[0] >= i || i >= projector->heightUpRegion[1]) && (projector->distBackRegion[0] >= i || i >= projector->distBackRegion[1])) {
     //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
@@ -330,8 +344,14 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
       sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
       sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
-      sensor_xyz[2] = -range + LASER_MIRROR_DISTANCE; //TODO: HACK to use the "up region" as extra down beams
+      sensor_xyz[2] = range - LASER_MIRROR_DISTANCE; //TODO: HACK to use the "up region" as extra down beams
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
+    }
+    else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
+      sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
+      sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
+      sensor_xyz[2] = 0;
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
