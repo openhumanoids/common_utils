@@ -54,6 +54,14 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
       self->distBackRegion[1] = -1;
   }
 
+  sprintf(key, "%s.back_region_db", param_prefix);
+  if (2 != bot_param_get_int_array(self->param, key, self->distBackRegionDB, 2)) {
+      fprintf(stderr, "Error: Missing or funny down region parameter "
+              "for planar LIDAR configuration key: '%s'\n", key);
+      self->distBackRegionDB[0] = -1;
+      self->distBackRegionDB[1] = -1;
+  }
+
   sprintf(key, "%s.down_region", param_prefix);
   if (2 != bot_param_get_int_array(self->param, key, self->heightDownRegion, 2)) {
     fprintf(stderr, "Error: Missing or funny down region parameter "
@@ -62,12 +70,28 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
     self->heightDownRegion[1] = -1;
   }
 
+  sprintf(key, "%s.down_region_db", param_prefix);
+  if (2 != bot_param_get_int_array(self->param, key, self->heightDownRegionDB, 2)) {
+      fprintf(stderr, "Error: Missing or funny down region parameter "
+              "for planar LIDAR configuration key: '%s'\n", key);
+      self->heightDownRegionDB[0] = -1;
+      self->heightDownRegionDB[1] = -1;
+  }
+
   sprintf(key, "%s.up_region", param_prefix);
   if (2 != bot_param_get_int_array(self->param, key, self->heightUpRegion, 2)) {
     fprintf(stderr, "Error: Missing or funny up region parameter "
         "for planar LIDAR configuration key: '%s'\n", key);
     self->heightUpRegion[0] = -1;
     self->heightUpRegion[1] = -1;
+  }
+
+  sprintf(key, "%s.up_region_db", param_prefix);
+  if (2 != bot_param_get_int_array(self->param, key, self->heightUpRegionDB, 2)) {
+      fprintf(stderr, "Error: Missing or funny down region parameter "
+              "for planar LIDAR configuration key: '%s'\n", key);
+      self->heightUpRegionDB[0] = -1;
+      self->heightUpRegionDB[1] = -1;
   }
 
   sprintf(key, "%s.surround_region", param_prefix);
@@ -166,8 +190,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1]) && (projector->heightUpRegion[0] >= i || i >= projector->heightUpRegion[1]) && (projector->distBackRegion[0] >= i || i >= projector->distBackRegion[1])) {
-    //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegionDB[0] >= i || i >= projector->heightDownRegionDB[1]) && (projector->heightUpRegionDB[0] >= i || i >= projector->heightUpRegionDB[1]) && (projector->distBackRegionDB[0] >= i || i >= projector->distBackRegionDB[1])) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
       sensor_xyz[2] = 0;
@@ -325,8 +348,7 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegion[0] >= i || i >= projector->heightDownRegion[1]) && (projector->heightUpRegion[0] >= i || i >= projector->heightUpRegion[1]) && (projector->distBackRegion[0] >= i || i >= projector->distBackRegion[1])) {
-    //if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1]) {
+    if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegionDB[0] >= i || i >= projector->heightDownRegionDB[1]) && (projector->heightUpRegionDB[0] >= i || i >= projector->heightUpRegionDB[1]) && (projector->distBackRegionDB[0] >= i || i >= projector->distBackRegionDB[1])) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
       sensor_xyz[2] = 0;

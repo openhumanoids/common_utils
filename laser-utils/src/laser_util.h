@@ -32,9 +32,12 @@ extern "C" {
     double max_range_free_dist; /*project max_range readings out this far (from param) */
     double min_range; /* min sensor range (from param) */
 
-    int distBackRegion[2]; /*(from param)*/
+    int distBackRegion[2]; /*start dead band, start region, end region, end dead band (from param)*/
+    int distBackRegionDB[2]; /*start dead band, start region, end region, end dead band (from param)*/
     int heightDownRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/
+    int heightDownRegionDB[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int heightUpRegion[2]; /*begining and end of beams deflected down by mirror (from param)*/
+    int heightUpRegionDB[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int surroundRegion[2]; /*begining and end of beams not deflected by mirror (from param)*/
     int project_height;
     double laser_frequency; /*frequency with which we should be expecting the laser msgs*/
