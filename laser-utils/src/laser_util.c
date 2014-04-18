@@ -215,7 +215,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
       sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
       sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);  // intentionally did not create new point status
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
@@ -373,7 +373,7 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
       sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
       sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
       sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);  // intentionally did not create new point status
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
