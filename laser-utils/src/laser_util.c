@@ -211,16 +211,16 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
         //sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = -range*s_u;
+        sensor_xyz[0] = range*s_u;
         //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE;
         //sensor_xyz[2] = range - LASER_MIRROR_DISTANCE;
-        sensor_xyz[2] = -LASER_MIRROR_DISTANCE + range*c_u;
+        sensor_xyz[2] = LASER_MIRROR_DISTANCE - range*c_u;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
         //sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = LASER_MIRROR_DISTANCE - range*c_b;
+        sensor_xyz[0] = -LASER_MIRROR_DISTANCE + range*c_b;
         //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
         sensor_xyz[1] = -LASER_MIRROR_DISTANCE - range*s_b;
         sensor_xyz[2] = 0;
@@ -378,16 +378,16 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
         //sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = -range*s_u;
+        sensor_xyz[0] = range*s_u;
         //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE;
         //sensor_xyz[2] = range - LASER_MIRROR_DISTANCE;
-        sensor_xyz[2] = -LASER_MIRROR_DISTANCE + range*c_u;
+        sensor_xyz[2] = LASER_MIRROR_DISTANCE - range*c_u;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
         //sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = LASER_MIRROR_DISTANCE - range*c_b;
+        sensor_xyz[0] = -LASER_MIRROR_DISTANCE + range*c_b;
         //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
         sensor_xyz[1] = -LASER_MIRROR_DISTANCE - range*s_b;
         sensor_xyz[2] = 0;
