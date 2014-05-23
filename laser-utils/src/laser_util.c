@@ -57,10 +57,10 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
       // is the up mirror on the right or the left?
       if(self->distBackRegion[0] > 0 && self->distBackRegion[0] < 540 && self->distBackRegion[1] > 0 && self->distBackRegion[1] < 540) {
           self->distBackAngle = -M_PI/2;
-          fprintf(sterr, "Back distance mirror is on the right.\n")
+          fprintf(stderr, "Back distance mirror is on the right.\n");
       }
       else if (self->distBackRegion[0] > 540 && self->distBackRegion[0] < 1080 && self->distBackRegion[1] > 540 && self->distBackRegion[1] < 1080) {
-          fprintf(sterr, "Warning: Back distance mirror needs to be on right to operate correctly.\n")
+          fprintf(stderr, "Warning: Back distance mirror needs to be on right to operate correctly.\n");
           self->distBackAngle = M_PI/2;
       }
   }
@@ -99,11 +99,11 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
   else {
       // is the up mirror on the right or the left?
       if(self->heightUpRegion[0] > 0 && self->heightUpRegion[0] < 540 && self->heightUpRegion[1] > 0 && self->heightUpRegion[1] < 540) {
-          fprintf(sterr, "Warning: Upward mirror needs to be on left to operate correctly.\n")
+          fprintf(stderr, "Warning: Upward mirror needs to be on left to operate correctly.\n");
           self->heightUpAngle = -M_PI/2;
       }
       else if (self->heightUpRegion[0] > 540 && self->heightUpRegion[0] < 1080 && self->heightUpRegion[1] > 540 && self->heightUpRegion[1] < 1080) {
-          fprintf(sterr, "Upward height mirror is on the left.\n")
+          fprintf(stderr, "Upward height mirror is on the left.\n");
           self->heightUpAngle = M_PI/2;
       }
   }
@@ -213,7 +213,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double s_b, c_b;
     bot_fasttrig_sincos(theta-projector->distBackAngle, &s_b, &c_b);
 
-    fprintf(stderr, "index: %i, theta: %4.2f, UpAng: %4.2f\n", i, theta, projector->heightUpAngle);
+    //fprintf(stderr, "index: %i, theta: %4.2f, UpAng: %4.2f\n", i, theta, projector->heightUpAngle);
 
     double sensor_xyz[3];
     /* point in sensor coordinates */
