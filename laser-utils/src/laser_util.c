@@ -335,7 +335,7 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
   if (proj_scan->projection_status == 0 && (latest_trans_timestamp - 100000) > proj_scan->utime) {
     proj_scan->projection_status = -1;
   }
-  else if (latest_trans_timestamp > proj_scan->utime) {
+  else if (latest_trans_timestamp >= proj_scan->utime) {
     proj_scan->projection_status = 1;
   }
   else
