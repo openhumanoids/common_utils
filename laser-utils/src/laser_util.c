@@ -53,6 +53,17 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
       self->distBackRegion[0] = -1;
       self->distBackRegion[1] = -1;
   }
+  else {
+      // is the up mirror on the right or the left?
+      if(self->distBackRegion[0] > 0 && self->distBackRegion[0] < 540 && self->distBackRegion[1] > 0 && self->distBackRegion[1] < 540) {
+          self->distBackAngle = -M_PI/2;
+          fprintf(sterr, "Back distance mirror is on the right.\n")
+      }
+      else if (self->distBackRegion[0] > 540 && self->distBackRegion[0] < 1080 && self->distBackRegion[1] > 540 && self->distBackRegion[1] < 1080) {
+          fprintf(sterr, "Warning: Back distance mirror needs to be on right to operate correctly.\n")
+          self->distBackAngle = M_PI/2;
+      }
+  }
 
   sprintf(key, "%s.back_region_db", param_prefix);
   if (2 != bot_param_get_int_array(self->param, key, self->distBackRegionDB, 2)) {
@@ -84,6 +95,17 @@ Laser_projector * laser_projector_new(BotParam *param, BotFrames * frames, const
         "for planar LIDAR configuration key: '%s'\n", key);
     self->heightUpRegion[0] = -1;
     self->heightUpRegion[1] = -1;
+  }
+  else {
+      // is the up mirror on the right or the left?
+      if(self->heightUpRegion[0] > 0 && self->heightUpRegion[0] < 540 && self->heightUpRegion[1] > 0 && self->heightUpRegion[1] < 540) {
+          fprintf(sterr, "Warning: Upward mirror needs to be on left to operate correctly.\n")
+          self->heightUpAngle = -M_PI/2;
+      }
+      else if (self->heightUpRegion[0] > 540 && self->heightUpRegion[0] < 1080 && self->heightUpRegion[1] > 540 && self->heightUpRegion[1] < 1080) {
+          fprintf(sterr, "Upward height mirror is on the left.\n")
+          self->heightUpAngle = M_PI/2;
+      }
   }
 
   sprintf(key, "%s.up_region_db", param_prefix);
@@ -187,9 +209,11 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
     double s, c;
     bot_fasttrig_sincos(theta, &s, &c);
     double s_u, c_u;
-    bot_fasttrig_sincos(theta-3*M_PI/2, &s_u, &c_u);
+    bot_fasttrig_sincos(theta-projector->heightUpAngle, &s_u, &c_u);
     double s_b, c_b;
-    bot_fasttrig_sincos(theta-M_PI/2, &s_b, &c_b);
+    bot_fasttrig_sincos(theta-projector->distBackAngle, &s_b, &c_b);
+
+    fprintf(stderr, "index: %i, theta: %4.2f, UpAng: %4.2f\n", i, theta, projector->heightUpAngle);
 
     double sensor_xyz[3];
     /* point in sensor coordinates */
@@ -210,19 +234,14 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_down);
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
-        //sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
         sensor_xyz[0] = range*s_u;
-        //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE;
-        //sensor_xyz[2] = range - LASER_MIRROR_DISTANCE;
-        sensor_xyz[2] = LASER_MIRROR_DISTANCE - range*c_u;
+        sensor_xyz[2] = range*c_u;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
-        //sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = -LASER_MIRROR_DISTANCE + range*c_b;
-        //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
-        sensor_xyz[1] = -LASER_MIRROR_DISTANCE - range*s_b;
+        sensor_xyz[0] = -range*c_b;
+        sensor_xyz[1] = range*s_b;
         sensor_xyz[2] = 0;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
     }
@@ -353,13 +372,11 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
       proj_scan->point_status[i] = laser_min_range;
     double s, c;
     bot_fasttrig_sincos(theta, &s, &c);
-    double s_u, c_u;
-    bot_fasttrig_sincos(theta-3*M_PI/2, &s_u, &c_u);
-    double s_b, c_b;
-    bot_fasttrig_sincos(theta-M_PI/2, &s_b, &c_b);
 
     double sensor_xyz[3];
     /* point in sensor coordinates */
+
+    fprintf(stderr, "CHECK");
 
     if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegionDB[0] >= i || i >= projector->heightDownRegionDB[1]) && (projector->heightUpRegionDB[0] >= i || i >= projector->heightUpRegionDB[1]) && (projector->distBackRegionDB[0] >= i || i >= projector->distBackRegionDB[1])) {
       sensor_xyz[0] = c * range;
@@ -377,19 +394,14 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_down);
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
-        //sensor_xyz[0] = c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = range*s_u;
-        //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
+        sensor_xyz[0] = range*s;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE;
-        //sensor_xyz[2] = range - LASER_MIRROR_DISTANCE;
-        sensor_xyz[2] = LASER_MIRROR_DISTANCE - range*c_u;
+        sensor_xyz[2] = -LASER_MIRROR_DISTANCE + range*c;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
-        //sensor_xyz[0] = -range + c * LASER_MIRROR_DISTANCE;
-        sensor_xyz[0] = -LASER_MIRROR_DISTANCE + range*c_b;
-        //sensor_xyz[1] = s * LASER_MIRROR_DISTANCE;
-        sensor_xyz[1] = -LASER_MIRROR_DISTANCE - range*s_b;
+        sensor_xyz[0] = LASER_MIRROR_DISTANCE - range*c;
+        sensor_xyz[1] = LASER_MIRROR_DISTANCE + range*s;
         sensor_xyz[2] = 0;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
     }

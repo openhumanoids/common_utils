@@ -40,6 +40,8 @@ extern "C" {
     int heightUpRegionDB[2]; /*begining and end of beams deflected down by mirror (from param)*/
     int surroundRegion[2]; /*begining and end of beams not deflected by mirror (from param)*/
     int project_height;
+    double distBackAngle;
+    double heightUpAngle;
     double laser_frequency; /*frequency with which we should be expecting the laser msgs*/
     char * laser_type;
   } Laser_projector;
