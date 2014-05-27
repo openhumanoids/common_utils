@@ -50,10 +50,11 @@ extern "C" {
     laser_surround=0,
     laser_height_down=1,
     laser_height_up=2,
-    laser_valid_projection=3, //less than this is a valid point
-    laser_max_range=4,
-    laser_min_range=5,
-    laser_invalid_projection=6
+    laser_dist_back=3,
+    laser_valid_projection=4, //less than this is a valid point
+    laser_max_range=5,
+    laser_min_range=6,
+    laser_invalid_projection=7
   }laser_point_projection_status;
 
   /*

@@ -208,6 +208,8 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       proj_scan->point_status[i] = laser_min_range;
     double s, c;
     bot_fasttrig_sincos(theta, &s, &c);
+
+    // assume that up mirror is on the left and back mirror is on the right
     double s_u, c_u;
     bot_fasttrig_sincos(theta-projector->heightUpAngle, &s_u, &c_u);
     double s_b, c_b;
@@ -234,22 +236,22 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_down);
     }
     else if (projector->project_height && projector->heightUpRegion[0] <= i && i <= projector->heightUpRegion[1]) {
-        sensor_xyz[0] = range*s_u;
+        sensor_xyz[0] = -range*s_u;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE;
-        sensor_xyz[2] = range*c_u;
+        sensor_xyz[2] = -LASER_MIRROR_DISTANCE + range*c_u;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_height_up);
     }
     else if (projector->project_height && projector->distBackRegion[0] <= i && i <= projector->distBackRegion[1]) {
-        sensor_xyz[0] = -range*c_b;
+        sensor_xyz[0] = LASER_MIRROR_DISTANCE -range*c_b;
         sensor_xyz[1] = range*s_b;
         sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_dist_back);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
       sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = 3;
+      proj_scan->point_status[i] = laser_valid_projection;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_invalid_projection);
     }
 
@@ -305,6 +307,7 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(
 }
 
 
+// THIS FUNCTION IS NOT CALLED BY CODE IN QUAD OR FIXIE REPO AS OF 5/14. NO LONGER MAINTAINED AS OF NOW. - JW
 ///////////////////////////////// START NEW NEW NEW NEW NEW NEW //////////////////////////////////
 int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
     const char * dest_frame)
@@ -376,8 +379,6 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
     double sensor_xyz[3];
     /* point in sensor coordinates */
 
-    fprintf(stderr, "CHECK");
-
     if (projector->surroundRegion[0] <= i && i <= projector->surroundRegion[1] && (projector->heightDownRegionDB[0] >= i || i >= projector->heightDownRegionDB[1]) && (projector->heightUpRegionDB[0] >= i || i >= projector->heightUpRegionDB[1]) && (projector->distBackRegionDB[0] >= i || i >= projector->distBackRegionDB[1])) {
       sensor_xyz[0] = c * range;
       sensor_xyz[1] = s * range;
@@ -403,13 +404,13 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
         sensor_xyz[0] = LASER_MIRROR_DISTANCE - range*c;
         sensor_xyz[1] = LASER_MIRROR_DISTANCE + range*s;
         sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_surround);  // intentionally did not create new point status
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_dist_back);  // intentionally did not create new point status
     }
     else {
       sensor_xyz[0] = 0;
       sensor_xyz[1] = 0;
       sensor_xyz[2] = 0;
-      proj_scan->point_status[i] = 3;
+      proj_scan->point_status[i] = laser_valid_projection;
       proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_invalid_projection);
     }
 
@@ -486,11 +487,12 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
       dist_to_prev = bot_vector_dist_3d(point3d_as_array(&lscan->points[i]),
           point3d_as_array(&lscan->points[lastAdd]));
     }
-    if (i < lscan->projector->surroundRegion[0] || i > lscan->projector->surroundRegion[1] || //always use height beams
-        (dist_to_prev > spatial_decimation_min && ((i - lastAdd) > beam_skip
-            || dist_to_prev > spatial_decimation_max
-            || bot_vector_dist_3d(point3d_as_array(&lscan->points[i]), lscan->origin.trans_vec)
-                > (lscan->aveSurroundRange + 1.8 * lscan->stddevSurroundRange)))) {
+    if ((i > lscan->projector->heightUpRegion[0] && i < lscan->projector->heightUpRegion[1]) || // always use up beams
+        (i > lscan->projector->heightDownRegion[0] && i < lscan->projector->heightDownRegion[1]) || // always use down beams
+        (i > lscan->projector->distBackRegion[0] && i < lscan->projector->distBackRegion[1]) || // always use back beams
+        (dist_to_prev > spatial_decimation_min && // point in surround region and greater than decimation_min and less than decimation_max or greater than beam_skip
+         ((i - lastAdd) > beam_skip ||
+          dist_to_prev > spatial_decimation_max))) {
       lastAdd = i;
     }
     else {
