@@ -87,7 +87,7 @@ LcmType readMsgFromFile(const std::string& logfileName)
   }
   // Try to decode the message.
   if (msg.decode(event->data, 0, event->datalen) != event->datalen) {
-    std::cerr << "ERRPR: Could not decode msg... incorrect template arg?\n";
+    std::cerr << "ERROR: Could not decode msg... incorrect template arg?\n";
   }
   return msg;
 }
