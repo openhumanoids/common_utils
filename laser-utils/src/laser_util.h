@@ -54,7 +54,9 @@ extern "C" {
     laser_valid_projection=4, //less than this is a valid point
     laser_max_range=5,
     laser_min_range=6,
-    laser_invalid_projection=7
+    laser_decimated_projection=7,
+    laser_deadband_projection=8,
+    laser_invalid_projection=9
   }laser_point_projection_status;
 
   /*

@@ -252,7 +252,7 @@ int laser_update_projected_scan_with_motion(Laser_projector * projector, laser_p
       sensor_xyz[1] = 0;
       sensor_xyz[2] = 0;
       proj_scan->point_status[i] = laser_valid_projection;
-      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_invalid_projection);
+      proj_scan->point_status[i] = bot_max(proj_scan->point_status[i],laser_deadband_projection);
     }
 
     if (proj_scan->point_status[i] < laser_valid_projection) {
@@ -489,14 +489,13 @@ void laser_decimate_projected_scan(laser_projected_scan * lscan, int beam_skip, 
     }
     if ((i > lscan->projector->heightUpRegion[0] && i < lscan->projector->heightUpRegion[1]) || // always use up beams
         (i > lscan->projector->heightDownRegion[0] && i < lscan->projector->heightDownRegion[1]) || // always use down beams
-        (i > lscan->projector->distBackRegion[0] && i < lscan->projector->distBackRegion[1]) || // always use back beams
         (dist_to_prev > spatial_decimation_min && // point in surround region and greater than decimation_min and less than decimation_max or greater than beam_skip
          ((i - lastAdd) > beam_skip ||
           dist_to_prev > spatial_decimation_max))) {
       lastAdd = i;
     }
     else {
-      lscan->point_status[i] = laser_invalid_projection;
+      lscan->point_status[i] = laser_decimated_projection;
       lscan->numValidPoints--;
     }
   }
