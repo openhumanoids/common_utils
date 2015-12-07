@@ -24,45 +24,44 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
   double mpp[3] = { resolution, resolution, resolution };
   FloatVoxelMap *voxMap = new FloatVoxelMap(xyz0, xyz1, mpp, .5);
 
-  std::list<octomap::OcTreeVolume> occupiedVoxels;
-  ocTree->getOccupied(occupiedVoxels, occupied_depth);
-  list<octomap::OcTreeVolume>::iterator it;
-  //mark the free ones
   double xyz[3];
-  for (it = occupiedVoxels.begin(); it != occupiedVoxels.end(); it++) {
-    double cxyz[3] = { it->first.x(), it->first.y(), it->first.z() };
-    double side_length = it->second;
-    int side_cells = side_length / resolution;
-    if (side_cells > 1)
-      int foo = side_length + 2;
-    for (int i = 0; i < side_cells; i++) {
-      xyz[0] = cxyz[0] - side_length / 2 + i * resolution;
-      for (int j = 0; j < side_cells; j++) {
-        xyz[1] = cxyz[1] - side_length / 2 + j * resolution;
-        for (int k = 0; k < side_cells; k++) {
-          xyz[2] = cxyz[2] - side_length / 2 + k * resolution;
-          voxMap->writeValue(xyz, 1);
+  // occupied spaec
+  for (octomap::OcTree::tree_iterator it = ocTree->begin_tree(occupied_depth), end = ocTree->end_tree(); it != end; ++it) {
+    if (ocTree->isNodeOccupied(*it)) {
+      double cxyz[3] = { it.getX(), it.getY(), it.getZ() };
+      double side_length = it.getSize();
+      int side_cells = side_length / resolution;
+      if (side_cells > 1)
+        int foo = side_length + 2;
+      for (int i = 0; i < side_cells; i++) {
+        xyz[0] = cxyz[0] - side_length / 2 + i * resolution;
+        for (int j = 0; j < side_cells; j++) {
+          xyz[1] = cxyz[1] - side_length / 2 + j * resolution;
+          for (int k = 0; k < side_cells; k++) {
+            xyz[2] = cxyz[2] - side_length / 2 + k * resolution;
+            voxMap->writeValue(xyz, 1);
+          }
         }
       }
     }
   }
-  occupiedVoxels.clear();
 
-  std::list<octomap::OcTreeVolume> freeVoxels;
-  ocTree->getFreespace(freeVoxels, free_depth);
-  for (it = freeVoxels.begin(); it != freeVoxels.end(); it++) {
-    double cxyz[3] = { it->first.x(), it->first.y(), it->first.z() };
-    double side_length = it->second;
-    int side_cells = side_length / resolution;
-    if (side_cells > 1)
-      int foo = side_length + 2;
-    for (int i = 0; i < side_cells; i++) {
-      xyz[0] = cxyz[0] - side_length / 2 + i * resolution;
-      for (int j = 0; j < side_cells; j++) {
-        xyz[1] = cxyz[1] - side_length / 2 + j * resolution;
-        for (int k = 0; k < side_cells; k++) {
-          xyz[2] = cxyz[2] - side_length / 2 + k * resolution;
-          voxMap->writeValue(xyz, 0);
+  // free space
+  for (octomap::OcTree::tree_iterator it = ocTree->begin_tree(free_depth), end = ocTree->end_tree(); it != end; ++it) {
+    if (!ocTree->isNodeOccupied(*it)) {
+      double cxyz[3] = { it.getX(), it.getY(), it.getZ() };
+      double side_length = it.getSize();
+      int side_cells = side_length / resolution;
+      if (side_cells > 1)
+        int foo = side_length + 2;
+      for (int i = 0; i < side_cells; i++) {
+        xyz[0] = cxyz[0] - side_length / 2 + i * resolution;
+        for (int j = 0; j < side_cells; j++) {
+          xyz[1] = cxyz[1] - side_length / 2 + j * resolution;
+          for (int k = 0; k < side_cells; k++) {
+            xyz[2] = cxyz[2] - side_length / 2 + k * resolution;
+            voxMap->writeValue(xyz, 0);
+          }
         }
       }
     }
@@ -175,7 +174,7 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
     }
     for (int i = 0; i < blurKernel->num_cells; i++) {
       OcTreeKey key;
-      if (!ocTree_blurred->genKey(center + indexTable->data[i], key)) {
+      if (!ocTree_blurred->coordToKeyChecked(center + indexTable->data[i], key)) {
         fprintf(stderr, "Error: couldn't generate key in blurred map!\n");
       }
       ocTree_blurred->updateNode(key, blurKernel->data[i], true);
@@ -266,7 +265,7 @@ octomap::OcTree * loadOctomap(const char * fname, double * minNegLogLike)
   for (int i = 0; i < saved_msg->num_nodes; i++) {
     OcTreeKey key;
     point3d location(saved_msg->nodes[i].xyz[0], saved_msg->nodes[i].xyz[1], saved_msg->nodes[i].xyz[2]);
-    if (!ocTree->genKey(location, key)) {
+    if (!ocTree->coordToKeyChecked(location, key)) {
       fprintf(stderr, "Error: couldn't generate key in map for (%f,%f,%f)!\n", location.x(), location.y(),
           location.z());
       break;
