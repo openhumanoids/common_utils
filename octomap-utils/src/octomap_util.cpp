@@ -87,6 +87,11 @@ occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupie
 
 
 //TODO: add verbose flag/disable printing?
+octomap::OcTree * octomapBlur(octomap::ColorOcTree * colorOcTree, double blurSigma, double * minNegLogLike)
+{
+  octomapBlur(dynamic_cast<OcTree*>(colorOcTree), blurSigma, minNegLogLike);
+}
+
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double *minNegLogLike)
 {
 
@@ -196,6 +201,11 @@ octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double
   }
   *minNegLogLike = -log(cross_section_sum);
   return ocTree_blurred;
+}
+
+void saveOctomap(octomap::ColorOcTree *colorOcTree, const char * fname, double minNegLogLike)
+{
+  saveOctomap(dynamic_cast<OcTree*>(colorOcTree), fname, minNegLogLike);
 }
 
 void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLike)

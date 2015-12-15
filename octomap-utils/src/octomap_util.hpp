@@ -5,6 +5,7 @@
 #include <octomap/octomap.h>
 #include <laser_utils/laser_util.h>
 #include <bot_core/bot_core.h>
+#include <octomap/ColorOcTree.h>
 
 
 
@@ -14,6 +15,7 @@ namespace octomap_utils {
 
 //our own save/load
 octomap::OcTree * loadOctomap(const char * fname, double *minNegLogLike);
+void saveOctomap(octomap::ColorOcTree *colorOcTree, const char * fname, double minNegLogLike);
 void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLike);
 
 
@@ -22,6 +24,7 @@ void saveOctomap(octomap::OcTree *ocTree, const char * fname, double minNegLogLi
 occ_map::FloatVoxelMap * octomapToVoxelMap(octomap::OcTree * ocTree, int occupied_depth, int free_depth);
 
 octomap::OcTree * octomapBlur(octomap::OcTree * ocTree, double blurSigma, double * minNegLogLike);
+octomap::OcTree * octomapBlur(octomap::ColorOcTree * colorOcTree, double blurSigma, double * minNegLogLike);
 
 octomap::OcTree * createZPlane(double resolution, double xy0[2],double xy1[2], double z_plane_height);
 
