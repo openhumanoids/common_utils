@@ -12,6 +12,12 @@ if(NOT BOT_LCMGL_FOUND)
     return()             
 endif()
 
+pkg_check_modules(BOT_VIS bot2-vis)
+if(NOT BOT_VIS_FOUND)
+    message("bot2-vis not found. not building eigen-utils")
+    return()
+endif()
+
 add_subdirectory(eigen-fftw)
 
 
