@@ -83,7 +83,7 @@ protected:
 
 public:
   RigidBodyState() :
-      vec(Eigen::VectorXd::Zero(basic_num_states)), utime(0), quat(Eigen::Quaterniond::Identity())
+      vec(Eigen::VectorXd::Zero((int) basic_num_states)), utime(0), quat(Eigen::Quaterniond::Identity())
   {
 
   }
@@ -103,7 +103,7 @@ public:
   }
 
   RigidBodyState(const rigid_body_pose_t * pose) :
-      vec(basic_num_states), utime(pose->utime)
+      vec((int) basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
     Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
@@ -121,7 +121,7 @@ public:
   }
 
   RigidBodyState(const rigid_body::pose_t * pose) :
-      vec(basic_num_states), utime(pose->utime)
+      vec((int) basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
     Eigen::Map<const Eigen::Vector3d> angular_velocity_map(pose->rotation_rate);
