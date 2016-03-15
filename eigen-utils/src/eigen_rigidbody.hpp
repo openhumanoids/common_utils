@@ -327,11 +327,11 @@ public:
   bool hasNan() const
   {
     for (int ii = 0; ii < vec.rows(); ii++) {
-      if (isnan(this->vec(ii)))
+      if (std::isnan(this->vec(ii)))
         return true;
     }
     for (int ii = 0; ii < 4; ii++) {
-      if (isnan(this->quat.coeffs()(ii)))
+      if (std::isnan(this->quat.coeffs()(ii)))
         return true;
     }
 
