@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <lcm/lcm-cpp.hpp>
-#include <lcmtypes/bot_core.hpp>
+#include <lcmtypes/bot_core/pose_t.hpp>
 #include <ConciseArgs>
 #include <list>
 #include <string>
