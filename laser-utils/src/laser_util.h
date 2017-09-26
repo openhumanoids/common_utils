@@ -112,6 +112,16 @@ extern "C" {
 
 
   ///////////////////////////////// NEW NEW NEW NEW NEW NEW //////////////////////////////////
+   /*
+   * interpolation corrects the projection due to motion expressed in laser frame using bot frames
+   * add by mfallon, march 2014: Uses bot-frames to determine required bottrans of start and end of scan
+   * And then interpolates that. It does NOT take into account the motion of the body for that duration
+   * that could be supported. I'd like to merge this *with_motion and provide optional arguments as the code is duplicative
+   * added by gtinchev to support interpolation with certain timeout period
+   */
+  laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(Laser_projector * projector,
+      const bot_core_planar_lidar_t *msg, const char * dest_frame, const int timeout);
+
   /*
    * interpolation corrects the projection due to motion expressed in laser frame using bot frames
    * add by mfallon, march 2014: Uses bot-frames to determine required bottrans of start and end of scan
@@ -119,14 +129,27 @@ extern "C" {
    * that could be supported. I'd like to merge this *with_motion and provide optional arguments as the code is duplicative
    */
   laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation(Laser_projector * projector,
-      const bot_core_planar_lidar_t *msg, const char * dest_frame);
+      const bot_core_planar_lidar_t *msg, const char * dest_frame) {
+    return laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(projector, msg, dest_frame, 100000);
+  }
 
   /*
    * interpolation corrects the projection due to motion expressed in laser frame using bot frames
    * added by mfallon, march 2014: ses bot-frames to determine required transform of start of scan
+   * edited by gtinchev, sep 2017: added timeout period as argument
+   */
+  int laser_update_projected_scan_with_interpolation_with_timeout(Laser_projector * projector, laser_projected_scan * proj_scan,
+      const char * dest_frame, const int timeout);
+
+  /*
+   * interpolation corrects the projection due to motion expressed in laser frame using bot frames
+   * added by mfallon, march 2014: ses bot-frames to determine required transform of start of scan
+   * edited by gtinchev, sep 2017: backwards compatible with the previous code
    */
   int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
-      const char * dest_frame);
+      const char * dest_frame) {
+    return laser_update_projected_scan_with_interpolation_with_timeout(projector, proj_scan, dest_frame, 100000);
+  }
 
   /*
    * update the scan with the current transform...
