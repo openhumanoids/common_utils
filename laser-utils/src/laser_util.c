@@ -309,8 +309,8 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_motion(
 
 // THIS FUNCTION IS NOT CALLED BY CODE IN QUAD OR FIXIE REPO AS OF 5/14. NO LONGER MAINTAINED AS OF NOW. - JW
 ///////////////////////////////// START NEW NEW NEW NEW NEW NEW //////////////////////////////////
-int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
-    const char * dest_frame)
+int laser_update_projected_scan_with_interpolation_with_timeout(Laser_projector * projector, laser_projected_scan * proj_scan,
+    const char * dest_frame, const int timeout)
 {
   if (!bot_frames_get_trans_with_utime(projector->bot_frames, projector->coord_frame, dest_frame, proj_scan->utime,
       &proj_scan->origin)) {
@@ -335,7 +335,7 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
   bot_frames_get_trans_with_utime(projector->bot_frames, "body", bot_frames_get_root_name(projector->bot_frames),
       proj_scan->utime, &proj_scan->body);
 
-  if (proj_scan->projection_status == 0 && (latest_trans_timestamp - 100000) > proj_scan->utime) {
+  if (proj_scan->projection_status == 0 && (latest_trans_timestamp - timeout) > proj_scan->utime) {
     proj_scan->projection_status = -1;
   }
   else if (latest_trans_timestamp >= proj_scan->utime) {
@@ -431,8 +431,8 @@ int laser_update_projected_scan_with_interpolation(Laser_projector * projector, 
   return proj_scan->projection_status;
 }
 
-laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation(Laser_projector * projector,
-    const bot_core_planar_lidar_t *msg, const char * dest_frame)
+laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(Laser_projector * projector,
+    const bot_core_planar_lidar_t *msg, const char * dest_frame, const int timeout)
 {
   laser_projected_scan * proj_scan = (laser_projected_scan *) calloc(1, sizeof(laser_projected_scan));
   proj_scan->npoints = msg->nranges;
@@ -451,7 +451,7 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpo
     return NULL;
   }
   else {
-    if (laser_update_projected_scan_with_interpolation(projector, proj_scan, dest_frame)
+    if (laser_update_projected_scan_with_interpolation_with_timeout(projector, proj_scan, dest_frame, timeout)
         == -1) { //scan is arriving way late
       laser_destroy_projected_scan(proj_scan);
       return NULL;
@@ -460,7 +460,6 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpo
 
   return proj_scan;
 }
-
 
 ///////////////////////////////// END NEW NEW NEW NEW NEW NEW //////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
