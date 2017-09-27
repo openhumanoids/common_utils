@@ -431,6 +431,11 @@ int laser_update_projected_scan_with_interpolation_with_timeout(Laser_projector 
   return proj_scan->projection_status;
 }
 
+int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
+    const char * dest_frame) {
+  return laser_update_projected_scan_with_interpolation_with_timeout(projector, proj_scan, dest_frame, 100000);
+}
+
 laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(Laser_projector * projector,
     const bot_core_planar_lidar_t *msg, const char * dest_frame, const int timeout)
 {
@@ -459,6 +464,11 @@ laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpo
   }
 
   return proj_scan;
+}
+
+laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation(Laser_projector * projector,
+    const bot_core_planar_lidar_t *msg, const char * dest_frame) {
+  return laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(projector, msg, dest_frame, 100000);
 }
 
 ///////////////////////////////// END NEW NEW NEW NEW NEW NEW //////////////////////////////////

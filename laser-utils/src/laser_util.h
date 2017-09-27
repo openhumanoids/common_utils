@@ -129,9 +129,7 @@ extern "C" {
    * that could be supported. I'd like to merge this *with_motion and provide optional arguments as the code is duplicative
    */
   laser_projected_scan *laser_create_projected_scan_from_planar_lidar_with_interpolation(Laser_projector * projector,
-      const bot_core_planar_lidar_t *msg, const char * dest_frame) {
-    return laser_create_projected_scan_from_planar_lidar_with_interpolation_with_timeout(projector, msg, dest_frame, 100000);
-  }
+      const bot_core_planar_lidar_t *msg, const char * dest_frame);
 
   /*
    * interpolation corrects the projection due to motion expressed in laser frame using bot frames
@@ -147,9 +145,7 @@ extern "C" {
    * edited by gtinchev, sep 2017: backwards compatible with the previous code
    */
   int laser_update_projected_scan_with_interpolation(Laser_projector * projector, laser_projected_scan * proj_scan,
-      const char * dest_frame) {
-    return laser_update_projected_scan_with_interpolation_with_timeout(projector, proj_scan, dest_frame, 100000);
-  }
+      const char * dest_frame);
 
   /*
    * update the scan with the current transform...
