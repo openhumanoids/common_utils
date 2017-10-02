@@ -81,7 +81,7 @@ bool hasNan(const Eigen::DenseBase<Derived> & m)
 {
   for (int ii = 0; ii < m.rows(); ii++) {
     for (int jj = 0; jj < m.cols(); jj++) {
-      if (isnan(m(ii, jj)))
+      if (std::isnan(m(ii, jj)))
         return true;
     }
   }
