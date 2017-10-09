@@ -8,20 +8,20 @@ include(cmake/lcmtypes.cmake)
 lcmtypes_build()
 
 
-find_package(PkgConfig REQUIRED)
+#find_package(PkgConfig REQUIRED)
+#
+#find_package(OpenGL REQUIRED)
 
-find_package(OpenGL REQUIRED)
+#list(APPEND OPENGL_LIBRARIES GL)
 
-list(APPEND OPENGL_LIBRARIES GL)
+#pkg_check_modules(OCTOMAP octomap)
+#if(NOT OCTOMAP_FOUND)
+#  message("\n\n---- noctomap not found. Not building octomap-utils\n")
+#  return()
+#endif()
 
-pkg_check_modules(OCTOMAP octomap)
-if(NOT OCTOMAP_FOUND)
-  message("\n\n---- noctomap not found. Not building octomap-utils\n")
-  return()
-endif()
-
-find_package(PkgConfig REQUIRED)
+#find_package(PkgConfig REQUIRED)
 
 #tell cmake to build these subdirectories
-add_subdirectory(src)
-add_subdirectory(src/renderer)
+#add_subdirectory(src)
+#add_subdirectory(src/renderer)
