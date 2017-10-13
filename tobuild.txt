@@ -6,7 +6,8 @@ stl-utils
 geom-utils
 image-utils
 laser-utils
-octomap-utils 
+# disabled to as not to require octomap within pods
+#octomap-utils 
 path-util
 eigen-utils
 marshall-utils
