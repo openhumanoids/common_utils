@@ -1,4 +1,4 @@
-package rigid_body;
+package eigen_utils;
 
 //note that in contrast to bot_pose_t, all values ARE IN BODY COORDINATES!
 struct pose_t

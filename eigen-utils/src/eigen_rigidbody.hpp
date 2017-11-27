@@ -4,8 +4,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <bot_core/bot_core.h>
-#include <lcmtypes/rigid_body/pose_t.hpp>
-#include <lcmtypes/rigid_body_pose_t.h>
+#include <lcmtypes/eigen_utils/pose_t.hpp>
+#include <lcmtypes/eigen_utils_pose_t.h>
 
 // Define isnan() function for OSX
 #if defined(__APPLE__)
@@ -102,7 +102,7 @@ public:
     utime = 0;
   }
 
-  RigidBodyState(const rigid_body_pose_t * pose) :
+  RigidBodyState(const eigen_utils_pose_t * pose) :
       vec((int) basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
@@ -120,7 +120,7 @@ public:
 
   }
 
-  RigidBodyState(const rigid_body::pose_t * pose) :
+  RigidBodyState(const eigen_utils::pose_t * pose) :
       vec((int) basic_num_states), utime(pose->utime)
   {
     Eigen::Map<const Eigen::Vector3d> velocity_map(pose->vel);
@@ -161,7 +161,7 @@ public:
     this->quat = eigen_utils::setQuatEulerAngles(eulers);
   }
 
-  void getPose(rigid_body_pose_t * pose) const
+  void getPose(eigen_utils_pose_t * pose) const
       {
     Eigen::Map<Eigen::Vector3d>(pose->rotation_rate) = this->angularVelocity();
     Eigen::Map<Eigen::Vector3d>(pose->vel) = this->velocity();
@@ -171,9 +171,9 @@ public:
     pose->utime = this->utime;
   }
 
-  rigid_body::pose_t getPose() const
+  eigen_utils::pose_t getPose() const
   {
-    rigid_body::pose_t pose;
+    eigen_utils::pose_t pose;
     Eigen::Map<Eigen::Vector3d>(&pose.rotation_rate[0]) = this->angularVelocity();
     Eigen::Map<Eigen::Vector3d>(&pose.vel[0]) = this->velocity();
     Eigen::Map<Eigen::Vector3d>(&pose.pos[0]) = this->position();
