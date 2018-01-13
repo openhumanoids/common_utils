@@ -21,8 +21,8 @@
 #include <bot_frames/bot_frames.h>
 #include <bot_param/param_util.h>
 
-#include <image_utils/jpeg.h>
-#include <image_utils/pixels.h>
+#include <jpeg.h>
+#include <pixels.h>
 #include <geom_utils/geometry.h>
 #include "renderer_cam_thumb.h"
 
