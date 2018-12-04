@@ -60,7 +60,7 @@ void bot_gl_cov_ellipse(const Eigen::Matrix2d & cov, double scale)
   glVertex2d(B(0), B(1));
   glEnd();
 
-  bot_gl_draw_ellipse(b, a, phi, 100);
+  //bot_gl_draw_ellipse(b, a, phi, 100);
 }
 
 void bot_gl_draw_vector(const Eigen::Vector3d & vec, const Vector3d & pos, double head_width, double head_length,
@@ -80,7 +80,7 @@ void bot_gl_draw_vector(const Eigen::Vector3d & vec, const Vector3d & pos, doubl
   if (head_length > length)
     head_length = length;
 
-  bot_gl_draw_arrow_3d(length, head_width, head_length, body_width);
+  //bot_gl_draw_arrow_3d(length, head_width, head_length, body_width);
   glPopMatrix();
 }
 
@@ -131,8 +131,8 @@ void bot_gl_draw_axes(const Eigen::Quaterniond & orientation, const Eigen::Vecto
   glPushMatrix();
   bot_gl_mult_quat_pos(orientation, pos);
   glScalef(scale, scale, scale);
-  bot_gl_draw_axes();
-  bot_gl_print_current_matrix();
+  //bot_gl_draw_axes();
+  //bot_gl_print_current_matrix();
   glPopMatrix();
 }
 
@@ -141,7 +141,7 @@ void bot_gl_draw_axes(const Eigen::Affine3d & trans, double scale)
   glPushMatrix();
   glMultMatrixd(trans.data());
   glScalef(scale, scale, scale);
-  bot_gl_draw_axes();
+  //bot_gl_draw_axes();
   glPopMatrix();
 }
 
@@ -169,7 +169,7 @@ void bot_gl_cov_ellipse_3d(const Eigen::Matrix3d & pos_cov, const Eigen::Vector3
     glTranslated(mu(0), mu(1), mu(2));
     glMultMatrixd(trans.data());
     glScaled(a, b, c);
-    bot_gl_draw_ortho_circles_3d();
+    //bot_gl_draw_ortho_circles_3d();
     glPopMatrix();
   }
   else {

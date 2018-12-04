@@ -5,7 +5,7 @@
 #include <Eigen/Cholesky>
 #include <math.h>
 #include <bot_core/bot_core.h>
-#include <bot_vis/bot_vis.h>
+//#include <bot_vis/bot_vis.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else

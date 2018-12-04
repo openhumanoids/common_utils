@@ -11,8 +11,8 @@ lcmtypes_build()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(BOT_FRAMES bot2-frames)
 if(NOT BOT_FRAMES_FOUND)
-    message("bot-frames not found. not building laser-utils") 
-    return()             
+    message("bot-frames not found. not building laser-utils")
+    return()
 endif()
 
 #tell cmake to build these subdirectories

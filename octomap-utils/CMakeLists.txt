@@ -24,4 +24,4 @@ find_package(PkgConfig REQUIRED)
 
 #tell cmake to build these subdirectories
 add_subdirectory(src)
-add_subdirectory(src/renderer)
+#add_subdirectory(src/renderer)
